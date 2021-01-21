@@ -1,5 +1,10 @@
 # mentor-pipeline
 
+## TODO
+
+- [ ] update to python 3.8
+- [ ] fix nltk impl so that datasets autodownload (not in makefiles or docker)
+
 A short answer pipeline service focused on cold-start performance
 
 This repo contains two subprojects:

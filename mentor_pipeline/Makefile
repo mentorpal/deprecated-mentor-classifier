@@ -8,15 +8,15 @@ $(VENV):
 $(VENV)-update: virtualenv-installed
 	[ -d $(VENV) ] || virtualenv -p python3.6 $(VENV)
 	$(VENV)/bin/pip install --upgrade pip
-	$(VENV)/bin/pip install -r ./requirements.txt
-	$(VENV)/bin/python3 -m nltk.downloader punkt
-	$(VENV)/bin/python3 -m nltk.downloader wordnet
+	$(VENV)/bin/pip install -r ./requirements.test.txt
+	# $(VENV)/bin/python3 -m nltk.downloader punkt
+	# $(VENV)/bin/python3 -m nltk.downloader wordnet
 	$(VENV)/bin/python3 -m nltk.downloader averaged_perceptron_tagger
-	$(VENV)/bin/python3 -m nltk.downloader stopwords
+	# $(VENV)/bin/python3 -m nltk.downloader stopwords
 
 .PHONY clean:
 clean:
-	rm -rf .venv htmlcov .coverage tests/fixtures/shared/word2vec.bin
+	rm -rf .venv htmlcov .coverage
 
 .PHONY docker-build:
 docker-build:
