@@ -12,8 +12,8 @@ $(VENV)-update: virtualenv-installed
 
 .PHONY: docker-build
 docker-build:
-	cd mentor_pipeline && $(MAKE) docker-build
-	cd mentor_pipeline_api && $(MAKE) docker-build
+	cd mentor_classifier && $(MAKE) docker-build
+	cd mentor_classifier_api && $(MAKE) docker-build
 
 .PHONY: format
 format: $(VENV)
@@ -30,17 +30,17 @@ LICENSE_HEADER:
 .PHONY: license
 license: LICENSE LICENSE_HEADER $(VENV)
 	. $(VENV)/bin/activate \
-		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_pipeline/src $(args) \
-		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_pipeline/tests $(args) \
-		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_pipeline_api/src $(args) \
-		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_pipeline_api/tests $(args) \
+		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/src $(args) \
+		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/tests $(args) \
+		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier_api/src $(args) \
+		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier_api/tests $(args) \
 		&& python -m licenseheaders -t LICENSE_HEADER -d tools $(args) \
 		&& python -m licenseheaders -t LICENSE_HEADER -d word2vec $(args)
 
 .PHONY: test
 test:
-	cd mentor_pipeline && $(MAKE) test
-	cd mentor_pipeline_api && $(MAKE) test
+	cd mentor_classifier && $(MAKE) test
+	cd mentor_classifier_api && $(MAKE) test
 
 .PHONY: test-all
 test-all:
@@ -65,8 +65,8 @@ test-license: LICENSE LICENSE_HEADER
 .PHONY: test-types
 test-types: $(VENV)
 	. $(VENV)/bin/activate \
-		&& mypy mentor_pipeline \
-		&& mypy mentor_pipeline_api \
+		&& mypy mentor_classifier \
+		&& mypy mentor_classifier_api \
 		&& mypy word2vec
 
 virtualenv-installed:
