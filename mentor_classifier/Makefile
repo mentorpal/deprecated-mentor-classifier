@@ -1,4 +1,4 @@
-DOCKER_IMAGE?=mentor-pipeline
+DOCKER_IMAGE?=mentor-classifier
 ROOT=$(shell dirname ${PWD})
 VENV=.venv
 $(VENV):

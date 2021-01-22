@@ -1,5 +1,6 @@
 FROM python:3.6-slim
 ENV STATUS_URL_FORCE_HTTPS=false
+ENV GRAPHQL_ENDPOINT=http://localhost:3001/graphql
 RUN apt-get update && apt-get install -y git \
     && rm -rf /var/lib/apt/lists/*
 ADD requirements.txt /tmp/requirements.txt

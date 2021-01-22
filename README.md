@@ -1,16 +1,16 @@
-# mentor-pipeline
+# mentor-classifier
 
 ## TODO
 
 - [ ] update to python 3.8
 - [ ] fix nltk impl so that datasets autodownload (not in makefiles or docker)
 
-A short answer pipeline service focused on cold-start performance
+A short answer classifier service focused on cold-start performance
 
 This repo contains two subprojects:
 
-- mentor-pipeline: core implementation of training and inference
-- mentor-pipeline-api: a REST api for answer classification as a service in the app
+- mentor-classifier: core implementation of training and inference
+- mentor-classifier-api: a REST api for answer classification as a service in the app
 
 ## Requirements
 
@@ -42,18 +42,18 @@ make license
 
 Currently, this image is semantically versioned. When making changes that you want to test in another project, create a branch and PR and then you can release a test tag one of two ways:
 
-To build/push a work-in-progress tag of `mentor-pipeline` for the current commit in your branch
+To build/push a work-in-progress tag of `mentor-classifier` for the current commit in your branch
 
-To build/push a pre-release semver tag of `mentor-pipeline` for the current commit in your branch
+To build/push a pre-release semver tag of `mentor-classifier` for the current commit in your branch
 
-- create a [github release](https://github.com/ICTLearningSciences/mentor-pipeline/releases/new) **from your development branch** with tag format `/^\d+\.\d+\.\d+(-[a-z\d\-.]+)?$/` (e.g. `1.0.0-alpha.1`)
-- this will create a tag like `uscictdocker/mentor-pipeline:1.0.0-alpha.1`
-- you can follow progress in [github actions](https://github.com/mentor/mentor-pipeline/actions)
+- create a [github release](https://github.com/ICTLearningSciences/mentor-classifier/releases/new) **from your development branch** with tag format `/^\d+\.\d+\.\d+(-[a-z\d\-.]+)?$/` (e.g. `1.0.0-alpha.1`)
+- this will create a tag like `uscictdocker/mentor-classifier:1.0.0-alpha.1`
+- you can follow progress in [github actions](https://github.com/mentor/mentor-classifier/actions)
 
 
 Once your changes are approved and merged to main, you should create a release tag in semver format as follows:
 
-- create a [github release](https://github.com/ICTLearningSciences/mentor-pipeline/releases/new) **from main** with tag format `/^\d+\.\d+\.\d$/` (e.g. `1.0.0`)
-- this will create a tag like `uscictdocker/mentor-pipeline:1.0.0`
-- you can follow progress in [github actions](https://github.com/mentor/mentor-pipeline/actions)
+- create a [github release](https://github.com/ICTLearningSciences/mentor-classifier/releases/new) **from main** with tag format `/^\d+\.\d+\.\d$/` (e.g. `1.0.0`)
+- this will create a tag like `uscictdocker/mentor-classifier:1.0.0`
+- you can follow progress in [github actions](https://github.com/mentor/mentor-classifier/actions)
 

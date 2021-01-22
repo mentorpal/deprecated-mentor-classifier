@@ -13,18 +13,18 @@ from . import Bunch
 
 
 @pytest.mark.parametrize(
-    "pipeline_domain,input_mentor,fake_task_id",
+    "classifier_domain,input_mentor,fake_task_id",
     [
         ("https://mentor.org", "mentor_1", "fake_task_id_1"),
         ("http://a.diff.org", "mentor_2", "fake_task_id_2"),
     ],
 )
 @patch("mentor_classifier_tasks.tasks.train_task")
-def test_train(mock_train_task, pipeline_domain, input_mentor, fake_task_id, client):
+def test_train(mock_train_task, classifier_domain, input_mentor, fake_task_id, client):
     mock_task = Bunch(id=fake_task_id)
     mock_train_task.apply_async.return_value = mock_task
     res = client.post(
-        f"{pipeline_domain}/pipeline/train/",
+        f"{classifier_domain}/classifier/train/",
         data=json.dumps({"mentor": input_mentor}),
         content_type="application/json",
     )
@@ -33,14 +33,14 @@ def test_train(mock_train_task, pipeline_domain, input_mentor, fake_task_id, cli
         "data": {
             "id": fake_task_id,
             "mentor": input_mentor,
-            "statusUrl": f"{pipeline_domain}/pipeline/train/status/{fake_task_id}",
+            "statusUrl": f"{classifier_domain}/classifier/train/status/{fake_task_id}",
         }
     }
 
 
-# ISSUE: if the pipeline api doesn't do end-to-end ssl
+# ISSUE: if the classifier api doesn't do end-to-end ssl
 # (e.g. if nginx terminates ssl),
-# then pipeline-api doesn't know that its TRUE
+# then classifier-api doesn't know that its TRUE
 # root url is https://...
 @pytest.mark.parametrize(
     "request_root,env_val,expected_status_url_root",
@@ -68,7 +68,7 @@ def test_env_fixes_ssl_status_url(
     mock_task = Bunch(id=fake_task_id)
     mock_train_task.apply_async.return_value = mock_task
     res = client.post(
-        f"{request_root}/pipeline/train/",
+        f"{request_root}/classifier/train/",
         data=json.dumps({"mentor": fake_mentor_id}),
         content_type="application/json",
     )
@@ -77,7 +77,7 @@ def test_env_fixes_ssl_status_url(
         "data": {
             "id": fake_task_id,
             "mentor": fake_mentor_id,
-            "statusUrl": f"{expected_status_url_root}/pipeline/train/status/fake_task_id",
+            "statusUrl": f"{expected_status_url_root}/classifier/train/status/fake_task_id",
         }
     }
 
@@ -109,7 +109,7 @@ def test_it_returns_status_for_a_train_job(
 ):
     mock_task = Bunch(id=task_id, state=state, status=status, info=info)
     mock_train_task.AsyncResult.return_value = mock_task
-    res = client.get(f"/pipeline/train/status/{task_id}")
+    res = client.get(f"/classifier/train/status/{task_id}")
     assert res.status_code == 200
     assert res.json == {
         "data": {"id": task_id, "state": state, "status": status, "info": expected_info}

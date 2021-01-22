@@ -1,5 +1,5 @@
-# mentor-pipeline-api
-dockerized REST api for the mentor pipeline
+# mentor-classifier-api
+dockerized REST api for the mentor classifier
 
 ## Licensing
 

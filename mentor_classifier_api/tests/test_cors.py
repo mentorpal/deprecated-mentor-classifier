@@ -10,12 +10,12 @@ import pytest
 @pytest.mark.parametrize(
     "endpoint",
     [
-        ("/pipeline/evaluate"),
-        ("/pipeline/evaluate/"),
-        ("/pipeline/train"),
-        ("/pipeline/train/"),
-        ("/pipeline/train/status/xyz"),
-        ("/pipeline/train/status/xyz/"),
+        ("/classifier/evaluate"),
+        ("/classifier/evaluate/"),
+        ("/classifier/train"),
+        ("/classifier/train/"),
+        ("/classifier/train/status/xyz"),
+        ("/classifier/train/status/xyz/"),
     ],
 )
 def test_cors_preflight(endpoint, client):

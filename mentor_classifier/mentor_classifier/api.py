@@ -8,7 +8,7 @@ import json
 import os
 import requests
 
-GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql"
+GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://localhost:3001/graphql"
 
 
 def __fetch_mentor_data(mentor: str, url=GRAPHQL_ENDPOINT) -> dict:

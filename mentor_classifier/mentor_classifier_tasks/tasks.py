@@ -8,7 +8,7 @@ import os
 
 from celery import Celery
 
-from mentor_classifier.svm import train
+from mentor_classifier.classifier.train import train
 
 config = {
     "broker_url": os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0"),
@@ -18,10 +18,9 @@ config = {
     "event_serializer": os.environ.get("CELERY_EVENT_SERIALIZER", "json"),
     "result_serializer": os.environ.get("CELERY_RESULT_SERIALIZER", "json"),
 }
-celery = Celery("mentor-pipeline-tasks", broker=config["broker_url"])
+celery = Celery("mentor-classifier-tasks", broker=config["broker_url"])
 celery.conf.update(config)
 
-ARCHIVE_ROOT = os.environ.get("ARCHIVE_ROOT") or "archive"
 OUTPUT_ROOT = os.environ.get("OUTPUT_ROOT") or "models"
 SHARED_ROOT = os.environ.get("SHARED_ROOT") or "shared"
 
@@ -30,7 +29,6 @@ SHARED_ROOT = os.environ.get("SHARED_ROOT") or "shared"
 def train_task(mentor: str) -> dict:
     return train(
         mentor,
-        archive_root=ARCHIVE_ROOT,
         shared_root=SHARED_ROOT,
-        output_dir=os.path.join(OUTPUT_ROOT, mentor),
+        output_dir=OUTPUT_ROOT,
     ).to_dict()

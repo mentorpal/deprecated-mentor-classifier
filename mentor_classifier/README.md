@@ -1,6 +1,6 @@
-# open-tutor-pipeline
+# open-tutor-classifier
 
-A short answer pipeline service focused on cold-start performance
+A short answer classifier service focused on cold-start performance
 
 
 ## Requirements
