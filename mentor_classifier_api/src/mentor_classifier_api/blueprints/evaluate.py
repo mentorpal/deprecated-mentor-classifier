@@ -41,15 +41,10 @@ def evaluate():
             jsonify({"message": f"No models found for mentor {mentor}."}),
             404,
         )
-    version_path = os.path.join(mentor_models, "build_version.json")
-    version = None
-    if os.path.isfile(version_path):
-        with open(version_path) as f:
-            version = json.load(f)
     shared_root = os.environ.get("SHARED_ROOT") or "shared"
     classifier = Classifier(mentor, shared_root, model_root)
-    _model_op = classifier.evaluate(input_question)
+    answer_id, answer, confidence = classifier.evaluate(input_question)
     return (
-        jsonify({"output": _model_op.to_dict(), "version": version}),
+        jsonify({"answerId": answer_id, "answer": answer, "confidence": confidence}),
         200,
     )

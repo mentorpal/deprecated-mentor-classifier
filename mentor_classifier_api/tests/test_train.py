@@ -87,13 +87,7 @@ def test_env_fixes_ssl_status_url(
     [
         ("fake-task-id-123", "PENDING", "working", None, None),
         ("fake-task-id-234", "STARTED", "working harder", None, None),
-        (
-            "fake-task-id-456",
-            "SUCCESS",
-            "done!",
-            {"questions": [{"accuracy": 0.81}, {"accuracy": 0.92}]},
-            {"questions": [{"accuracy": 0.81}, {"accuracy": 0.92}]},
-        ),
+        ("fake-task-id-456", "SUCCESS", "done!", None, None),
         (
             "fake-task-id-678",
             "FAILURE",

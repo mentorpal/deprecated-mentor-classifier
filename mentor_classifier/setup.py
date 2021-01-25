@@ -20,8 +20,7 @@ requirements = _read_dependencies()
 setup(
     name="mentor_classifier",
     version="1.0.0",
-    author_email="vinitbodhwani123@gmail.com",
-    description="train and run inference for open tutor",
+    description="train and run inference for mentor pal",
     packages=packages,
     package_dir={"mentor_classifier": "mentor_classifier"},
     scripts=["bin/mentor_classifier"],

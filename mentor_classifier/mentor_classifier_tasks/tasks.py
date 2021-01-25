@@ -26,9 +26,10 @@ SHARED_ROOT = os.environ.get("SHARED_ROOT") or "shared"
 
 
 @celery.task()
-def train_task(mentor: str) -> dict:
-    return train(
+def train_task(mentor: str) -> float:
+    scores, accuracy, model_path = train(
         mentor,
         shared_root=SHARED_ROOT,
         output_dir=OUTPUT_ROOT,
-    ).to_dict()
+    )
+    return accuracy

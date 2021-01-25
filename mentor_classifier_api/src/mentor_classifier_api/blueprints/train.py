@@ -9,7 +9,6 @@ from flask import Blueprint, jsonify, request
 
 import mentor_classifier_tasks
 import mentor_classifier_tasks.tasks
-from mentor_classifier.classifier.train import ClassifierTraining
 
 train_blueprint = Blueprint("train", __name__)
 
@@ -22,27 +21,13 @@ def _to_status_url(root: str, id: str) -> str:
 @train_blueprint.route("", methods=["POST"])
 def train():
     mentor: str = request.json.get("mentor")
-    # t = mentor_classifier_tasks.tasks.train_task.apply_async(args=[mentor])
-    # return jsonify(
-    #     {
-    #         "data": {
-    #             "id": t.id,
-    #             "mentor": mentor,
-    #             "statusUrl": _to_status_url(request.url_root, t.id),
-    #         }
-    #     }
-    # )
-    # model_root = os.environ.get("MODEL_ROOT") or "models"
-    # shared_root = os.environ.get("SHARED_ROOT") or "shared"
-    classifier = ClassifierTraining(mentor)
-    t = classifier.train(mentor)
-    classifier.save()
+    t = mentor_classifier_tasks.tasks.train_task.apply_async(args=[mentor])
     return jsonify(
         {
             "data": {
-                "id": mentor,
+                "id": t.id,
                 "mentor": mentor,
-                "statusUrl": t.to_dict(),
+                "statusUrl": _to_status_url(request.url_root, t.id),
             }
         }
     )

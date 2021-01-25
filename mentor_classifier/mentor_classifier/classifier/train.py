@@ -6,9 +6,11 @@
 #
 import logging
 import os
+from typing import List, Tuple
+
+
 import numpy as np
 import pandas as pd
-
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Activation, Dense, Dropout
@@ -17,6 +19,7 @@ from sklearn import metrics
 from sklearn.externals import joblib
 from sklearn.linear_model import RidgeClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict
+
 
 from mentor_classifier.api import fetch_mentor_data
 from mentor_classifier.mentor import Mentor
@@ -45,7 +48,7 @@ class ClassifierTraining:
         accuracy: (float) accuracy score for training data
     """
 
-    def train(self):
+    def train(self) -> Tuple[List[float], float, str]:
         if not os.path.exists(self.model_path):
             os.makedirs(self.model_path)
         training_data, num_rows_having_paraphrases = self.__load_training_data()
