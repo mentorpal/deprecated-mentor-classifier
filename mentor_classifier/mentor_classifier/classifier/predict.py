@@ -58,7 +58,6 @@ class Classifier:
     def __load_model(self, model_path):
         logistic_model = None
         topic_model = None
-        word2vec = None
         print("loading model from path {}...".format(model_path))
         if not os.path.exists(model_path) or not os.listdir(model_path):
             print("Local checkpoint {0} does not exist.".format(model_path))

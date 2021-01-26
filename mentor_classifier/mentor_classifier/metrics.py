@@ -75,7 +75,7 @@ class Metrics:
         total_predictions = 0
 
         for q in user_questions:
-            ID, text, confidence = self.answer_confidence(classifier, q)
+            id, text, confidence = self.answer_confidence(classifier, q)
             if sanitize_string(text) in user_questions[q]:
                 correct_predictions += 1
             else:

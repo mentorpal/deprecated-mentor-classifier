@@ -20,11 +20,11 @@ class NLTKPreprocessor(object):
         self.punct = set(string.punctuation)
         self.stemmer = PorterStemmer()
 
-    def inverse_transform(self, X):
-        return [" ".join(doc) for doc in X]
+    def inverse_transform(self, x):
+        return [" ".join(doc) for doc in x]
 
-    def transform(self, X):
-        return list(self.tokenize(X))
+    def transform(self, x):
+        return list(self.tokenize(x))
 
     """
     Tokenizes the input question. It also performs case-folding and stems each word in the question using Porter's Stemmer.
