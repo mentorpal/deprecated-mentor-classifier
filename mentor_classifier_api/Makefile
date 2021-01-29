@@ -22,7 +22,7 @@ $(VENV)-update: $(VENV)-installed
 
 .PHONY clean:
 clean:
-	rm -rf .pytest_cache .mypy_cache build
+	rm -rf .venv .pytest_cache .mypy_cache build
 
 build/mentor_classifier:
 	mkdir -p build

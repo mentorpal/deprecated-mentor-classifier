@@ -16,28 +16,27 @@ class Mentor(object):
     def load(self, data=None):
         if data is None:
             data = fetch_mentor_data(self.id)
-        self.name = data["name"]
-        self.title = data["title"]
         self.topics = []
-        for subject in data["subjects"]:
-            self.topics.append(subject["name"])
         self.questions_by_id = {}
         self.questions_by_text = {}
         self.questions_by_answer = {}
-        for question in data["questions"]:
-            # TODO: paraphrases
-            id = question["id"]
+        print(data)
+        for answer in data["answers"]:
+            question = answer["question"]
+            id = question["_id"]
             q = {
-                "id": question["id"],
+                "id": id,
                 "question": question["question"],
-                "answer": question["transcript"],
-                "video": question["video"],
+                "answer": answer["transcript"],
+                "video": answer["video"],
             }
             q["topics"] = [question["subject"]["name"]]
+            if question["subject"]["name"] not in self.topics:
+                self.topics.append(question["subject"]["name"])
             for topic in question["topics"]:
                 q["topics"].append(topic["name"])
                 if topic["name"] not in self.topics:
                     self.topics.append(topic["name"])
             self.questions_by_id[id] = q
             self.questions_by_text[sanitize_string(question["question"])] = q
-            self.questions_by_answer[sanitize_string(question["transcript"])] = q
+            self.questions_by_answer[sanitize_string(answer["transcript"])] = q

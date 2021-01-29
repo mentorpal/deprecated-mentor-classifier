@@ -10,6 +10,10 @@ $(VENV)-update: virtualenv-installed
 	$(VENV)/bin/pip install --upgrade pip
 	$(VENV)/bin/pip install -r ./requirements.txt
 
+.PHONY clean:
+clean:
+	rm -rf .venv htmlcov .coverage
+
 .PHONY: docker-build
 docker-build:
 	cd mentor_classifier && $(MAKE) docker-build

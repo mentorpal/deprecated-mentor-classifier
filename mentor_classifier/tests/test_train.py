@@ -16,7 +16,7 @@ from .helpers import fixture_path
 
 @pytest.fixture(scope="module")
 def data_root() -> str:
-    return fixture_path("data")
+    return fixture_path("data_out")
 
 
 @pytest.fixture(scope="module")

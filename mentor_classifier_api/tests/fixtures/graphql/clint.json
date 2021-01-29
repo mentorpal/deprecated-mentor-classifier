@@ -1,42 +1,38 @@
 {
     "data": {
         "mentor": {
-            "_id": "clint",
-            "name": "Clinton Anderson",
-            "title": "Nuclear Electrician's Mate",
-            "subjects": [
+            "answers": [
                 {
-                    "name": "Background"
-                }
-            ],
-            "questions": [
-                {
-                    "id": "Q1",
-                    "question": "What is your name?",
-                    "transcript": "Clint Anderson",
-                    "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
-                    "subject": {
-                        "name": "Background"
+                    "question": {
+                        "_id": "Q1",
+                        "question": "What is your name?",
+                        "subject": {
+                            "name": "Background"
+                        },
+                        "topics": [
+                            {
+                                "name": "About Me"
+                            }
+                        ]
                     },
-                    "topics": [
-                        {
-                            "name": "About Me"
-                        }
-                    ]
+                    "transcript": "Clint Anderson",
+                    "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4"
                 },
                 {
-                    "id": "Q2",
-                    "question": "How old are you?",
-                    "transcript": "37 years old",
-                    "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
-                    "subject": {
-                        "name": "Background"
+                    "question": {
+                        "_id": "Q2",
+                        "question": "How old are you?",
+                        "subject": {
+                            "name": "Background"
+                        },
+                        "topics": [
+                            {
+                                "name": "About Me"
+                            }
+                        ]
                     },
-                    "topics": [
-                        {
-                            "name": "About Me"
-                        }
-                    ]
+                    "transcript": "37 years old",
+                    "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4"
                 }
             ]
         }
