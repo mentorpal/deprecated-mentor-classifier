@@ -35,6 +35,6 @@ def train_task(mentor: str) -> float:
             output_dir=OUTPUT_ROOT,
         )
         return accuracy
-    except err as Exception:
+    except Exception as err:
         logging.exception(err)
         raise (err)
