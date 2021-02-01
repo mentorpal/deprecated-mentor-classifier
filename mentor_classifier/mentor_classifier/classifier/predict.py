@@ -16,6 +16,7 @@ from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
 from .word2vec import W2V
 
+import logging
 
 class Classifier:
     def __init__(self, mentor, shared_root, data_path):
@@ -125,7 +126,17 @@ class Classifier:
                 f"Prediction should be a list with at least one element (answer text) but found {prediction}"
             )
         answer_text = prediction[0]
-        answer_id = self.mentor.questions_by_answer[sanitize_string(answer_text)]["id"]
+        import logging
+
+        logging.warning(f"predicted answer={answer_text}")
+        answer_key = sanitize_string(answer_text)
+        logging.warning(f"answer_key={answer_key}")
+        logging.warning(f"self.mentor.questions_by_answer={self.mentor.questions_by_answer}")
+        answer_id = (
+            self.mentor.questions_by_answer[answer_key].get("id", "")
+            if answer_key in self.mentor.questions_by_answer
+            else ""
+        )
         if not answer_id:
             raise Exception(
                 f"No answer id found for answer text (classifier_data may be out of sync with trained model): {answer_text}"

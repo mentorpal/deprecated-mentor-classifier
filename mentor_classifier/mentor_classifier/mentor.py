@@ -11,13 +11,16 @@ import logging
 
 class Mentor(object):
     def __init__(self, id, data=None):
+        logging.warning(f"init mentor for id {id}")
         self.id = id
         self.load(data)
 
     def load(self, data=None):
         logging.warning(f"loading data for mentor: {data}")
         if data is None:
+            logging.warning(f"fetching data for mentor {self.id}")
             data = fetch_mentor_data(self.id)
+        logging.warning(f"data={data}")
         self.topics = ["Background", "About Me"]  # TODO
         # self.topics = []
         self.questions_by_id = {}
