@@ -16,8 +16,6 @@ from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
 from .word2vec import W2V
 
-import logging
-
 class Classifier:
     def __init__(self, mentor, shared_root, data_path):
         if isinstance(mentor, str):
@@ -121,17 +119,12 @@ class Classifier:
         highest_confidence = confidence_scorces[-1]
         if highest_confidence < -0.88:
             return "_OFF_TOPIC_", "_OFF_TOPIC_", highest_confidence
-        if not len(prediction) >= 1 and prediction[0]:
+        if not (prediction and prediction[0]):
             raise Exception(
                 f"Prediction should be a list with at least one element (answer text) but found {prediction}"
             )
         answer_text = prediction[0]
-        import logging
-
-        logging.warning(f"predicted answer={answer_text}")
         answer_key = sanitize_string(answer_text)
-        logging.warning(f"answer_key={answer_key}")
-        logging.warning(f"self.mentor.questions_by_answer={self.mentor.questions_by_answer}")
         answer_id = (
             self.mentor.questions_by_answer[answer_key].get("id", "")
             if answer_key in self.mentor.questions_by_answer
