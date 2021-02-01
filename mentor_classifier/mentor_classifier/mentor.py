@@ -7,6 +7,7 @@
 from mentor_classifier.api import fetch_mentor_data
 from mentor_classifier.utils import sanitize_string
 
+import logging
 
 class Mentor(object):
     def __init__(self, id, data=None):
@@ -14,6 +15,7 @@ class Mentor(object):
         self.load(data)
 
     def load(self, data=None):
+        logging.warning(f"loading data for mentor: {data}")
         if data is None:
             data = fetch_mentor_data(self.id)
         self.topics = ["Background", "About Me"]  # TODO

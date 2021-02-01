@@ -26,8 +26,8 @@
                         "question": "Will you be my friend?"
                     },
                     "status": "Incomplete",
-                    "transcript": "Call me",
-                    "video": "https://video.mentorpal.org/videos/mentors/clint/Q3.mp4"
+                    "transcript": null,
+                    "video": null
                 }
             ]
         }
