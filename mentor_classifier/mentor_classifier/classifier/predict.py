@@ -120,12 +120,17 @@ class Classifier:
         highest_confidence = confidence_scorces[-1]
         if highest_confidence < -0.88:
             return "_OFF_TOPIC_", "_OFF_TOPIC_", highest_confidence
-        if not len(prediction) >= 1 and prediction[0]:
+        if not (prediction and prediction[0]):
             raise Exception(
                 f"Prediction should be a list with at least one element (answer text) but found {prediction}"
             )
         answer_text = prediction[0]
-        answer_id = self.mentor.questions_by_answer[sanitize_string(answer_text)]["id"]
+        answer_key = sanitize_string(answer_text)
+        answer_id = (
+            self.mentor.questions_by_answer[answer_key].get("id", "")
+            if answer_key in self.mentor.questions_by_answer
+            else ""
+        )
         if not answer_id:
             raise Exception(
                 f"No answer id found for answer text (classifier_data may be out of sync with trained model): {answer_text}"

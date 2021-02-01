@@ -22,8 +22,6 @@ from .helpers import (
             "clint",
             {
                 "id": "clint",
-                "name": "Clinton Anderson",
-                "title": "Nuclear Electrician's Mate",
                 "topics": ["Background", "About Me"],
                 "questions_by_id": {
                     "Q1": {
@@ -57,7 +55,5 @@ def test_loads_mentor_from_api(mentor_id, expected_data):
     )
     m = Mentor(mentor_id)
     assert m.id == expected_data["id"]
-    assert m.name == expected_data["name"]
-    assert m.title == expected_data["title"]
     assert m.topics == expected_data["topics"]
     assert m.questions_by_id == expected_data["questions_by_id"]

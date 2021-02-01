@@ -16,7 +16,7 @@ from .helpers import fixture_path
 
 @pytest.fixture(scope="module")
 def data_root() -> str:
-    return fixture_path("data")
+    return fixture_path("data_out")
 
 
 @pytest.fixture(scope="module")
@@ -25,7 +25,7 @@ def shared_root(word2vec) -> str:
 
 
 @responses.activate
-@pytest.mark.parametrize("mentor_id", ["clint"])
+@pytest.mark.parametrize("mentor_id", [("clint")])
 def test_trains_and_outputs_models(
     tmpdir, data_root: str, shared_root: str, mentor_id: str
 ):
