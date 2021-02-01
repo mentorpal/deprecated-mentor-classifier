@@ -16,6 +16,7 @@ from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
 from .word2vec import W2V
 
+
 class Classifier:
     def __init__(self, mentor, shared_root, data_path):
         if isinstance(mentor, str):

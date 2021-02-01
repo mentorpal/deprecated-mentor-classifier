@@ -37,4 +37,4 @@ def train_task(mentor: str) -> float:
         return accuracy
     except err as Exception:
         logging.exception(err)
-        raise(err)
+        raise (err)

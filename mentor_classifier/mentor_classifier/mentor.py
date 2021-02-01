@@ -9,6 +9,7 @@ from mentor_classifier.utils import sanitize_string
 
 import logging
 
+
 class Mentor(object):
     def __init__(self, id, data=None):
         self.id = id
