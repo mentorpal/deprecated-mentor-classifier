@@ -16,12 +16,14 @@ class Mentor(object):
     def load(self, data=None):
         if data is None:
             data = fetch_mentor_data(self.id)
-        self.topics = []
+        self.topics = ["Background", "About Me"]  # TODO
+        # self.topics = []
         self.questions_by_id = {}
         self.questions_by_text = {}
         self.questions_by_answer = {}
-        print(data)
         for answer in data["answers"]:
+            if answer["status"] != "Complete":
+                continue
             question = answer["question"]
             id = question["_id"]
             q = {
@@ -30,13 +32,14 @@ class Mentor(object):
                 "answer": answer["transcript"],
                 "video": answer["video"],
             }
-            q["topics"] = [question["subject"]["name"]]
-            if question["subject"]["name"] not in self.topics:
-                self.topics.append(question["subject"]["name"])
-            for topic in question["topics"]:
-                q["topics"].append(topic["name"])
-                if topic["name"] not in self.topics:
-                    self.topics.append(topic["name"])
+            q["topics"] = ["Background", "About Me"]  # TODO
+            # q["topics"] = [question["subject"]["name"]]
+            # if question["subject"]["name"] not in self.topics:
+            #     self.topics.append(question["subject"]["name"])
+            # for topic in question["topics"]:
+            #     q["topics"].append(topic["name"])
+            #     if topic["name"] not in self.topics:
+            #         self.topics.append(topic["name"])
             self.questions_by_id[id] = q
             self.questions_by_text[sanitize_string(question["question"])] = q
             self.questions_by_answer[sanitize_string(answer["transcript"])] = q

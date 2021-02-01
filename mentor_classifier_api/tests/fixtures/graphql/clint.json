@@ -5,34 +5,29 @@
                 {
                     "question": {
                         "_id": "Q1",
-                        "question": "What is your name?",
-                        "subject": {
-                            "name": "Background"
-                        },
-                        "topics": [
-                            {
-                                "name": "About Me"
-                            }
-                        ]
+                        "question": "What is your name?"
                     },
+                    "status": "Complete",
                     "transcript": "Clint Anderson",
                     "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4"
                 },
                 {
                     "question": {
                         "_id": "Q2",
-                        "question": "How old are you?",
-                        "subject": {
-                            "name": "Background"
-                        },
-                        "topics": [
-                            {
-                                "name": "About Me"
-                            }
-                        ]
+                        "question": "How old are you?"
                     },
+                    "status": "Complete",
                     "transcript": "37 years old",
                     "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4"
+                },
+                {
+                    "question": {
+                        "_id": "Q3",
+                        "question": "Will you be my friend?"
+                    },
+                    "status": "Incomplete",
+                    "transcript": "Call me",
+                    "video": "https://video.mentorpal.org/videos/mentors/clint/Q3.mp4"
                 }
             ]
         }
