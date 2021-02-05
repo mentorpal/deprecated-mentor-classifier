@@ -22,24 +22,80 @@ from .helpers import (
             "clint",
             {
                 "id": "clint",
-                "topics": ["Background", "About Me"],
+                "name": "Clint Anderson",
+                "short_name": "Clint",
+                "title": "Nuclear Electrician's Mate",
+                "topics": ["Background", "About Me", "Advice", "Weird"],
+                "subjects_by_id": {
+                    "background": {
+                        "name": "Background",
+                        "questions": ["Q1"],
+                        "topics": ["about_me"],
+                    },
+                    "advice": {
+                        "name": "Advice",
+                        "questions": ["Q2"],
+                        "topics": ["weird"],
+                    },
+                },
+                "topics_by_id": {
+                    "about_me": {
+                        "name": "About Me",
+                        "questions": ["Q1"],
+                    },
+                    "weird": {
+                        "name": "Weird",
+                        "questions": [],
+                    },
+                },
                 "questions_by_id": {
                     "Q1": {
                         "id": "Q1",
-                        "question": "What is your name?",
+                        "question_text": "What is your name?",
                         "answer": "Clint Anderson",
                         "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
                         "topics": ["Background", "About Me"],
                     },
                     "Q2": {
                         "id": "Q2",
-                        "question": "How old are you?",
+                        "question_text": "How old are you?",
                         "answer": "37 years old",
                         "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
-                        "topics": ["Background", "About Me"],
+                        "topics": ["Advice"],
                     },
                 },
-                "utterances_by_type": {},
+                "questions_by_text": {
+                    "what is your name": {
+                        "id": "Q1",
+                        "question_text": "What is your name?",
+                        "answer": "Clint Anderson",
+                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
+                        "topics": ["Background", "About Me"],
+                    },
+                    "how old are you": {
+                        "id": "Q2",
+                        "question_text": "How old are you?",
+                        "answer": "37 years old",
+                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
+                        "topics": ["Advice"],
+                    },
+                },
+                "questions_by_answer": {
+                    "clint anderson": {
+                        "id": "Q1",
+                        "question_text": "What is your name?",
+                        "answer": "Clint Anderson",
+                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
+                        "topics": ["Background", "About Me"],
+                    },
+                    "37 years old": {
+                        "id": "Q2",
+                        "question_text": "How old are you?",
+                        "answer": "37 years old",
+                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
+                        "topics": ["Advice"],
+                    },
+                },
             },
         )
     ],
@@ -55,5 +111,12 @@ def test_loads_mentor_from_api(mentor_id, expected_data):
     )
     m = Mentor(mentor_id)
     assert m.id == expected_data["id"]
+    assert m.name == expected_data["name"]
+    assert m.short_name == expected_data["short_name"]
+    assert m.title == expected_data["title"]
     assert m.topics == expected_data["topics"]
+    assert m.topics_by_id == expected_data["topics_by_id"]
+    assert m.subjects_by_id == expected_data["subjects_by_id"]
     assert m.questions_by_id == expected_data["questions_by_id"]
+    assert m.questions_by_text == expected_data["questions_by_text"]
+    assert m.questions_by_answer == expected_data["questions_by_answer"]

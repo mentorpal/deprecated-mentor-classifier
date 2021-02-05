@@ -52,8 +52,7 @@ def test_gets_answer_for_exact_match(
         json=data,
         status=200,
     )
-    data = fetch_mentor_data(mentor_id)
-    mentor = Mentor(mentor_id, data)
+    mentor = Mentor(mentor_id)
     if not path.exists(path.join(data_root, mentor_id)):
         training = ClassifierTraining(mentor, shared_root, data_root)
         training.train()
@@ -90,8 +89,7 @@ def test_predicts_answer(
         json=data,
         status=200,
     )
-    data = fetch_mentor_data(mentor_id)
-    mentor = Mentor(mentor_id, data)
+    mentor = Mentor(mentor_id)
     if not path.exists(path.join(data_root, mentor_id)):
         training = ClassifierTraining(mentor, shared_root, data_root)
         training.train()

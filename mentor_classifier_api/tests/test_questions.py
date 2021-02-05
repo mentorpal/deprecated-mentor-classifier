@@ -25,23 +25,15 @@ def python_path_env(monkeypatch, shared_root):
 
 
 def test_returns_400_response_when_mentor_not_set(client):
-    res = client.post(
-        "/classifier/evaluate/",
-        data=json.dumps({"question": "who are you?"}),
-        content_type="application/json",
-    )
+    res = client.get(f"/classifier/questions/?query=test")
     assert res.status_code == 400
     assert res.json == {"mentor": ["required field"]}
 
 
 def test_returns_400_response_when_question_not_set(client):
-    res = client.post(
-        "/classifier/evaluate/",
-        data=json.dumps({"mentor": "clint"}),
-        content_type="application/json",
-    )
+    res = client.get(f"/classifier/questions/?mentor=test")
     assert res.status_code == 400
-    assert res.json == {"question": ["required field"]}
+    assert res.json == {"query": ["required field"]}
 
 
 @responses.activate
@@ -51,19 +43,30 @@ def test_returns_400_response_when_question_not_set(client):
         (
             "clint",
             "What is your name?",
-            {"answerId": "Q1", "answer": "Clint Anderson", "confidence": 1},
+            {
+                "query": "What is your name?",
+                "answer_id": "Q1",
+                "answer_text": "Clint Anderson",
+                "confidence": 1,
+            },
         ),
         (
             "clint",
             "How old are you?",
-            {"answerId": "Q2", "answer": "37 years old", "confidence": 1},
+            {
+                "query": "How old are you?",
+                "answer_id": "Q2",
+                "answer_text": "37 years old",
+                "confidence": 1,
+            },
         ),
         (
             "clint",
             "What's your name?",
             {
-                "answerId": "Q1",
-                "answer": "Clint Anderson",
+                "query": "What's your name?",
+                "answer_id": "Q1",
+                "answer_text": "Clint Anderson",
                 "confidence": 0.12711383125936865,
             },
         ),
@@ -71,8 +74,9 @@ def test_returns_400_response_when_question_not_set(client):
             "clint",
             "How many years old are you?",
             {
-                "answerId": "Q2",
-                "answer": "37 years old",
+                "query": "How many years old are you?",
+                "answer_id": "Q2",
+                "answer_text": "37 years old",
                 "confidence": -0.42817784731913755,
             },
         ),
@@ -92,16 +96,10 @@ def test_evaluate_classifies_user_questions(
         json=data,
         status=200,
     )
-    res = client.post(
-        "/classifier/evaluate/",
-        data=json.dumps(
-            {
-                "mentor": input_mentor,
-                "question": input_question,
-            }
-        ),
-        content_type="application/json",
+    res = client.get(
+        f"/classifier/questions/?mentor={input_mentor}&query={input_question}"
     )
-    assert res.json["answerId"] == expected_results["answerId"]
-    assert res.json["answer"] == expected_results["answer"]
+    assert res.json["query"] == expected_results["query"]
+    assert res.json["answer_id"] == expected_results["answer_id"]
+    assert res.json["answer_text"] == expected_results["answer_text"]
     assert res.json["confidence"] == expected_results["confidence"]

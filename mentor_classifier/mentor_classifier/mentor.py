@@ -11,38 +11,72 @@ import logging
 
 
 class Mentor(object):
-    def __init__(self, id, data=None):
+    def __init__(self, id):
+        data = fetch_mentor_data(id)
         self.id = id
-        self.load(data)
-
-    def load(self, data=None):
-        if data is None:
-            data = fetch_mentor_data(self.id)
-        logging.warning("topics hard coded for demo. FIX THIS")
-        self.topics = ["Background", "About Me"]  # TODO
-        # self.topics = []
+        self.name = data["name"]
+        self.short_name = data["firstName"]
+        self.title = data["title"]
+        self.topics = []
+        self.subjects_by_id = {}
+        self.topics_by_id = {}
         self.questions_by_id = {}
         self.questions_by_text = {}
         self.questions_by_answer = {}
+        # todo
+        self.utterances_by_type = {
+            "_IDLE_": [["idle", ""]],
+            "_INTRO_": [["intro", "hi there!"]],
+            "_OFF_TOPIC_": [["off_topic", "I don't know"]],
+            "_PROMPT_": [["prompt", "ask me about my job"]],
+            "_FEEDBACK_": [["feedback", "no"]],
+            "_REPEAT_": [["repeat", "you already asked that!"]],
+            "_REPEAT_BUMP_": [["repeat_bump", "you asked that, how about this?"]],
+            "_PROFANITY_": [["profanity", "watch your mouth!"]],
+        }
+
+        for subject in data["subjects"]:
+            s = {"name": subject["name"], "questions": [], "topics": []}
+            self.topics.append(subject["name"])
+            for question in subject["questions"]:
+                s["questions"].append(question["_id"])
+                for topic in question["topics"]:
+                    if topic["name"] not in self.topics:
+                        self.topics.append(topic["name"])
+                    if topic["_id"] not in s["topics"]:
+                        s["topics"].append(topic["_id"])
+                    if topic["_id"] not in self.topics_by_id:
+                        self.topics_by_id[topic["_id"]] = {
+                            "name": topic["name"],
+                            "questions": [],
+                        }
+                    self.topics_by_id[topic["_id"]]["questions"].append(question["_id"])
+            self.subjects_by_id[subject["_id"]] = s
+
         for answer in data["answers"]:
-            if answer["status"] != "Complete":
-                continue
             question = answer["question"]
-            id = question["_id"]
+            qid = question["_id"]
+            if answer["status"] != "Complete":
+                for sid in self.subjects_by_id:
+                    if qid in self.subjects_by_id[sid]["questions"]:
+                        self.subjects_by_id[sid]["questions"].remove(qid)
+                for tid in self.topics_by_id:
+                    if qid in self.topics_by_id[tid]["questions"]:
+                        self.topics_by_id[tid]["questions"].remove(qid)
+                continue
             q = {
-                "id": id,
-                "question": question["question"],
+                "id": qid,
+                "question_text": question["question"],
                 "answer": answer["transcript"],
                 "video": answer["video"],
+                "topics": [],
             }
-            q["topics"] = ["Background", "About Me"]  # TODO
-            # q["topics"] = [question["subject"]["name"]]
-            # if question["subject"]["name"] not in self.topics:
-            #     self.topics.append(question["subject"]["name"])
-            # for topic in question["topics"]:
-            #     q["topics"].append(topic["name"])
-            #     if topic["name"] not in self.topics:
-            #         self.topics.append(topic["name"])
-            self.questions_by_id[id] = q
-            self.questions_by_text[sanitize_string(question["question"])] = q
-            self.questions_by_answer[sanitize_string(answer["transcript"])] = q
+            for sid in self.subjects_by_id:
+                if qid in self.subjects_by_id[sid]["questions"]:
+                    q["topics"].append(self.subjects_by_id[sid]["name"])
+            for tid in self.topics_by_id:
+                if qid in self.topics_by_id[tid]["questions"]:
+                    q["topics"].append(self.topics_by_id[tid]["name"])
+            self.questions_by_id[qid] = q
+            self.questions_by_text[sanitize_string(q["question_text"])] = q
+            self.questions_by_answer[sanitize_string(q["answer"])] = q

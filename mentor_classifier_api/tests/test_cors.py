@@ -10,8 +10,8 @@ import pytest
 @pytest.mark.parametrize(
     "endpoint",
     [
-        ("/classifier/evaluate"),
-        ("/classifier/evaluate/"),
+        ("/classifier/questions"),
+        ("/classifier/questions/"),
         ("/classifier/train"),
         ("/classifier/train/"),
         ("/classifier/train/status/xyz"),

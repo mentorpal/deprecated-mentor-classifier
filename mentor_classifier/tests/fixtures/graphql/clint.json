@@ -1,11 +1,45 @@
 {
     "data": {
         "mentor": {
-            "answers": [
+            "name": "Clint Anderson",
+            "firstName": "Clint",
+            "title": "Nuclear Electrician's Mate",
+            "subjects": [{
+                    "_id": "background",
+                    "name": "Background",
+                    "questions": [{
+                        "_id": "Q1",
+                        "topics": [{
+                            "_id": "about_me",
+                            "name": "About Me"
+                        }]
+                    }]
+                },
                 {
+                    "_id": "advice",
+                    "name": "Advice",
+                    "questions": [{
+                            "_id": "Q2",
+                            "topics": []
+                        },
+                        {
+                            "_id": "Q3",
+                            "topics": [{
+                                "_id": "weird",
+                                "name": "Weird"
+                            }]
+                        }
+                    ]
+                }
+            ],
+            "answers": [{
                     "question": {
                         "_id": "Q1",
-                        "question": "What is your name?"
+                        "question": "What is your name?",
+                        "topics": [{
+                            "_id": "about_me",
+                            "name": "About Me"
+                        }]
                     },
                     "status": "Complete",
                     "transcript": "Clint Anderson",
@@ -14,7 +48,8 @@
                 {
                     "question": {
                         "_id": "Q2",
-                        "question": "How old are you?"
+                        "question": "How old are you?",
+                        "topics": []
                     },
                     "status": "Complete",
                     "transcript": "37 years old",
@@ -23,7 +58,11 @@
                 {
                     "question": {
                         "_id": "Q3",
-                        "question": "Will you be my friend?"
+                        "question": "Will you be my friend?",
+                        "topics": [{
+                            "_id": "weird",
+                            "name": "Weird"
+                        }]
                     },
                     "status": "Incomplete",
                     "transcript": null,

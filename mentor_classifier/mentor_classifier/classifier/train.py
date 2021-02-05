@@ -97,7 +97,7 @@ class ClassifierTraining:
         for key in self.mentor.questions_by_id:
             question = self.mentor.questions_by_id[key]
             topics = question["topics"]
-            current_question = question["question"]
+            current_question = question["question_text"]
             answer = question["answer"]
             answer_id = key
             # add question to dataset
@@ -260,8 +260,7 @@ def train(
     output_dir: str = "out",
     save_model: bool = True,
 ):
-    data = fetch_mentor_data(mentor)
-    m = Mentor(mentor, data)
+    m = Mentor(mentor)
     classifier = ClassifierTraining(m, shared_root, output_dir)
     result = classifier.train()
     if save_model:

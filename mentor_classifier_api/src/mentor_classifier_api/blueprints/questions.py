@@ -13,28 +13,27 @@ from mentor_classifier.classifier import Classifier
 
 import re
 
-eval_blueprint = Blueprint("evaluate", __name__)
+questions_blueprint = Blueprint("questions", __name__)
 under_pat = re.compile(r"_([a-z])")
 
 
-@eval_blueprint.route("/", methods=["POST"])
-@eval_blueprint.route("", methods=["POST"])
-def evaluate():
-    validator = Validator(
-        {
-            "mentor": {"required": True, "type": "string"},
-            "question": {"required": True, "type": "string"},
-        },
-        allow_unknown=True,
-        purge_unknown=True,
-    )
-    if not validator(request.json or {}):
-        return jsonify(validator.errors), 400
-    args = validator.document
+@questions_blueprint.route("/", methods=["GET", "POST"])
+@questions_blueprint.route("", methods=["GET", "POST"])
+def answer():
+    if not "query" in request.args:
+        return (
+            jsonify({"query": ["required field"]}),
+            400,
+        )
+    if not "mentor" in request.args:
+        return (
+            jsonify({"mentor": ["required field"]}),
+            400,
+        )
+    question = request.args["query"].strip()
+    mentor = request.args["mentor"].strip()
     model_root = os.environ.get("MODEL_ROOT") or "models"
-    mentor = args.get("mentor")
     mentor_models = os.path.join(model_root, mentor)
-    input_question = args.get("question")
     if not os.path.isdir(mentor_models):
         return (
             jsonify({"message": f"No models found for mentor {mentor}."}),
@@ -42,8 +41,16 @@ def evaluate():
         )
     shared_root = os.environ.get("SHARED_ROOT") or "shared"
     classifier = Classifier(mentor, shared_root, model_root)
-    answer_id, answer, confidence = classifier.evaluate(input_question)
+    answer_id, answer, confidence = classifier.evaluate(question)
     return (
-        jsonify({"answerId": answer_id, "answer": answer, "confidence": confidence}),
+        jsonify(
+            {
+                "query": question,
+                "answer_id": answer_id,
+                "answer_text": answer,
+                "confidence": confidence,
+                "classifier": "",
+            }
+        ),
         200,
     )

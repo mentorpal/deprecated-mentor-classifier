@@ -4,30 +4,30 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-import json
 import os
-import requests
+from flask import Blueprint, jsonify, request
 
-GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql"
+from cerberus import Validator
+
+from mentor_classifier.mentor import Mentor
+
+import re
+
+mentors_blueprint = Blueprint("mentors", __name__)
+under_pat = re.compile(r"_([a-z])")
 
 
-def __fetch_mentor_data(mentor: str, url=GRAPHQL_ENDPOINT) -> dict:
-    if not url.startswith("http"):
-        with open(url) as f:
-            return json.load(f)
-    res = requests.post(
-        url,
-        json={
-            "query": f'query {{ mentor(id: "{mentor}") {{ name firstName title subjects {{ _id name questions {{ _id topics {{ _id name }} }} }} answers {{ question {{ _id question topics {{ _id name }} }} status transcript video }} }} }}'
-        },
+@mentors_blueprint.route("/<mentor_id>/data", methods=["GET"])
+def fetch_mentor(mentor_id: str):
+    m = Mentor(mentor_id)
+    return jsonify(
+        {
+            "id": m.id,
+            "name": m.name,
+            "short_name": m.short_name,
+            "title": m.title,
+            "topics_by_id": m.topics_by_id,
+            "questions_by_id": m.questions_by_id,
+            "utterances_by_type": m.utterances_by_type,
+        }
     )
-    res.raise_for_status()
-    return res.json()
-
-
-def fetch_mentor_data(mentor: str, url=GRAPHQL_ENDPOINT) -> dict:
-    tdjson = __fetch_mentor_data(mentor, url)
-    if "errors" in tdjson:
-        raise Exception(json.dumps(tdjson.get("errors")))
-    data = tdjson["data"]["mentor"]
-    return data
