@@ -23,16 +23,15 @@ class Mentor(object):
         self.questions_by_id = {}
         self.questions_by_text = {}
         self.questions_by_answer = {}
-        # todo
         self.utterances_by_type = {
-            "_IDLE_": [["idle", ""]],
-            "_INTRO_": [["intro", "hi there!"]],
-            "_OFF_TOPIC_": [["off_topic", "I don't know"]],
-            "_PROMPT_": [["prompt", "ask me about my job"]],
-            "_FEEDBACK_": [["feedback", "no"]],
-            "_REPEAT_": [["repeat", "you already asked that!"]],
-            "_REPEAT_BUMP_": [["repeat_bump", "you asked that, how about this?"]],
-            "_PROFANITY_": [["profanity", "watch your mouth!"]],
+            "_IDLE_": [],
+            "_INTRO_": [],
+            "_OFF_TOPIC_": [],
+            "_PROMPT_": [],
+            "_FEEDBACK_": [],
+            "_REPEAT_": [],
+            "_REPEAT_BUMP_": [],
+            "_PROFANITY_": [],
         }
 
         for subject in data["subjects"]:
@@ -56,13 +55,18 @@ class Mentor(object):
         for answer in data["answers"]:
             question = answer["question"]
             qid = question["_id"]
-            if answer["status"] != "Complete":
+            if answer["status"] != "COMPLETE":
                 for sid in self.subjects_by_id:
                     if qid in self.subjects_by_id[sid]["questions"]:
                         self.subjects_by_id[sid]["questions"].remove(qid)
                 for tid in self.topics_by_id:
                     if qid in self.topics_by_id[tid]["questions"]:
                         self.topics_by_id[tid]["questions"].remove(qid)
+                continue
+            if question["type"] == "UTTERANCE":
+                self.utterances_by_type[question["name"]].append(
+                    [qid, answer["transcript"]]
+                )
                 continue
             q = {
                 "id": qid,

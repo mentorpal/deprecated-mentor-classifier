@@ -18,7 +18,7 @@ def __fetch_mentor_data(mentor: str, url=GRAPHQL_ENDPOINT) -> dict:
     res = requests.post(
         url,
         json={
-            "query": f'query {{ mentor(id: "{mentor}") {{ name firstName title subjects {{ _id name questions {{ _id topics {{ _id name }} }} }} answers {{ question {{ _id question topics {{ _id name }} }} status transcript video }} }} }}'
+            "query": f'query {{ mentor(id: "{mentor}") {{ name firstName title subjects {{ _id name questions {{ _id topics {{ _id name }} }} }} answers {{ question {{ _id question type name topics {{ _id name }} }} status transcript video }} }} }}'
         },
     )
     res.raise_for_status()

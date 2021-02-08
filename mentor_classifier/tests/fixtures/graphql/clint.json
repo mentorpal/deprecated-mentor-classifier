@@ -30,18 +30,37 @@
                             }]
                         }
                     ]
+                },
+                {
+                    "_id": "utterances",
+                    "name": "Utterances",
+                    "questions": [{
+                            "_id": "Q4",
+                            "topics": []
+                        },
+                        {
+                            "_id": "Q5",
+                            "topics": []
+                        },
+                        {
+                            "_id": "Q6",
+                            "topics": []
+                        }
+                    ]
                 }
             ],
             "answers": [{
                     "question": {
                         "_id": "Q1",
                         "question": "What is your name?",
+                        "type": null,
+                        "name": null,
                         "topics": [{
                             "_id": "about_me",
                             "name": "About Me"
                         }]
                     },
-                    "status": "Complete",
+                    "status": "COMPLETE",
                     "transcript": "Clint Anderson",
                     "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4"
                 },
@@ -49,9 +68,11 @@
                     "question": {
                         "_id": "Q2",
                         "question": "How old are you?",
+                        "type": null,
+                        "name": null,
                         "topics": []
                     },
-                    "status": "Complete",
+                    "status": "COMPLETE",
                     "transcript": "37 years old",
                     "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4"
                 },
@@ -59,13 +80,51 @@
                     "question": {
                         "_id": "Q3",
                         "question": "Will you be my friend?",
+                        "type": null,
+                        "name": null,
                         "topics": [{
                             "_id": "weird",
                             "name": "Weird"
                         }]
                     },
-                    "status": "Incomplete",
+                    "status": "INCOMPLETE",
                     "transcript": null,
+                    "video": null
+                },
+                {
+                    "question": {
+                        "_id": "Q4",
+                        "question": "Look at the camera.",
+                        "type": "UTTERANCE",
+                        "name": "_IDLE_",
+                        "topics": []
+                    },
+                    "status": "COMPLETE",
+                    "transcript": null,
+                    "video": null
+                },
+                {
+                    "question": {
+                        "_id": "Q5",
+                        "question": "Introduce yourself.",
+                        "type": "UTTERANCE",
+                        "name": "_INTRO_",
+                        "topics": []
+                    },
+                    "status": "COMPLETE",
+                    "transcript": "Hi I'm Clint",
+                    "video": null
+                },
+                {
+                    "question": {
+                        "_id": "Q6",
+                        "question": "Off topic",
+                        "type": "UTTERANCE",
+                        "name": "_OFF_TOPIC_",
+                        "topics": []
+                    },
+                    "status": "COMPLETE",
+                    "transcript": "Ask me something else",
                     "video": null
                 }
             ]

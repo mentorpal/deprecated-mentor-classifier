@@ -51,16 +51,14 @@ from . import fixture_path
                     },
                 },
                 "utterances_by_type": {
-                    "_IDLE_": [["idle", ""]],
-                    "_INTRO_": [["intro", "hi there!"]],
-                    "_OFF_TOPIC_": [["off_topic", "I don't know"]],
-                    "_PROMPT_": [["prompt", "ask me about my job"]],
-                    "_FEEDBACK_": [["feedback", "no"]],
-                    "_REPEAT_": [["repeat", "you already asked that!"]],
-                    "_REPEAT_BUMP_": [
-                        ["repeat_bump", "you asked that, how about this?"]
-                    ],
-                    "_PROFANITY_": [["profanity", "watch your mouth!"]],
+                    "_IDLE_": [["Q4", None]],
+                    "_INTRO_": [["Q5", "Hi I'm Clint"]],
+                    "_OFF_TOPIC_": [["Q6", "Ask me something else"]],
+                    "_PROMPT_": [],
+                    "_FEEDBACK_": [],
+                    "_REPEAT_": [],
+                    "_REPEAT_BUMP_": [],
+                    "_PROFANITY_": [],
                 },
             },
         )

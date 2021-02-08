@@ -25,7 +25,7 @@ from .helpers import (
                 "name": "Clint Anderson",
                 "short_name": "Clint",
                 "title": "Nuclear Electrician's Mate",
-                "topics": ["Background", "About Me", "Advice", "Weird"],
+                "topics": ["Background", "About Me", "Advice", "Weird", "Utterances"],
                 "subjects_by_id": {
                     "background": {
                         "name": "Background",
@@ -37,6 +37,11 @@ from .helpers import (
                         "questions": ["Q2"],
                         "topics": ["weird"],
                     },
+                    "utterances": {
+                        "name": "Utterances",
+                        "questions": ["Q4", "Q5", "Q6"],
+                        "topics": [],
+                    },
                 },
                 "topics_by_id": {
                     "about_me": {
@@ -47,6 +52,16 @@ from .helpers import (
                         "name": "Weird",
                         "questions": [],
                     },
+                },
+                "utterances_by_type": {
+                    "_IDLE_": [["Q4", None]],
+                    "_INTRO_": [["Q5", "Hi I'm Clint"]],
+                    "_OFF_TOPIC_": [["Q6", "Ask me something else"]],
+                    "_PROMPT_": [],
+                    "_FEEDBACK_": [],
+                    "_REPEAT_": [],
+                    "_REPEAT_BUMP_": [],
+                    "_PROFANITY_": [],
                 },
                 "questions_by_id": {
                     "Q1": {
@@ -115,8 +130,9 @@ def test_loads_mentor_from_api(mentor_id, expected_data):
     assert m.short_name == expected_data["short_name"]
     assert m.title == expected_data["title"]
     assert m.topics == expected_data["topics"]
-    assert m.topics_by_id == expected_data["topics_by_id"]
     assert m.subjects_by_id == expected_data["subjects_by_id"]
+    assert m.topics_by_id == expected_data["topics_by_id"]
+    assert m.utterances_by_type == expected_data["utterances_by_type"]
     assert m.questions_by_id == expected_data["questions_by_id"]
     assert m.questions_by_text == expected_data["questions_by_text"]
     assert m.questions_by_answer == expected_data["questions_by_answer"]
