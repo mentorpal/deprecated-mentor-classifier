@@ -7,8 +7,6 @@
 from mentor_classifier.api import fetch_mentor_data
 from mentor_classifier.utils import sanitize_string
 
-import logging
-
 
 class Mentor(object):
     def __init__(self, id):

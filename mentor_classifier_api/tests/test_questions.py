@@ -25,13 +25,13 @@ def python_path_env(monkeypatch, shared_root):
 
 
 def test_returns_400_response_when_mentor_not_set(client):
-    res = client.get(f"/classifier/questions/?query=test")
+    res = client.get("/classifier/questions/?query=test")
     assert res.status_code == 400
     assert res.json == {"mentor": ["required field"]}
 
 
 def test_returns_400_response_when_question_not_set(client):
-    res = client.get(f"/classifier/questions/?mentor=test")
+    res = client.get("/classifier/questions/?mentor=test")
     assert res.status_code == 400
     assert res.json == {"query": ["required field"]}
 

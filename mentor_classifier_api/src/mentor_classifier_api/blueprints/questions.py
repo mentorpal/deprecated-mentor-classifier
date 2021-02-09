@@ -7,8 +7,6 @@
 import os
 from flask import Blueprint, jsonify, request
 
-from cerberus import Validator
-
 from mentor_classifier.classifier import Classifier
 
 import re
@@ -20,12 +18,12 @@ under_pat = re.compile(r"_([a-z])")
 @questions_blueprint.route("/", methods=["GET", "POST"])
 @questions_blueprint.route("", methods=["GET", "POST"])
 def answer():
-    if not "query" in request.args:
+    if "query" not in request.args:
         return (
             jsonify({"query": ["required field"]}),
             400,
         )
-    if not "mentor" in request.args:
+    if "mentor" not in request.args:
         return (
             jsonify({"mentor": ["required field"]}),
             400,

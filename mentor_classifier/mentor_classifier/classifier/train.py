@@ -20,7 +20,6 @@ from sklearn.linear_model import RidgeClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict
 
 
-from mentor_classifier.api import fetch_mentor_data
 from mentor_classifier.mentor import Mentor
 from .nltk_preprocessor import NLTKPreprocessor
 from .word2vec import W2V

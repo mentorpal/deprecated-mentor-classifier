@@ -10,7 +10,6 @@ import json
 import pytest
 import responses
 
-from mentor_classifier.api import fetch_mentor_data
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.classifier.train import ClassifierTraining
 from mentor_classifier.classifier.predict import Classifier
