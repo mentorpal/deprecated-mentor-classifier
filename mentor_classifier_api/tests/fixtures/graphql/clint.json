@@ -58,7 +58,8 @@
                         "topics": [{
                             "_id": "about_me",
                             "name": "About Me"
-                        }]
+                        }],
+                        "paraphrases": ["Who are you?"]
                     },
                     "status": "COMPLETE",
                     "transcript": "Clint Anderson",
@@ -70,7 +71,8 @@
                         "question": "How old are you?",
                         "type": null,
                         "name": null,
-                        "topics": []
+                        "topics": [],
+                        "paraphrases": ["What's your age?"]
                     },
                     "status": "COMPLETE",
                     "transcript": "37 years old",
@@ -85,7 +87,8 @@
                         "topics": [{
                             "_id": "weird",
                             "name": "Weird"
-                        }]
+                        }],
+                        "paraphrases": []
                     },
                     "status": "INCOMPLETE",
                     "transcript": null,
@@ -97,7 +100,8 @@
                         "question": "Look at the camera.",
                         "type": "UTTERANCE",
                         "name": "_IDLE_",
-                        "topics": []
+                        "topics": [],
+                        "paraphrases": []
                     },
                     "status": "COMPLETE",
                     "transcript": null,
@@ -109,7 +113,8 @@
                         "question": "Introduce yourself.",
                         "type": "UTTERANCE",
                         "name": "_INTRO_",
-                        "topics": []
+                        "topics": [],
+                        "paraphrases": []
                     },
                     "status": "COMPLETE",
                     "transcript": "Hi I'm Clint",
@@ -121,7 +126,8 @@
                         "question": "Off topic",
                         "type": "UTTERANCE",
                         "name": "_OFF_TOPIC_",
-                        "topics": []
+                        "topics": [],
+                        "paraphrases": []
                     },
                     "status": "COMPLETE",
                     "transcript": "Ask me something else",

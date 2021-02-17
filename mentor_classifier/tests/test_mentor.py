@@ -70,6 +70,7 @@ from .helpers import (
                         "answer": "Clint Anderson",
                         "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
                         "topics": ["Background", "About Me"],
+                        "paraphrases": ["Who are you?"],
                     },
                     "Q2": {
                         "id": "Q2",
@@ -77,6 +78,7 @@ from .helpers import (
                         "answer": "37 years old",
                         "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
                         "topics": ["Advice"],
+                        "paraphrases": ["What's your age?"],
                     },
                 },
                 "questions_by_text": {
@@ -86,6 +88,15 @@ from .helpers import (
                         "answer": "Clint Anderson",
                         "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
                         "topics": ["Background", "About Me"],
+                        "paraphrases": ["Who are you?"],
+                    },
+                    "who are you": {
+                        "id": "Q1",
+                        "question_text": "What is your name?",
+                        "answer": "Clint Anderson",
+                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
+                        "topics": ["Background", "About Me"],
+                        "paraphrases": ["Who are you?"],
                     },
                     "how old are you": {
                         "id": "Q2",
@@ -93,6 +104,15 @@ from .helpers import (
                         "answer": "37 years old",
                         "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
                         "topics": ["Advice"],
+                        "paraphrases": ["What's your age?"],
+                    },
+                    "whats your age": {
+                        "id": "Q2",
+                        "question_text": "How old are you?",
+                        "answer": "37 years old",
+                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
+                        "topics": ["Advice"],
+                        "paraphrases": ["What's your age?"],
                     },
                 },
                 "questions_by_answer": {
@@ -102,6 +122,7 @@ from .helpers import (
                         "answer": "Clint Anderson",
                         "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
                         "topics": ["Background", "About Me"],
+                        "paraphrases": ["Who are you?"],
                     },
                     "37 years old": {
                         "id": "Q2",
@@ -109,6 +130,7 @@ from .helpers import (
                         "answer": "37 years old",
                         "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
                         "topics": ["Advice"],
+                        "paraphrases": ["What's your age?"],
                     },
                 },
             },

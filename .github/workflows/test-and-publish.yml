@@ -47,7 +47,7 @@ jobs:
       - name: docker tag
         id: tag
         run: |
-          IMAGE_TAG=${GITHUB_SHA::8}
+          IMAGE_TAG=${GITHUB_SHA}
           echo ::set-output name=image_tag::${IMAGE_TAG}
       - name: docker login
         run: docker login -u ${{ secrets.DOCKER_LOGIN }} -p ${{ secrets.DOCKER_PASSWORD }}
@@ -66,6 +66,6 @@ jobs:
           docker tag "uscictdocker/mentor-classifier:${{ steps.tag.outputs.image_tag }}" "uscictdocker/mentor-classifier:latest"
           docker tag "uscictdocker/mentor-classifier-api:${{ steps.tag.outputs.image_tag }}" "uscictdocker/mentor-classifier-api:latest"
       - name: docker push classifier
-        run: docker push uscictdocker/mentor-classifier
+        run: docker push --all-tags uscictdocker/mentor-classifier
       - name: docker push api
-        run: docker push uscictdocker/mentor-classifier-api
+        run: docker push --all-tags uscictdocker/mentor-classifier-api

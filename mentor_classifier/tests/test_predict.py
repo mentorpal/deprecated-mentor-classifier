@@ -32,6 +32,8 @@ def shared_root(word2vec) -> str:
     [
         ("clint", "What is your name?", "Q1", "Clint Anderson"),
         ("clint", "How old are you?", "Q2", "37 years old"),
+        ("clint", "Who are you?", "Q1", "Clint Anderson"),
+        ("clint", "What's your age?", "Q2", "37 years old"),
     ],
 )
 def test_gets_answer_for_exact_match(

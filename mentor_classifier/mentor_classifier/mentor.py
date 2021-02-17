@@ -31,25 +31,29 @@ class Mentor(object):
             "_REPEAT_BUMP_": [],
             "_PROFANITY_": [],
         }
+        self.load_topics(data)
+        self.load_questions(data)
 
-        for subject in data["subjects"]:
-            s = {"name": subject["name"], "questions": [], "topics": []}
-            self.topics.append(subject["name"])
-            for question in subject["questions"]:
-                s["questions"].append(question["_id"])
-                for topic in question["topics"]:
+    def load_topics(self, data):
+        for s in data.get("subjects", []):
+            self.topics.append(s["name"])
+            subject = {"name": s["name"], "questions": [], "topics": []}
+            for q in s.get("questions", []):
+                subject["questions"].append(q["_id"])
+                for topic in q.get("topics", []):
                     if topic["name"] not in self.topics:
                         self.topics.append(topic["name"])
-                    if topic["_id"] not in s["topics"]:
-                        s["topics"].append(topic["_id"])
+                    if topic["_id"] not in subject["topics"]:
+                        subject["topics"].append(topic["_id"])
                     if topic["_id"] not in self.topics_by_id:
                         self.topics_by_id[topic["_id"]] = {
                             "name": topic["name"],
                             "questions": [],
                         }
-                    self.topics_by_id[topic["_id"]]["questions"].append(question["_id"])
-            self.subjects_by_id[subject["_id"]] = s
+                    self.topics_by_id[topic["_id"]]["questions"].append(q["_id"])
+            self.subjects_by_id[s["_id"]] = subject
 
+    def load_questions(self, data):
         for answer in data["answers"]:
             question = answer["question"]
             qid = question["_id"]
@@ -69,6 +73,7 @@ class Mentor(object):
             q = {
                 "id": qid,
                 "question_text": question["question"],
+                "paraphrases": question["paraphrases"],
                 "answer": answer["transcript"],
                 "video": answer["video"],
                 "topics": [],
@@ -81,4 +86,6 @@ class Mentor(object):
                     q["topics"].append(self.topics_by_id[tid]["name"])
             self.questions_by_id[qid] = q
             self.questions_by_text[sanitize_string(q["question_text"])] = q
+            for paraphrase in question["paraphrases"]:
+                self.questions_by_text[sanitize_string(paraphrase)] = q
             self.questions_by_answer[sanitize_string(q["answer"])] = q

@@ -97,6 +97,7 @@ class ClassifierTraining:
             question = self.mentor.questions_by_id[key]
             topics = question["topics"]
             current_question = question["question_text"]
+            num_rows_having_paraphrases += len(question["paraphrases"])
             answer = question["answer"]
             answer_id = key
             # add question to dataset
@@ -105,6 +106,12 @@ class ClassifierTraining:
             train_data.append(
                 [current_question, processed_question, topics, answer_id, answer]
             )
+            # look for paraphrases and add them to dataset
+            for paraphrase in question["paraphrases"]:
+                processed_paraphrase = preprocessor.transform(paraphrase)
+                train_data.append(
+                    [paraphrase, processed_paraphrase, topics, answer_id, answer]
+                )
         return train_data, num_rows_having_paraphrases
 
     def __load_training_vectors(self, train_data):

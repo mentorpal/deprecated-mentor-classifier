@@ -40,6 +40,7 @@ from . import fixture_path
                         "answer": "Clint Anderson",
                         "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
                         "topics": ["Background", "About Me"],
+                        "paraphrases": ["Who are you?"],
                     },
                     "Q2": {
                         "id": "Q2",
@@ -47,6 +48,7 @@ from . import fixture_path
                         "answer": "37 years old",
                         "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
                         "topics": ["Advice"],
+                        "paraphrases": ["What's your age?"],
                     },
                 },
                 "utterances_by_type": {
