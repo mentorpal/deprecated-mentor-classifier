@@ -59,7 +59,9 @@ test: $(VENV)
 	cd $(ROOT)/word2vec/ && $(MAKE) word2vec.bin
 	. $(VENV)/bin/activate \
 		&& export PYTHONPATH=$${PYTHONPATH}:$(PWD)/src \
-		&& coverage run -m py.test -vv $(args)
+		&& coverage run \
+			--omit="$(PWD)/tests $(VENV)" \
+			-m py.test -vv $(args)
 
 .PHONY: test-all
 test-all:

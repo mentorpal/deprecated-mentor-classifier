@@ -31,12 +31,7 @@ def test_trains_and_outputs_models(
 ):
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
-    responses.add(
-        responses.POST,
-        "http://graphql/graphql",
-        json=data,
-        status=200,
-    )
+    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     scores, accuracy, model_path = train(mentor_id, shared_root, data_root)
     assert model_path == path.join(data_root, mentor_id)
     assert path.exists(path.join(model_path, "lstm_topic_model.h5"))

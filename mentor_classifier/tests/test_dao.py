@@ -6,15 +6,14 @@
 #
 import json
 from os import path
+from shutil import copytree
 
 import responses
 import pytest
 
-from mentor_classifier.mentor import Mentor
 from mentor_classifier.classifier.dao import Dao
-from .helpers import (
-    fixture_path,
-)
+from mentor_classifier.classifier.train import train
+from .helpers import fixture_path
 
 
 @pytest.fixture(scope="module")
@@ -26,25 +25,31 @@ def data_root() -> str:
 def shared_root(word2vec) -> str:
     return path.dirname(word2vec)
 
+
 @responses.activate
-@pytest.mark.parametrize(
-    "mentor_id",
-    [("clint")]
-)
-def test_find_classifier_caches(
-    data_root: str,
-    shared_root: str,
-    mentor_id: str):
+@pytest.mark.parametrize("mentor_id", [("clint")])
+def test_find_classifier_caches(data_root: str, shared_root: str, mentor_id: str):
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
-        responses.add(
-            responses.POST,
-            "http://graphql/graphql",
-            json=data,
-            status=200,
-        )
+        responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     dao = Dao(shared_root=shared_root, data_root=data_root)
     c1 = dao.find_classifier(mentor_id)
     c2 = dao.find_classifier(mentor_id)
     assert c1 == c2
-    
+
+
+@responses.activate
+@pytest.mark.parametrize("mentor_id", [("clint")])
+def test_find_classifier_returns_updated_classifier_if_model_has_changed(
+    tmp_path, data_root: str, shared_root: str, mentor_id: str
+):
+    with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
+        data = json.load(f)
+        responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    test_data_root = tmp_path / "data"
+    copytree(path.join(data_root, mentor_id), path.join(test_data_root, mentor_id))
+    dao = Dao(shared_root=shared_root, data_root=test_data_root)
+    c1 = dao.find_classifier(mentor_id)
+    train(mentor_id, shared_root=shared_root, output_dir=test_data_root)
+    c2 = dao.find_classifier(mentor_id)
+    assert c1 != c2

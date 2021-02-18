@@ -5,8 +5,9 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 import os
-import numpy as np
+from pathlib import Path
 
+import numpy as np
 from tensorflow.keras.models import load_model
 from sklearn.externals import joblib
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -15,6 +16,14 @@ from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
 from .word2vec import W2V
+
+
+def logistic_model_path(models_path: str) -> str:
+    return os.path.join(models_path, "fused_model.pkl")
+
+
+def get_classifier_last_trained_at(models_path: str) -> float:
+    return Path(logistic_model_path(models_path)).stat().st_mtime
 
 
 class Classifier:
@@ -55,6 +64,9 @@ class Classifier:
         predicted_answer = self.__get_prediction(w2v_vector, topic_vector)
         return predicted_answer
 
+    def get_last_trained_at(self) -> float:
+        return get_classifier_last_trained_at(self.model_path)
+
     def __load_model(self, model_path):
         logistic_model = None
         topic_model = None
@@ -71,8 +83,7 @@ class Classifier:
                 )
             )
         try:
-            path = os.path.join(model_path, "fused_model.pkl")
-            logistic_model = joblib.load(path)
+            logistic_model = joblib.load(logistic_model_path(model_path))
         except BaseException:
             print(
                 "Unable to load logistic model from {0}. Classifier needs to be retrained before asking questions.".format(

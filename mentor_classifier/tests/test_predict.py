@@ -47,12 +47,7 @@ def test_gets_answer_for_exact_match(
 ):
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
-    responses.add(
-        responses.POST,
-        "http://graphql/graphql",
-        json=data,
-        status=200,
-    )
+    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     mentor = Mentor(mentor_id)
     if not path.exists(path.join(data_root, mentor_id)):
         training = ClassifierTraining(mentor, shared_root, data_root)
@@ -84,12 +79,7 @@ def test_predicts_answer(
 ):
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
-    responses.add(
-        responses.POST,
-        "http://graphql/graphql",
-        json=data,
-        status=200,
-    )
+    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     mentor = Mentor(mentor_id)
     if not path.exists(path.join(data_root, mentor_id)):
         training = ClassifierTraining(mentor, shared_root, data_root)
