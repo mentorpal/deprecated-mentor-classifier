@@ -24,14 +24,8 @@ from . import fixture_path
                 "short_name": "Clint",
                 "title": "Nuclear Electrician's Mate",
                 "topics_by_id": {
-                    "about_me": {
-                        "name": "About Me",
-                        "questions": ["Q1"],
-                    },
-                    "weird": {
-                        "name": "Weird",
-                        "questions": [],
-                    },
+                    "about_me": {"name": "About Me", "questions": ["Q1"]},
+                    "weird": {"name": "Weird", "questions": []},
                 },
                 "questions_by_id": {
                     "Q1": {
@@ -65,19 +59,10 @@ from . import fixture_path
         )
     ],
 )
-def test_get_mentor_data(
-    client,
-    input_mentor,
-    expected_results,
-):
+def test_get_mentor_data(client, input_mentor, expected_results):
     with open(fixture_path("graphql/{}.json".format(input_mentor))) as f:
         data = json.load(f)
-    responses.add(
-        responses.POST,
-        "http://graphql/graphql",
-        json=data,
-        status=200,
-    )
+    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     res = client.get(f"/classifier/mentors/{input_mentor}/data")
     assert res.json["id"] == expected_results["id"]
     assert res.json["name"] == expected_results["name"]

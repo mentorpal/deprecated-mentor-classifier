@@ -6,7 +6,4 @@
 #
 from .predict import Classifier  # noqa: F401
 from .word2vec import find_or_load_word2vec  # noqa: F401
-from .train import (  # noqa: F401
-    ClassifierTraining,
-    train,
-)
+from .train import ClassifierTraining, train  # noqa: F401

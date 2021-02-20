@@ -9,9 +9,7 @@ import responses
 import pytest
 
 from mentor_classifier.mentor import Mentor
-from .helpers import (
-    fixture_path,
-)
+from .helpers import fixture_path
 
 
 @responses.activate
@@ -44,14 +42,8 @@ from .helpers import (
                     },
                 },
                 "topics_by_id": {
-                    "about_me": {
-                        "name": "About Me",
-                        "questions": ["Q1"],
-                    },
-                    "weird": {
-                        "name": "Weird",
-                        "questions": [],
-                    },
+                    "about_me": {"name": "About Me", "questions": ["Q1"]},
+                    "weird": {"name": "Weird", "questions": []},
                 },
                 "utterances_by_type": {
                     "_IDLE_": [["Q4", None]],
@@ -140,12 +132,7 @@ from .helpers import (
 def test_loads_mentor_from_api(mentor_id, expected_data):
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
-    responses.add(
-        responses.POST,
-        "http://graphql/graphql",
-        json=data,
-        status=200,
-    )
+    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     m = Mentor(mentor_id)
     assert m.id == expected_data["id"]
     assert m.name == expected_data["name"]

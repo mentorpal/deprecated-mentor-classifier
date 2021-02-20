@@ -55,7 +55,10 @@ license:
 PHONY: test
 test: $(VENV)
 	cd $(ROOT)/word2vec/ && $(MAKE) word2vec.bin
-	. $(VENV)/bin/activate && coverage run -m py.test -vv $(args)
+	. $(VENV)/bin/activate \
+		&& coverage run \
+			--omit="$(PWD)/tests $(VENV)" \
+			-m py.test -vv $(args)
 
 .PHONY: test-all
 test-all: test-format test-lint test-types test-license test

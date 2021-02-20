@@ -83,19 +83,11 @@ def test_returns_400_response_when_question_not_set(client):
     ],
 )
 def test_evaluate_classifies_user_questions(
-    client,
-    input_mentor,
-    input_question,
-    expected_results,
+    client, input_mentor, input_question, expected_results
 ):
     with open(fixture_path("graphql/{}.json".format(input_mentor))) as f:
         data = json.load(f)
-    responses.add(
-        responses.POST,
-        "http://graphql/graphql",
-        json=data,
-        status=200,
-    )
+    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     res = client.get(
         f"/classifier/questions/?mentor={input_mentor}&query={input_question}"
     )
