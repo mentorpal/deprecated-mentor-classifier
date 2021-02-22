@@ -20,6 +20,7 @@ from sklearn.linear_model import RidgeClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict
 
 
+from mentor_classifier.api import update_training
 from mentor_classifier.mentor import Mentor
 from .nltk_preprocessor import NLTKPreprocessor
 from .word2vec import W2V
@@ -76,6 +77,7 @@ class ClassifierTraining:
             y_train_unfused,
             num_rows_having_paraphrases,
         )
+        update_training(self.mentor.id)
         return scores, accuracy, self.model_path
 
     def save(self, to_path=None):

@@ -6,12 +6,14 @@
 #
 import os
 from pathlib import Path
+import random
 
 import numpy as np
 from tensorflow.keras.models import load_model
 from sklearn.externals import joblib
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
+from mentor_classifier.api import send_feedback
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
@@ -46,9 +48,9 @@ class Classifier:
             sanitized_question = sanitize_string(question)
             if sanitized_question in self.mentor.questions_by_text:
                 question = self.mentor.questions_by_text[sanitized_question]
-                answer_id = question["id"]
+                answer_id = question["answer_id"]
                 answer = question["answer"]
-                return answer_id, answer, 1.0
+                return answer_id, answer, 1.0, None
         preprocessor = NLTKPreprocessor()
         processed_question = preprocessor.transform(question)
         w2v_vector, lstm_vector = self.w2v_model.w2v_for_question(processed_question)
@@ -61,8 +63,13 @@ class Classifier:
             value=0.0,
         )
         topic_vector = self.__get_topic_vector(padded_vector)
-        predicted_answer = self.__get_prediction(w2v_vector, topic_vector)
-        return predicted_answer
+        answer_id, answer_text, highest_confidence = self.__get_prediction(
+            w2v_vector, topic_vector
+        )
+        feedback_id = send_feedback(
+            self.mentor.id, question, answer_id, highest_confidence
+        )
+        return answer_id, answer_text, highest_confidence, feedback_id
 
     def get_last_trained_at(self) -> float:
         return get_classifier_last_trained_at(self.model_path)
@@ -125,12 +132,13 @@ class Classifier:
         test_vector = test_vector.reshape(1, -1)
         prediction = self.logistic_model.predict(test_vector)
         decision = self.logistic_model.decision_function(test_vector)
-        confidence_scorces = (
+        confidence_scores = (
             sorted(decision[0]) if decision.ndim >= 2 else sorted(decision)
         )
-        highest_confidence = confidence_scorces[-1]
-        if highest_confidence < -0.88:
-            return "_OFF_TOPIC_", "_OFF_TOPIC_", highest_confidence
+        highest_confidence = confidence_scores[-1]
+        if highest_confidence < 0:
+            off_topic_id, off_topic_answer = self.__get_offtopic()
+            return off_topic_id, off_topic_answer, highest_confidence
         if not (prediction and prediction[0]):
             raise Exception(
                 f"Prediction should be a list with at least one element (answer text) but found {prediction}"
@@ -138,7 +146,7 @@ class Classifier:
         answer_text = prediction[0]
         answer_key = sanitize_string(answer_text)
         answer_id = (
-            self.mentor.questions_by_answer[answer_key].get("id", "")
+            self.mentor.questions_by_answer[answer_key].get("answer_id", "")
             if answer_key in self.mentor.questions_by_answer
             else ""
         )
@@ -147,3 +155,18 @@ class Classifier:
                 f"No answer id found for answer text (classifier_data may be out of sync with trained model): {answer_text}"
             )
         return answer_id, answer_text, highest_confidence
+
+    def __get_offtopic(self):
+        try:
+            i = random.randint(
+                0, len(self.mentor.utterances_by_type["_OFF_TOPIC_"]) - 1
+            )
+            return (
+                self.mentor.utterances_by_type["_OFF_TOPIC_"][i][0],
+                self.mentor.utterances_by_type["_OFF_TOPIC_"][i][1],
+            )
+        except KeyError:
+            return (
+                "_OFF_TOPIC_",
+                "_OFF_TOPIC_",
+            )

@@ -67,7 +67,7 @@ class Mentor(object):
                 continue
             if question["type"] == "UTTERANCE":
                 self.utterances_by_type[question["name"]].append(
-                    [qid, answer["transcript"]]
+                    [answer["_id"], answer["transcript"]]
                 )
                 continue
             q = {
@@ -75,6 +75,7 @@ class Mentor(object):
                 "question_text": question["question"],
                 "paraphrases": question["paraphrases"],
                 "answer": answer["transcript"],
+                "answer_id": answer["_id"],
                 "video": answer["video"],
                 "topics": [],
             }

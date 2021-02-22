@@ -42,7 +42,7 @@ def answer():
     if not os.path.isdir(mentor_models):
         return (jsonify({"message": f"No models found for mentor {mentor}."}), 404)
     classifier = _get_dao().find_classifier(mentor)
-    answer_id, answer, confidence = classifier.evaluate(question)
+    answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
     return (
         jsonify(
             {
@@ -50,6 +50,7 @@ def answer():
                 "answer_id": answer_id,
                 "answer_text": answer,
                 "confidence": confidence,
+                "feedback_id": feedback_id,
                 "classifier": "",
             }
         ),

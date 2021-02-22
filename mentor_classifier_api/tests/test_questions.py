@@ -45,9 +45,10 @@ def test_returns_400_response_when_question_not_set(client):
             "What is your name?",
             {
                 "query": "What is your name?",
-                "answer_id": "Q1",
+                "answer_id": "A1",
                 "answer_text": "Clint Anderson",
                 "confidence": 1,
+                "feedback_id": None,
             },
         ),
         (
@@ -55,9 +56,10 @@ def test_returns_400_response_when_question_not_set(client):
             "How old are you?",
             {
                 "query": "How old are you?",
-                "answer_id": "Q2",
+                "answer_id": "A2",
                 "answer_text": "37 years old",
                 "confidence": 1,
+                "feedback_id": None,
             },
         ),
         (
@@ -65,19 +67,10 @@ def test_returns_400_response_when_question_not_set(client):
             "What's your name?",
             {
                 "query": "What's your name?",
-                "answer_id": "Q1",
+                "answer_id": "A1",
                 "answer_text": "Clint Anderson",
-                "confidence": 0.12711383125936865,
-            },
-        ),
-        (
-            "clint",
-            "How many years old are you?",
-            {
-                "query": "How many years old are you?",
-                "answer_id": "Q2",
-                "answer_text": "37 years old",
-                "confidence": -0.42817784731913755,
+                "confidence": 0.4133306493832687,
+                "feedback_id": "error",
             },
         ),
     ],
@@ -95,3 +88,4 @@ def test_evaluate_classifies_user_questions(
     assert res.json["answer_id"] == expected_results["answer_id"]
     assert res.json["answer_text"] == expected_results["answer_text"]
     assert res.json["confidence"] == expected_results["confidence"]
+    assert res.json["feedback_id"] == expected_results["feedback_id"]

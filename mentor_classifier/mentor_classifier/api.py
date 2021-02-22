@@ -7,16 +7,14 @@
 import json
 import os
 import requests
+import urllib.parse
 
 GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql"
 
 
-def __fetch_mentor_data(mentor: str, url=GRAPHQL_ENDPOINT) -> dict:
-    if not url.startswith("http"):
-        with open(url) as f:
-            return json.load(f)
+def fetch_mentor_data(mentor: str) -> dict:
     res = requests.post(
-        url,
+        GRAPHQL_ENDPOINT,
         json={
             "query": f"""query {{
                 mentor(id: "{mentor}") {{
@@ -35,6 +33,7 @@ def __fetch_mentor_data(mentor: str, url=GRAPHQL_ENDPOINT) -> dict:
                         }}
                     }}
                     answers {{
+                        _id
                         question {{
                             _id
                             question
@@ -55,12 +54,49 @@ def __fetch_mentor_data(mentor: str, url=GRAPHQL_ENDPOINT) -> dict:
         },
     )
     res.raise_for_status()
-    return res.json()
-
-
-def fetch_mentor_data(mentor: str, url=GRAPHQL_ENDPOINT) -> dict:
-    tdjson = __fetch_mentor_data(mentor, url)
+    tdjson = res.json()
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
     data = tdjson["data"]["mentor"]
     return data
+
+
+def update_training(mentor: str):
+    res = requests.post(
+        GRAPHQL_ENDPOINT,
+        json={
+            "query": f"""mutation {{
+                updateMentorTraining(id: "{mentor}") {{
+                    _id
+                }}
+            }}"""
+        },
+    )
+    res.raise_for_status()
+
+
+def send_feedback(mentor: str, question: str, answer_id: str, confidence: float):
+    feedback = {
+        "mentor": mentor,
+        "question": question,
+        "classifierAnswer": answer_id,
+        "confidence": confidence,
+    }
+    res = requests.post(
+        GRAPHQL_ENDPOINT,
+        json={
+            "query": f"""mutation {{
+                updateFeedback(feedback: "{urllib.parse.urlencode(feedback)}") {{
+                    _id
+                }}
+            }}"""
+        },
+    )
+    res.raise_for_status()
+    tdjson = res.json()
+    if "errors" in tdjson:
+        raise Exception(json.dumps(tdjson.get("errors")))
+    try:
+        return tdjson["data"]["updateFeedback"]["_id"]
+    except KeyError:
+        return "error"
