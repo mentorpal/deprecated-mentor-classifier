@@ -7,7 +7,6 @@
 import json
 import os
 import requests
-import urllib.parse
 
 GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql"
 
@@ -75,18 +74,17 @@ def update_training(mentor: str):
     res.raise_for_status()
 
 
-def send_feedback(mentor: str, question: str, answer_id: str, confidence: float):
-    feedback = {
-        "mentor": mentor,
-        "question": question,
-        "classifierAnswer": answer_id,
-        "confidence": confidence,
-    }
+def create_user_question(mentor: str, question: str, answer_id: str, confidence: float):
     res = requests.post(
         GRAPHQL_ENDPOINT,
         json={
             "query": f"""mutation {{
-                updateFeedback(feedback: "{urllib.parse.urlencode(feedback)}") {{
+                userQuestionCreate(userQuestion: {{
+                    question: "{question}",
+                    mentor: "{mentor}",
+                    classifierAnswer: "{answer_id}",
+                    confidence: {confidence}
+                }}) {{
                     _id
                 }}
             }}"""
@@ -96,7 +94,8 @@ def send_feedback(mentor: str, question: str, answer_id: str, confidence: float)
     tdjson = res.json()
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
+    # TODO: should throw an error but need to figure out how to mock 2 different GQL queries...
     try:
-        return tdjson["data"]["updateFeedback"]["_id"]
+        return tdjson["data"]["userQuestionCreate"]["_id"]
     except KeyError:
         return "error"

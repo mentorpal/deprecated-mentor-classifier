@@ -13,7 +13,7 @@ from tensorflow.keras.models import load_model
 from sklearn.externals import joblib
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-from mentor_classifier.api import send_feedback
+from mentor_classifier.api import create_user_question
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
@@ -66,7 +66,7 @@ class Classifier:
         answer_id, answer_text, highest_confidence = self.__get_prediction(
             w2v_vector, topic_vector
         )
-        feedback_id = send_feedback(
+        feedback_id = create_user_question(
             self.mentor.id, question, answer_id, highest_confidence
         )
         return answer_id, answer_text, highest_confidence, feedback_id
