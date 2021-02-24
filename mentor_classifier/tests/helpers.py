@@ -4,8 +4,19 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+import json
 from os import path
+
+from mentor_classifier.mentor import Mentor, mentor_from_dict
+
+mentor_from_dict
 
 
 def fixture_path(p: str) -> str:
     return path.abspath(path.join(".", "tests", "fixtures", p))
+
+
+def fixture_mentor(mentor_id: str) -> Mentor:
+    with open(fixture_path(path.join("mentors", f"{mentor_id}.json"))) as f:
+        d = json.load(f)
+        return mentor_from_dict(mentor_id, d)

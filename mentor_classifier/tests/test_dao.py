@@ -50,6 +50,6 @@ def test_find_classifier_returns_updated_classifier_if_model_has_changed(
     copytree(path.join(data_root, mentor_id), path.join(test_data_root, mentor_id))
     dao = Dao(shared_root=shared_root, data_root=test_data_root)
     c1 = dao.find_classifier(mentor_id)
-    train(mentor_id, shared_root=shared_root, output_dir=test_data_root)
+    train(c1.mentor, shared_root=shared_root, output_dir=test_data_root)
     c2 = dao.find_classifier(mentor_id)
     assert c1 != c2

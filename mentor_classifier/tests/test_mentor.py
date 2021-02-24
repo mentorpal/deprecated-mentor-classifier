@@ -4,12 +4,10 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-import json
 import responses
 import pytest
 
-from mentor_classifier.mentor import Mentor
-from .helpers import fixture_path
+from .helpers import fixture_mentor
 
 
 @responses.activate
@@ -137,11 +135,8 @@ from .helpers import fixture_path
         )
     ],
 )
-def test_loads_mentor_from_api(mentor_id, expected_data):
-    with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    m = Mentor(mentor_id)
+def test_loads_mentor_from_config(mentor_id, expected_data):
+    m = fixture_mentor(mentor_id)
     assert m.id == expected_data["id"]
     assert m.name == expected_data["name"]
     assert m.short_name == expected_data["short_name"]

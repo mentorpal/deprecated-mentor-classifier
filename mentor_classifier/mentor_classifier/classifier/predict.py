@@ -29,10 +29,7 @@ def get_classifier_last_trained_at(models_path: str) -> float:
 
 
 class Classifier:
-    def __init__(self, mentor, shared_root, data_path):
-        if isinstance(mentor, str):
-            print("loading mentor id {}...".format(mentor))
-            mentor = Mentor(mentor)
+    def __init__(self, mentor: Mentor, shared_root: str, data_path: str):
         assert isinstance(
             mentor, Mentor
         ), "invalid type for mentor (expected mentor.Mentor or string id for a mentor, encountered {}".format(

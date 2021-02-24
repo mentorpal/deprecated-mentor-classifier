@@ -8,10 +8,12 @@ import json
 import os
 import requests
 
+from mentor_classifier.mentor import MentorConfig, mentor_config_from_dict
+
 GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql"
 
 
-def fetch_mentor_data(mentor: str) -> dict:
+def fetch_mentor_data(mentor: str) -> MentorConfig:
     res = requests.post(
         GRAPHQL_ENDPOINT,
         json={
@@ -56,8 +58,7 @@ def fetch_mentor_data(mentor: str) -> dict:
     tdjson = res.json()
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
-    data = tdjson["data"]["mentor"]
-    return data
+    return mentor_config_from_dict(tdjson["data"]["mentor"])
 
 
 def update_training(mentor: str):

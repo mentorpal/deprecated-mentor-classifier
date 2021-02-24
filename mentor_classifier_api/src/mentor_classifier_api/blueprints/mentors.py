@@ -6,6 +6,7 @@
 #
 from flask import Blueprint, jsonify
 
+from mentor_classifier.api import fetch_mentor_data
 from mentor_classifier.mentor import Mentor
 
 import re
@@ -16,7 +17,7 @@ under_pat = re.compile(r"_([a-z])")
 
 @mentors_blueprint.route("/<mentor_id>/data", methods=["GET"])
 def fetch_mentor(mentor_id: str):
-    m = Mentor(mentor_id)
+    m = Mentor(mentor_id, fetch_mentor_data(mentor_id))
     return jsonify(
         {
             "id": m.id,

@@ -27,10 +27,9 @@ from .word2vec import W2V
 
 
 class ClassifierTraining:
-    def __init__(self, mentor, shared_root: str = "shared", output_dir: str = "out"):
-        if isinstance(mentor, str):
-            print("loading mentor id {}...".format(mentor))
-            mentor = Mentor(mentor)
+    def __init__(
+        self, mentor: Mentor, shared_root: str = "shared", output_dir: str = "out"
+    ):
         assert isinstance(
             mentor, Mentor
         ), "invalid type for mentor (expected mentor.Mentor or string id for a mentor, encountered {}".format(
@@ -263,13 +262,12 @@ class ClassifierTraining:
 
 
 def train(
-    mentor: str,
+    mentor: Mentor,
     shared_root: str = "shared",
     output_dir: str = "out",
     save_model: bool = True,
 ):
-    m = Mentor(mentor)
-    classifier = ClassifierTraining(m, shared_root, output_dir)
+    classifier = ClassifierTraining(mentor, shared_root, output_dir)
     result = classifier.train()
     if save_model:
         classifier.save()

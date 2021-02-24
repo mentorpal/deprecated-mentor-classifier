@@ -6,12 +6,11 @@
 #
 from os import path
 
-import json
 import pytest
 import responses
 
 from mentor_classifier.classifier.train import train
-from .helpers import fixture_path
+from .helpers import fixture_path, fixture_mentor
 
 
 @pytest.fixture(scope="module")
@@ -29,10 +28,11 @@ def shared_root(word2vec) -> str:
 def test_trains_and_outputs_models(
     tmpdir, data_root: str, shared_root: str, mentor_id: str
 ):
-    with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    scores, accuracy, model_path = train(mentor_id, shared_root, data_root)
+    responses.add(responses.POST, "http://graphql/graphql", json={}, status=200)
+    # TODO: get rid of the above when training-success callback isn't hardcoded to gql
+    scores, accuracy, model_path = train(
+        fixture_mentor(mentor_id), shared_root, data_root
+    )
     assert model_path == path.join(data_root, mentor_id)
     assert path.exists(path.join(model_path, "lstm_topic_model.h5"))
     assert path.exists(path.join(model_path, "fused_model.pkl"))

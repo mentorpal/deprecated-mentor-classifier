@@ -10,10 +10,9 @@ import json
 import pytest
 import responses
 
-from mentor_classifier.mentor import Mentor
 from mentor_classifier.classifier.train import ClassifierTraining
 from mentor_classifier.classifier.predict import Classifier
-from .helpers import fixture_path
+from .helpers import fixture_mentor, fixture_path
 
 
 @pytest.fixture(scope="module")
@@ -45,10 +44,7 @@ def test_gets_answer_for_exact_match_and_paraphrases(
     expected_answer_id: str,
     expected_answer: str,
 ):
-    with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    mentor = Mentor(mentor_id)
+    mentor = fixture_mentor(mentor_id)
     with open(fixture_path("graphql/feedback.json")) as f:
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
@@ -81,10 +77,7 @@ def test_predicts_answer(
     expected_answer_id: str,
     expected_answer: str,
 ):
-    with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    mentor = Mentor(mentor_id)
+    mentor = fixture_mentor(mentor_id)
     with open(fixture_path("graphql/feedback.json")) as f:
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
@@ -116,10 +109,7 @@ def test_gets_off_topic(
     expected_answer_id: str,
     expected_answer: str,
 ):
-    with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    mentor = Mentor(mentor_id)
+    mentor = fixture_mentor(mentor_id)
     with open(fixture_path("graphql/feedback.json")) as f:
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)

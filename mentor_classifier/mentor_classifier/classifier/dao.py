@@ -1,6 +1,9 @@
 from os import environ, path
 
 import pylru
+
+from mentor_classifier.mentor import Mentor
+from mentor_classifier.api import fetch_mentor_data
 from .predict import Classifier, get_classifier_last_trained_at
 
 
@@ -23,6 +26,7 @@ class Dao:
                 path.join(self.data_root, mentor_id)
             ):
                 return e.classifier
-        c = Classifier(mentor_id, self.shared_root, self.data_root)
+        mentor = Mentor(mentor_id, fetch_mentor_data(mentor_id))
+        c = Classifier(mentor, self.shared_root, self.data_root)
         self.cache[mentor_id] = Entry(c)
         return c

@@ -1,5 +1,7 @@
 celery==5.0.2
 click==7.1.2
+# import dataclasses module until upgrade out of python 3.6
+dataclasses==0.8
 gensim==3.8.3
 h5py==2.8.0
 nltk==3.5
