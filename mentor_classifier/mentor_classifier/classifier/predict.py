@@ -13,7 +13,7 @@ from tensorflow.keras.models import load_model
 from sklearn.externals import joblib
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-from mentor_classifier.api import create_user_question
+from mentor_classifier.api import create_user_question, OFF_TOPIC_THRESHOLD
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
@@ -69,6 +69,8 @@ class Classifier:
         feedback_id = create_user_question(
             self.mentor.id, question, answer_id, highest_confidence
         )
+        if highest_confidence < OFF_TOPIC_THRESHOLD:
+            answer_id, answer_text = self.__get_offtopic()
         return answer_id, answer_text, highest_confidence, feedback_id
 
     def get_last_trained_at(self) -> float:
@@ -136,9 +138,6 @@ class Classifier:
             sorted(decision[0]) if decision.ndim >= 2 else sorted(decision)
         )
         highest_confidence = confidence_scores[-1]
-        if highest_confidence < 0:
-            off_topic_id, off_topic_answer = self.__get_offtopic()
-            return off_topic_id, off_topic_answer, highest_confidence
         if not (prediction and prediction[0]):
             raise Exception(
                 f"Prediction should be a list with at least one element (answer text) but found {prediction}"

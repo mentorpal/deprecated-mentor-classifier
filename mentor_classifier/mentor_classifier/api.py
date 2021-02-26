@@ -9,6 +9,7 @@ import os
 import requests
 
 GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql"
+OFF_TOPIC_THRESHOLD = -0.55  # todo: put this in graphql and have it be configurable
 
 
 def fetch_mentor_data(mentor: str) -> dict:

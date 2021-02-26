@@ -1,1 +1,0 @@
-/Users/kcarr/Documents/v2.mentorpal/mentor-classifier/word2vec/word2vec.bin

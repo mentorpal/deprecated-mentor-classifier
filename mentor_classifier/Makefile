@@ -54,7 +54,7 @@ license:
 
 PHONY: test
 test: $(VENV)
-	rm -rf tests/fixtures/data_out
+	rm -rf tests/fixtures/data_out/*/*
 	cd $(ROOT)/word2vec/ && $(MAKE) word2vec.bin
 	. $(VENV)/bin/activate \
 		&& coverage run \
