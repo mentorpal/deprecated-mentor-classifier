@@ -8,6 +8,7 @@ import json
 import os
 import requests
 
+
 GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql"
 OFF_TOPIC_THRESHOLD = -0.55  # todo: put this in graphql and have it be configurable
 
@@ -75,15 +76,22 @@ def update_training(mentor: str):
     res.raise_for_status()
 
 
-def create_user_question(mentor: str, question: str, answer_id: str, confidence: float):
+def create_user_question(
+    mentor: str,
+    question: str,
+    answer_id: str,
+    answer_type: str,
+    confidence: float,
+) -> str:
     res = requests.post(
         GRAPHQL_ENDPOINT,
         json={
             "query": f"""mutation {{
                 userQuestionCreate(userQuestion: {{
-                    question: "{question}",
                     mentor: "{mentor}",
+                    question: "{question}",
                     classifierAnswer: "{answer_id}",
+                    classifierAnswerType: "{answer_type}",
                     confidence: {confidence}
                 }}) {{
                     _id

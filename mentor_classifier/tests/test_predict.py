@@ -62,7 +62,7 @@ def test_gets_answer_for_exact_match_and_paraphrases(
     assert answer_id == expected_answer_id
     assert answer == expected_answer
     assert confidence == 1
-    assert feedback_id is None
+    assert feedback_id is not None
 
 
 @responses.activate

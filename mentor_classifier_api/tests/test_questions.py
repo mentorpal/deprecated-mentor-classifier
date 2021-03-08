@@ -48,7 +48,6 @@ def test_returns_400_response_when_question_not_set(client):
                 "answer_id": "A1",
                 "answer_text": "Clint Anderson",
                 "confidence": 1,
-                "feedback_id": None,
             },
         ),
         (
@@ -59,7 +58,6 @@ def test_returns_400_response_when_question_not_set(client):
                 "answer_id": "A2",
                 "answer_text": "37 years old",
                 "confidence": 1,
-                "feedback_id": None,
             },
         ),
         (
@@ -70,7 +68,6 @@ def test_returns_400_response_when_question_not_set(client):
                 "answer_id": "A1",
                 "answer_text": "Clint Anderson",
                 "confidence": 0.4133306493832687,
-                "feedback_id": "error",
             },
         ),
     ],
@@ -88,4 +85,4 @@ def test_evaluate_classifies_user_questions(
     assert res.json["answer_id"] == expected_results["answer_id"]
     assert res.json["answer_text"] == expected_results["answer_text"]
     assert res.json["confidence"] == expected_results["confidence"]
-    assert res.json["feedback_id"] == expected_results["feedback_id"]
+    assert res.json["feedback_id"] is not None

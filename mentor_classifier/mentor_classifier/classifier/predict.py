@@ -13,7 +13,10 @@ from tensorflow.keras.models import load_model
 from sklearn.externals import joblib
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-from mentor_classifier.api import create_user_question, OFF_TOPIC_THRESHOLD
+from mentor_classifier.api import (
+    create_user_question,
+    OFF_TOPIC_THRESHOLD,
+)
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
@@ -47,10 +50,20 @@ class Classifier:
         if not canned_question_match_disabled:
             sanitized_question = sanitize_string(question)
             if sanitized_question in self.mentor.questions_by_text:
-                question = self.mentor.questions_by_text[sanitized_question]
-                answer_id = question["answer_id"]
-                answer = question["answer"]
-                return answer_id, answer, 1.0, None
+                q = self.mentor.questions_by_text[sanitized_question]
+                answer_id = q["answer_id"]
+                answer = q["answer"]
+                feedback_id = create_user_question(
+                    self.mentor.id,
+                    question,
+                    answer_id,
+                    "PARAPHRASE"
+                    if sanitized_question != sanitize_string(q["question_text"])
+                    else "EXACT",
+                    1.0,
+                )
+                return answer_id, answer, 1.0, feedback_id
+
         preprocessor = NLTKPreprocessor()
         processed_question = preprocessor.transform(question)
         w2v_vector, lstm_vector = self.w2v_model.w2v_for_question(processed_question)
@@ -67,7 +80,11 @@ class Classifier:
             w2v_vector, topic_vector
         )
         feedback_id = create_user_question(
-            self.mentor.id, question, answer_id, highest_confidence
+            self.mentor.id,
+            question,
+            answer_id,
+            "OFF_TOPIC" if highest_confidence < OFF_TOPIC_THRESHOLD else "CLASSIFIER",
+            highest_confidence,
         )
         if highest_confidence < OFF_TOPIC_THRESHOLD:
             answer_id, answer_text = self.__get_offtopic()
