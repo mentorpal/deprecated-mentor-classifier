@@ -21,39 +21,70 @@ from .helpers import fixture_path
             {
                 "id": "clint",
                 "name": "Clint Anderson",
-                "short_name": "Clint",
+                "firstName": "Clint",
                 "title": "Nuclear Electrician's Mate",
-                "topics": ["Background", "About Me", "Advice", "Weird", "Utterances"],
-                "subjects_by_id": {
-                    "background": {
-                        "name": "Background",
-                        "questions": ["Q1"],
-                        "topics": ["about_me"],
-                    },
-                    "advice": {
+                "topics": ["Advice", "Background", "Utterances", "About Me", "Weird"],
+                "subjects_by_id": [
+                    {
+                        "id": "advice",
                         "name": "Advice",
-                        "questions": ["Q2"],
-                        "topics": ["weird"],
+                        "topics": [{"id": "weird", "name": "Weird", "questions": []}],
+                        "questions": [],
                     },
-                    "utterances": {
+                    {
+                        "id": "background",
+                        "name": "Background",
+                        "topics": [
+                            {
+                                "id": "about_me",
+                                "name": "About Me",
+                                "questions": [
+                                    {
+                                        "id": "Q1",
+                                        "question_text": "What is your name?",
+                                    }
+                                ],
+                            }
+                        ],
+                        "questions": [
+                            {
+                                "id": "Q1",
+                                "question_text": "What is your name?",
+                            },
+                            {
+                                "id": "Q2",
+                                "question_text": "How old are you?",
+                            },
+                        ],
+                    },
+                    {
+                        "id": "utterances",
                         "name": "Utterances",
-                        "questions": ["Q4", "Q5", "Q6"],
                         "topics": [],
+                        "questions": [],
                     },
-                },
-                "topics_by_id": {
-                    "about_me": {"name": "About Me", "questions": ["Q1"]},
-                    "weird": {"name": "Weird", "questions": []},
-                },
+                ],
+                "topics_by_id": [
+                    {
+                        "id": "about_me",
+                        "name": "About Me",
+                        "questions": [
+                            {
+                                "id": "Q1",
+                                "question_text": "What is your name?",
+                            }
+                        ],
+                    },
+                    {
+                        "id": "weird",
+                        "name": "Weird",
+                        "questions": [],
+                    },
+                ],
                 "utterances_by_type": {
                     "_IDLE_": [["A4", None]],
                     "_INTRO_": [["A5", "Hi I'm Clint"]],
                     "_OFF_TOPIC_": [["A6", "Ask me something else"]],
-                    "_PROMPT_": [],
-                    "_FEEDBACK_": [],
-                    "_REPEAT_": [],
-                    "_REPEAT_BUMP_": [],
-                    "_PROFANITY_": [],
                 },
                 "questions_by_id": {
                     "Q1": {
@@ -61,8 +92,7 @@ from .helpers import fixture_path
                         "question_text": "What is your name?",
                         "answer": "Clint Anderson",
                         "answer_id": "A1",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
-                        "topics": ["Background", "About Me"],
+                        "topics": ["About Me"],
                         "paraphrases": ["Who are you?"],
                     },
                     "Q2": {
@@ -70,8 +100,7 @@ from .helpers import fixture_path
                         "question_text": "How old are you?",
                         "answer": "37 years old",
                         "answer_id": "A2",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
-                        "topics": ["Advice"],
+                        "topics": [],
                         "paraphrases": ["What's your age?"],
                     },
                 },
@@ -81,8 +110,7 @@ from .helpers import fixture_path
                         "question_text": "What is your name?",
                         "answer": "Clint Anderson",
                         "answer_id": "A1",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
-                        "topics": ["Background", "About Me"],
+                        "topics": ["About Me"],
                         "paraphrases": ["Who are you?"],
                     },
                     "who are you": {
@@ -90,8 +118,7 @@ from .helpers import fixture_path
                         "question_text": "What is your name?",
                         "answer": "Clint Anderson",
                         "answer_id": "A1",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
-                        "topics": ["Background", "About Me"],
+                        "topics": ["About Me"],
                         "paraphrases": ["Who are you?"],
                     },
                     "how old are you": {
@@ -99,8 +126,7 @@ from .helpers import fixture_path
                         "question_text": "How old are you?",
                         "answer": "37 years old",
                         "answer_id": "A2",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
-                        "topics": ["Advice"],
+                        "topics": [],
                         "paraphrases": ["What's your age?"],
                     },
                     "whats your age": {
@@ -108,8 +134,7 @@ from .helpers import fixture_path
                         "question_text": "How old are you?",
                         "answer": "37 years old",
                         "answer_id": "A2",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
-                        "topics": ["Advice"],
+                        "topics": [],
                         "paraphrases": ["What's your age?"],
                     },
                 },
@@ -119,8 +144,7 @@ from .helpers import fixture_path
                         "question_text": "What is your name?",
                         "answer": "Clint Anderson",
                         "answer_id": "A1",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
-                        "topics": ["Background", "About Me"],
+                        "topics": ["About Me"],
                         "paraphrases": ["Who are you?"],
                     },
                     "37 years old": {
@@ -128,8 +152,7 @@ from .helpers import fixture_path
                         "question_text": "How old are you?",
                         "answer": "37 years old",
                         "answer_id": "A2",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
-                        "topics": ["Advice"],
+                        "topics": [],
                         "paraphrases": ["What's your age?"],
                     },
                 },
@@ -144,7 +167,7 @@ def test_loads_mentor_from_api(mentor_id, expected_data):
     m = Mentor(mentor_id)
     assert m.id == expected_data["id"]
     assert m.name == expected_data["name"]
-    assert m.short_name == expected_data["short_name"]
+    assert m.firstName == expected_data["firstName"]
     assert m.title == expected_data["title"]
     assert m.topics == expected_data["topics"]
     assert m.subjects_by_id == expected_data["subjects_by_id"]

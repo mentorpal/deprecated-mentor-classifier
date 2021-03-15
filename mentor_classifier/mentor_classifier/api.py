@@ -13,42 +13,52 @@ GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql
 OFF_TOPIC_THRESHOLD = -0.55  # todo: put this in graphql and have it be configurable
 
 
-def fetch_mentor_data(mentor: str) -> dict:
+def fetch_mentor_data(mentor: str, subject="", topic="") -> dict:
     res = requests.post(
         GRAPHQL_ENDPOINT,
         json={
             "query": f"""query {{
                 mentor(id: "{mentor}") {{
+                    _id
                     name
                     firstName
                     title
+                    mentorType
                     subjects {{
                         _id
                         name
+                        topics {{
+                            _id
+                            name
+                        }}
                         questions {{
                             _id
+                            question
                             topics {{
                                 _id
                                 name
                             }}
                         }}
                     }}
-                    answers {{
+                    topics(subject: "{subject}") {{
                         _id
+                        name
+                    }}
+                    answers(subject: "{subject}", topic: "{topic}") {{
+                        _id
+                        status
+                        transcript
                         question {{
                             _id
                             question
-                            paraphrases
                             type
                             name
+                            paraphrases
                             topics {{
                                 _id
                                 name
                             }}
                         }}
-                        status
-                        transcript
-                        video
                     }}
                 }}
             }}"""

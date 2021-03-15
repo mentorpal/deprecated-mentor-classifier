@@ -21,20 +21,15 @@ from . import fixture_path
             {
                 "id": "clint",
                 "name": "Clint Anderson",
-                "short_name": "Clint",
+                "firstName": "Clint",
                 "title": "Nuclear Electrician's Mate",
-                "topics_by_id": {
-                    "about_me": {"name": "About Me", "questions": ["Q1"]},
-                    "weird": {"name": "Weird", "questions": []},
-                },
                 "questions_by_id": {
                     "Q1": {
                         "id": "Q1",
                         "question_text": "What is your name?",
                         "answer": "Clint Anderson",
                         "answer_id": "A1",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
-                        "topics": ["Background", "About Me"],
+                        "topics": ["About Me"],
                         "paraphrases": ["Who are you?"],
                     },
                     "Q2": {
@@ -42,8 +37,7 @@ from . import fixture_path
                         "question_text": "How old are you?",
                         "answer": "37 years old",
                         "answer_id": "A2",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
-                        "topics": ["Advice"],
+                        "topics": [],
                         "paraphrases": ["What's your age?"],
                     },
                 },
@@ -51,11 +45,6 @@ from . import fixture_path
                     "_IDLE_": [["A4", None]],
                     "_INTRO_": [["A5", "Hi I'm Clint"]],
                     "_OFF_TOPIC_": [["A6", "Ask me something else"]],
-                    "_PROMPT_": [],
-                    "_FEEDBACK_": [],
-                    "_REPEAT_": [],
-                    "_REPEAT_BUMP_": [],
-                    "_PROFANITY_": [],
                 },
             },
         )
@@ -68,8 +57,7 @@ def test_get_mentor_data(client, input_mentor, expected_results):
     res = client.get(f"/classifier/mentors/{input_mentor}/data")
     assert res.json["id"] == expected_results["id"]
     assert res.json["name"] == expected_results["name"]
-    assert res.json["short_name"] == expected_results["short_name"]
+    assert res.json["firstName"] == expected_results["firstName"]
     assert res.json["title"] == expected_results["title"]
-    assert res.json["topics_by_id"] == expected_results["topics_by_id"]
     assert res.json["questions_by_id"] == expected_results["questions_by_id"]
     assert res.json["utterances_by_type"] == expected_results["utterances_by_type"]

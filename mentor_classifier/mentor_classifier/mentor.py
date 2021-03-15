@@ -11,82 +11,115 @@ from mentor_classifier.utils import sanitize_string
 class Mentor(object):
     def __init__(self, id):
         data = fetch_mentor_data(id)
-        self.id = id
+        self.id = data["_id"]
         self.name = data["name"]
-        self.short_name = data["firstName"]
+        self.firstName = data["firstName"]
         self.title = data["title"]
+        self.mentorType = data["mentorType"]
+
+        self.utterances_by_type = self.load_utterances_by_type(data)
+        self.questions_by_id = self.load_questions(data)
+        self.topics_by_id = self.load_topics(data)
+        self.subjects_by_id = self.load_subjects(data)
+
         self.topics = []
-        self.subjects_by_id = {}
-        self.topics_by_id = {}
-        self.questions_by_id = {}
+        for subject in self.subjects_by_id:
+            self.topics.append(subject["name"])
+        for topic in self.topics_by_id:
+            self.topics.append(topic["name"])
+
         self.questions_by_text = {}
         self.questions_by_answer = {}
-        self.utterances_by_type = {
-            "_IDLE_": [],
-            "_INTRO_": [],
-            "_OFF_TOPIC_": [],
-            "_PROMPT_": [],
-            "_FEEDBACK_": [],
-            "_REPEAT_": [],
-            "_REPEAT_BUMP_": [],
-            "_PROFANITY_": [],
-        }
-        self.load_topics(data)
-        self.load_questions(data)
+        for qid in self.questions_by_id:
+            q = self.questions_by_id[qid]
+            self.questions_by_text[sanitize_string(q["question_text"])] = q
+            for paraphrase in q["paraphrases"]:
+                self.questions_by_text[sanitize_string(paraphrase)] = q
+            self.questions_by_answer[sanitize_string(q["answer"])] = q
 
-    def load_topics(self, data):
-        for s in data.get("subjects", []):
-            self.topics.append(s["name"])
-            subject = {"name": s["name"], "questions": [], "topics": []}
-            for q in s.get("questions", []):
-                subject["questions"].append(q["_id"])
-                for topic in q.get("topics", []):
-                    if topic["name"] not in self.topics:
-                        self.topics.append(topic["name"])
-                    if topic["_id"] not in subject["topics"]:
-                        subject["topics"].append(topic["_id"])
-                    if topic["_id"] not in self.topics_by_id:
-                        self.topics_by_id[topic["_id"]] = {
-                            "name": topic["name"],
-                            "questions": [],
-                        }
-                    self.topics_by_id[topic["_id"]]["questions"].append(q["_id"])
-            self.subjects_by_id[s["_id"]] = subject
+    def load_subjects(self, data=None):
+        if data is None:
+            data = fetch_mentor_data(self.id)
+        subjects = []
+        for subject in data.get("subjects", []):
+            s = {
+                "id": subject["_id"],
+                "name": subject["name"],
+                "topics": self.load_topics(subject),
+                "questions": [],
+            }
+            for question in subject["questions"]:
+                if question["_id"] in self.questions_by_id:
+                    s["questions"].append(
+                        {"id": question["_id"], "question_text": question["question"]}
+                    )
+            subjects.append(s)
+        return subjects
 
-    def load_questions(self, data):
-        for answer in data["answers"]:
+    def load_topics(self, data=None):
+        if data is None:
+            data = fetch_mentor_data(self.id)
+        topics = []
+        for topic in data.get("topics", []):
+            t = {
+                "id": topic["_id"],
+                "name": topic["name"],
+                "questions": [],
+            }
+            for question in data.get("questions", []):
+                if question["_id"] in self.questions_by_id:
+                    for qtopic in question["topics"]:
+                        if qtopic["_id"] == topic["_id"]:
+                            t["questions"].append(
+                                {
+                                    "id": question["_id"],
+                                    "question_text": question["question"],
+                                }
+                            )
+            for answer in data.get("answers", []):
+                question = answer["question"]
+                if question["_id"] in self.questions_by_id:
+                    for qtopic in question["topics"]:
+                        if qtopic["_id"] == topic["_id"]:
+                            t["questions"].append(
+                                {
+                                    "id": question["_id"],
+                                    "question_text": question["question"],
+                                }
+                            )
+            topics.append(t)
+        return topics
+
+    def load_questions(self, data=None):
+        if data is None:
+            data = fetch_mentor_data(self.id)
+        questions = {}
+        for answer in data.get("answers", []):
             question = answer["question"]
-            qid = question["_id"]
-            if answer["status"] != "COMPLETE":
-                for sid in self.subjects_by_id:
-                    if qid in self.subjects_by_id[sid]["questions"]:
-                        self.subjects_by_id[sid]["questions"].remove(qid)
-                for tid in self.topics_by_id:
-                    if qid in self.topics_by_id[tid]["questions"]:
-                        self.topics_by_id[tid]["questions"].remove(qid)
-                continue
-            if question["type"] == "UTTERANCE":
-                self.utterances_by_type[question["name"]].append(
-                    [answer["_id"], answer["transcript"]]
-                )
+            if answer["status"] != "COMPLETE" or question["type"] == "UTTERANCE":
                 continue
             q = {
-                "id": qid,
+                "id": question["_id"],
                 "question_text": question["question"],
                 "paraphrases": question["paraphrases"],
                 "answer": answer["transcript"],
                 "answer_id": answer["_id"],
-                "video": answer["video"],
                 "topics": [],
             }
-            for sid in self.subjects_by_id:
-                if qid in self.subjects_by_id[sid]["questions"]:
-                    q["topics"].append(self.subjects_by_id[sid]["name"])
-            for tid in self.topics_by_id:
-                if qid in self.topics_by_id[tid]["questions"]:
-                    q["topics"].append(self.topics_by_id[tid]["name"])
-            self.questions_by_id[qid] = q
-            self.questions_by_text[sanitize_string(q["question_text"])] = q
-            for paraphrase in question["paraphrases"]:
-                self.questions_by_text[sanitize_string(paraphrase)] = q
-            self.questions_by_answer[sanitize_string(q["answer"])] = q
+            for topic in question["topics"]:
+                q["topics"].append(topic["name"])
+            questions[question["_id"]] = q
+        return questions
+
+    def load_utterances_by_type(self, data=None):
+        if data is None:
+            data = fetch_mentor_data(self.id)
+        utterances = {}
+        for answer in data.get("answers", []):
+            question = answer["question"]
+            if answer["status"] != "COMPLETE" or question["type"] != "UTTERANCE":
+                continue
+            if question["name"] not in utterances:
+                utterances[question["name"]] = []
+            utterances[question["name"]].append([answer["_id"], answer["transcript"]])
+        return utterances

@@ -21,8 +21,10 @@ def fetch_mentor(mentor_id: str):
         {
             "id": m.id,
             "name": m.name,
-            "short_name": m.short_name,
+            "firstName": m.firstName,
             "title": m.title,
+            "mentorType": m.mentorType,
+            "subjects_by_id": m.subjects_by_id,
             "topics_by_id": m.topics_by_id,
             "questions_by_id": m.questions_by_id,
             "utterances_by_type": m.utterances_by_type,

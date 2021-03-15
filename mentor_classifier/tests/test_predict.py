@@ -50,9 +50,6 @@ def test_gets_answer_for_exact_match_and_paraphrases(
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     mentor = Mentor(mentor_id)
-    with open(fixture_path("graphql/feedback.json")) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     if not path.exists(path.join(data_root, mentor_id)):
         training = ClassifierTraining(mentor, shared_root, data_root)
         training.train()
@@ -86,9 +83,6 @@ def test_predicts_answer(
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     mentor = Mentor(mentor_id)
-    with open(fixture_path("graphql/feedback.json")) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     if not path.exists(path.join(data_root, mentor_id)):
         training = ClassifierTraining(mentor, shared_root, data_root)
         training.train()
@@ -127,9 +121,6 @@ def test_gets_off_topic(
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     mentor = Mentor(mentor_id)
-    with open(fixture_path("graphql/feedback.json")) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     if not path.exists(path.join(data_root, mentor_id)):
         training = ClassifierTraining(mentor, shared_root, data_root)
         training.train()
