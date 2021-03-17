@@ -19,16 +19,16 @@ def fetch_mentor_data(mentor: str) -> dict:
         json={
             "query": f"""query {{
                 mentor(id: "{mentor}") {{
+                    subjects {{
+                        name
+                    }}
+                    topics {{
+                        name
+                    }}
                     answers {{
                         _id
                         status
                         transcript
-                        subjects {{
-                            name
-                        }}
-                        topics {{
-                            name
-                        }}
                         question {{
                             _id
                             question
