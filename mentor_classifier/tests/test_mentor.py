@@ -19,68 +19,7 @@ from .helpers import fixture_path
         (
             "clint",
             {
-                "id": "clint",
-                "name": "Clint Anderson",
-                "firstName": "Clint",
-                "title": "Nuclear Electrician's Mate",
                 "topics": ["Advice", "Background", "Utterances", "About Me", "Weird"],
-                "subjects_by_id": [
-                    {
-                        "id": "advice",
-                        "name": "Advice",
-                        "topics": [{"id": "weird", "name": "Weird", "questions": []}],
-                        "questions": [],
-                    },
-                    {
-                        "id": "background",
-                        "name": "Background",
-                        "topics": [
-                            {
-                                "id": "about_me",
-                                "name": "About Me",
-                                "questions": [
-                                    {
-                                        "id": "Q1",
-                                        "question_text": "What is your name?",
-                                    }
-                                ],
-                            }
-                        ],
-                        "questions": [
-                            {
-                                "id": "Q1",
-                                "question_text": "What is your name?",
-                            },
-                            {
-                                "id": "Q2",
-                                "question_text": "How old are you?",
-                            },
-                        ],
-                    },
-                    {
-                        "id": "utterances",
-                        "name": "Utterances",
-                        "topics": [],
-                        "questions": [],
-                    },
-                ],
-                "topics_by_id": [
-                    {
-                        "id": "about_me",
-                        "name": "About Me",
-                        "questions": [
-                            {
-                                "id": "Q1",
-                                "question_text": "What is your name?",
-                            }
-                        ],
-                    },
-                    {
-                        "id": "weird",
-                        "name": "Weird",
-                        "questions": [],
-                    },
-                ],
                 "utterances_by_type": {
                     "_IDLE_": [["A4", None]],
                     "_INTRO_": [["A5", "Hi I'm Clint"]],
@@ -165,13 +104,8 @@ def test_loads_mentor_from_api(mentor_id, expected_data):
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     m = Mentor(mentor_id)
-    assert m.id == expected_data["id"]
-    assert m.name == expected_data["name"]
-    assert m.firstName == expected_data["firstName"]
-    assert m.title == expected_data["title"]
+    assert m.id == mentor_id
     assert m.topics == expected_data["topics"]
-    assert m.subjects_by_id == expected_data["subjects_by_id"]
-    assert m.topics_by_id == expected_data["topics_by_id"]
     assert m.utterances_by_type == expected_data["utterances_by_type"]
     assert m.questions_by_id == expected_data["questions_by_id"]
     assert m.questions_by_text == expected_data["questions_by_text"]

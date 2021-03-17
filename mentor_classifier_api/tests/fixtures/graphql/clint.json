@@ -1,91 +1,22 @@
 {
     "data": {
         "mentor": {
-            "_id": "clint",
-            "name": "Clint Anderson",
-            "firstName": "Clint",
-            "title": "Nuclear Electrician's Mate",
-            "mentorType": "CHAT",
             "subjects": [
                 {
-                    "_id": "advice",
-                    "name": "Advice",
-                    "topics": [
-                        {
-                            "_id": "weird",
-                            "name": "Weird"
-                        }
-                    ],
-                    "questions": [
-                        {
-                            "_id": "Q3",
-                            "question": "Will you be my friend?",
-                            "topics": [
-                                {
-                                    "_id": "weird",
-                                    "name": "Weird"
-                                }
-                            ]
-                        }
-                    ]
+                    "name": "Advice"
                 },
                 {
-                    "_id": "background",
-                    "name": "Background",
-                    "topics": [
-                        {
-                            "_id": "about_me",
-                            "name": "About Me"
-                        }
-                    ],
-                    "questions": [
-                        {
-                            "_id": "Q1",
-                            "question": "What is your name?",
-                            "topics": [
-                                {
-                                    "_id": "about_me",
-                                    "name": "About Me"
-                                }
-                            ]
-                        },
-                        {
-                            "_id": "Q2",
-                            "question": "How old are you?",
-                            "topics": []
-                        }
-                    ]
+                    "name": "Background"
                 },
                 {
-                    "_id": "utterances",
-                    "name": "Utterances",
-                    "topics": [],
-                    "questions": [
-                        {
-                            "_id": "Q4",
-                            "question": "Look at the camera.",
-                            "topics": []
-                        },
-                        {
-                            "_id": "Q5",
-                            "question": "Introduce yourself.",
-                            "topics": []
-                        },
-                        {
-                            "_id": "Q6",
-                            "question": "Off topic",
-                            "topics": []
-                        }
-                    ]
+                    "name": "Utterances"
                 }
             ],
             "topics": [
                 {
-                    "_id": "about_me",
                     "name": "About Me"
                 },
                 {
-                    "_id": "weird",
                     "name": "Weird"
                 }
             ],
@@ -104,7 +35,6 @@
                         ],
                         "topics": [
                             {
-                                "_id": "about_me",
                                 "name": "About Me"
                             }
                         ]
@@ -137,7 +67,6 @@
                         "paraphrases": [],
                         "topics": [
                             {
-                                "_id": "weird",
                                 "name": "Weird"
                             }
                         ]
