@@ -9,7 +9,7 @@ jobs:
       - name: python env setup
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.6
       - name: test format
         run: make test-format
       - name: test lint

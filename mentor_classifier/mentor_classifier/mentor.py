@@ -10,83 +10,43 @@ from mentor_classifier.utils import sanitize_string
 
 class Mentor(object):
     def __init__(self, id):
-        data = fetch_mentor_data(id)
         self.id = id
-        self.name = data["name"]
-        self.short_name = data["firstName"]
-        self.title = data["title"]
         self.topics = []
-        self.subjects_by_id = {}
-        self.topics_by_id = {}
+        self.utterances_by_type = {}
         self.questions_by_id = {}
         self.questions_by_text = {}
         self.questions_by_answer = {}
-        self.utterances_by_type = {
-            "_IDLE_": [],
-            "_INTRO_": [],
-            "_OFF_TOPIC_": [],
-            "_PROMPT_": [],
-            "_FEEDBACK_": [],
-            "_REPEAT_": [],
-            "_REPEAT_BUMP_": [],
-            "_PROFANITY_": [],
-        }
-        self.load_topics(data)
-        self.load_questions(data)
+        self.load()
 
-    def load_topics(self, data):
-        for s in data.get("subjects", []):
-            self.topics.append(s["name"])
-            subject = {"name": s["name"], "questions": [], "topics": []}
-            for q in s.get("questions", []):
-                subject["questions"].append(q["_id"])
-                for topic in q.get("topics", []):
-                    if topic["name"] not in self.topics:
-                        self.topics.append(topic["name"])
-                    if topic["_id"] not in subject["topics"]:
-                        subject["topics"].append(topic["_id"])
-                    if topic["_id"] not in self.topics_by_id:
-                        self.topics_by_id[topic["_id"]] = {
-                            "name": topic["name"],
-                            "questions": [],
-                        }
-                    self.topics_by_id[topic["_id"]]["questions"].append(q["_id"])
-            self.subjects_by_id[s["_id"]] = subject
-
-    def load_questions(self, data):
-        for answer in data["answers"]:
+    def load(self):
+        data = fetch_mentor_data(self.id)
+        for subject in data.get("subjects", []):
+            self.topics.append(subject["name"])
+        for topic in data.get("topics", []):
+            self.topics.append(topic["name"])
+        for answer in data.get("answers", []):
             question = answer["question"]
-            qid = question["_id"]
             if answer["status"] != "COMPLETE":
-                for sid in self.subjects_by_id:
-                    if qid in self.subjects_by_id[sid]["questions"]:
-                        self.subjects_by_id[sid]["questions"].remove(qid)
-                for tid in self.topics_by_id:
-                    if qid in self.topics_by_id[tid]["questions"]:
-                        self.topics_by_id[tid]["questions"].remove(qid)
                 continue
             if question["type"] == "UTTERANCE":
+                if question["name"] not in self.utterances_by_type:
+                    self.utterances_by_type[question["name"]] = []
                 self.utterances_by_type[question["name"]].append(
                     [answer["_id"], answer["transcript"]]
                 )
                 continue
             q = {
-                "id": qid,
+                "id": question["_id"],
                 "question_text": question["question"],
                 "paraphrases": question["paraphrases"],
                 "answer": answer["transcript"],
                 "answer_id": answer["_id"],
-                "video": answer["video"],
                 "topics": [],
             }
-            for sid in self.subjects_by_id:
-                if qid in self.subjects_by_id[sid]["questions"]:
-                    q["topics"].append(self.subjects_by_id[sid]["name"])
-            for tid in self.topics_by_id:
-                if qid in self.topics_by_id[tid]["questions"]:
-                    q["topics"].append(self.topics_by_id[tid]["name"])
-            self.questions_by_id[qid] = q
+            for topic in question["topics"]:
+                q["topics"].append(topic["name"])
+            self.questions_by_id[question["_id"]] = q
             self.questions_by_text[sanitize_string(q["question_text"])] = q
-            for paraphrase in question["paraphrases"]:
+            for paraphrase in q["paraphrases"]:
                 self.questions_by_text[sanitize_string(paraphrase)] = q
             self.questions_by_answer[sanitize_string(q["answer"])] = q
