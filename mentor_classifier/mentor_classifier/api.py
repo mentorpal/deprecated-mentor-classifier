@@ -8,26 +8,93 @@ import json
 import os
 import requests
 
+
 GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql"
+OFF_TOPIC_THRESHOLD = -0.55  # todo: put this in graphql and have it be configurable
 
 
-def __fetch_mentor_data(mentor: str, url=GRAPHQL_ENDPOINT) -> dict:
-    if not url.startswith("http"):
-        with open(url) as f:
-            return json.load(f)
+def fetch_mentor_data(mentor: str) -> dict:
     res = requests.post(
-        url,
+        GRAPHQL_ENDPOINT,
         json={
-            "query": f'query {{ mentor(id: "{mentor}") {{ answers {{ question {{ _id question }} status transcript video }} }} }}'
+            "query": f"""query {{
+                mentor(id: "{mentor}") {{
+                    subjects {{
+                        name
+                    }}
+                    topics {{
+                        name
+                    }}
+                    answers {{
+                        _id
+                        status
+                        transcript
+                        question {{
+                            _id
+                            question
+                            type
+                            name
+                            paraphrases
+                            topics {{
+                                name
+                            }}
+                        }}
+                    }}
+                }}
+            }}"""
         },
     )
     res.raise_for_status()
-    return res.json()
-
-
-def fetch_mentor_data(mentor: str, url=GRAPHQL_ENDPOINT) -> dict:
-    tdjson = __fetch_mentor_data(mentor, url)
+    tdjson = res.json()
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
     data = tdjson["data"]["mentor"]
     return data
+
+
+def update_training(mentor: str):
+    res = requests.post(
+        GRAPHQL_ENDPOINT,
+        json={
+            "query": f"""mutation {{
+                updateMentorTraining(id: "{mentor}") {{
+                    _id
+                }}
+            }}"""
+        },
+    )
+    res.raise_for_status()
+
+
+def create_user_question(
+    mentor: str,
+    question: str,
+    answer_id: str,
+    answer_type: str,
+    confidence: float,
+) -> str:
+    res = requests.post(
+        GRAPHQL_ENDPOINT,
+        json={
+            "query": f"""mutation {{
+                userQuestionCreate(userQuestion: {{
+                    mentor: "{mentor}",
+                    question: "{question}",
+                    classifierAnswer: "{answer_id}",
+                    classifierAnswerType: "{answer_type}",
+                    confidence: {confidence}
+                }}) {{
+                    _id
+                }}
+            }}"""
+        },
+    )
+    res.raise_for_status()
+    tdjson = res.json()
+    if "errors" in tdjson:
+        raise Exception(json.dumps(tdjson.get("errors")))
+    # TODO: should throw an error but need to figure out how to mock 2 different GQL queries...
+    try:
+        return tdjson["data"]["userQuestionCreate"]["_id"]
+    except KeyError:
+        return "error"

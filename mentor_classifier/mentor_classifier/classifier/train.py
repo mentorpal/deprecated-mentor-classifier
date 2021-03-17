@@ -20,7 +20,7 @@ from sklearn.linear_model import RidgeClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict
 
 
-from mentor_classifier.api import fetch_mentor_data
+from mentor_classifier.api import update_training
 from mentor_classifier.mentor import Mentor
 from .nltk_preprocessor import NLTKPreprocessor
 from .word2vec import W2V
@@ -77,6 +77,7 @@ class ClassifierTraining:
             y_train_unfused,
             num_rows_having_paraphrases,
         )
+        update_training(self.mentor.id)
         return scores, accuracy, self.model_path
 
     def save(self, to_path=None):
@@ -97,7 +98,8 @@ class ClassifierTraining:
         for key in self.mentor.questions_by_id:
             question = self.mentor.questions_by_id[key]
             topics = question["topics"]
-            current_question = question["question"]
+            current_question = question["question_text"]
+            num_rows_having_paraphrases += len(question["paraphrases"])
             answer = question["answer"]
             answer_id = key
             # add question to dataset
@@ -106,6 +108,12 @@ class ClassifierTraining:
             train_data.append(
                 [current_question, processed_question, topics, answer_id, answer]
             )
+            # look for paraphrases and add them to dataset
+            for paraphrase in question["paraphrases"]:
+                processed_paraphrase = preprocessor.transform(paraphrase)
+                train_data.append(
+                    [paraphrase, processed_paraphrase, topics, answer_id, answer]
+                )
         return train_data, num_rows_having_paraphrases
 
     def __load_training_vectors(self, train_data):
@@ -260,8 +268,7 @@ def train(
     output_dir: str = "out",
     save_model: bool = True,
 ):
-    data = fetch_mentor_data(mentor)
-    m = Mentor(mentor, data)
+    m = Mentor(mentor)
     classifier = ClassifierTraining(m, shared_root, output_dir)
     result = classifier.train()
     if save_model:

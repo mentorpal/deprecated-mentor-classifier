@@ -9,9 +9,7 @@ import responses
 import pytest
 
 from mentor_classifier.mentor import Mentor
-from .helpers import (
-    fixture_path,
-)
+from .helpers import fixture_path
 
 
 @responses.activate
@@ -21,25 +19,82 @@ from .helpers import (
         (
             "clint",
             {
-                "id": "clint",
-                "topics": ["Background", "About Me"],
+                "topics": ["Advice", "Background", "Utterances", "About Me", "Weird"],
+                "utterances_by_type": {
+                    "_IDLE_": [["A4", None]],
+                    "_INTRO_": [["A5", "Hi I'm Clint"]],
+                    "_OFF_TOPIC_": [["A6", "Ask me something else"]],
+                },
                 "questions_by_id": {
                     "Q1": {
                         "id": "Q1",
-                        "question": "What is your name?",
+                        "question_text": "What is your name?",
                         "answer": "Clint Anderson",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4",
-                        "topics": ["Background", "About Me"],
+                        "answer_id": "A1",
+                        "topics": ["About Me"],
+                        "paraphrases": ["Who are you?"],
                     },
                     "Q2": {
                         "id": "Q2",
-                        "question": "How old are you?",
+                        "question_text": "How old are you?",
                         "answer": "37 years old",
-                        "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4",
-                        "topics": ["Background", "About Me"],
+                        "answer_id": "A2",
+                        "topics": [],
+                        "paraphrases": ["What's your age?"],
                     },
                 },
-                "utterances_by_type": {},
+                "questions_by_text": {
+                    "what is your name": {
+                        "id": "Q1",
+                        "question_text": "What is your name?",
+                        "answer": "Clint Anderson",
+                        "answer_id": "A1",
+                        "topics": ["About Me"],
+                        "paraphrases": ["Who are you?"],
+                    },
+                    "who are you": {
+                        "id": "Q1",
+                        "question_text": "What is your name?",
+                        "answer": "Clint Anderson",
+                        "answer_id": "A1",
+                        "topics": ["About Me"],
+                        "paraphrases": ["Who are you?"],
+                    },
+                    "how old are you": {
+                        "id": "Q2",
+                        "question_text": "How old are you?",
+                        "answer": "37 years old",
+                        "answer_id": "A2",
+                        "topics": [],
+                        "paraphrases": ["What's your age?"],
+                    },
+                    "whats your age": {
+                        "id": "Q2",
+                        "question_text": "How old are you?",
+                        "answer": "37 years old",
+                        "answer_id": "A2",
+                        "topics": [],
+                        "paraphrases": ["What's your age?"],
+                    },
+                },
+                "questions_by_answer": {
+                    "clint anderson": {
+                        "id": "Q1",
+                        "question_text": "What is your name?",
+                        "answer": "Clint Anderson",
+                        "answer_id": "A1",
+                        "topics": ["About Me"],
+                        "paraphrases": ["Who are you?"],
+                    },
+                    "37 years old": {
+                        "id": "Q2",
+                        "question_text": "How old are you?",
+                        "answer": "37 years old",
+                        "answer_id": "A2",
+                        "topics": [],
+                        "paraphrases": ["What's your age?"],
+                    },
+                },
             },
         )
     ],
@@ -47,13 +102,11 @@ from .helpers import (
 def test_loads_mentor_from_api(mentor_id, expected_data):
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
-    responses.add(
-        responses.POST,
-        "http://graphql/graphql",
-        json=data,
-        status=200,
-    )
+    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     m = Mentor(mentor_id)
-    assert m.id == expected_data["id"]
+    assert m.id == mentor_id
     assert m.topics == expected_data["topics"]
+    assert m.utterances_by_type == expected_data["utterances_by_type"]
     assert m.questions_by_id == expected_data["questions_by_id"]
+    assert m.questions_by_text == expected_data["questions_by_text"]
+    assert m.questions_by_answer == expected_data["questions_by_answer"]

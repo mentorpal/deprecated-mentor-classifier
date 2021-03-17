@@ -1,33 +1,115 @@
 {
     "data": {
         "mentor": {
+            "subjects": [
+                {
+                    "name": "Advice"
+                },
+                {
+                    "name": "Background"
+                },
+                {
+                    "name": "Utterances"
+                }
+            ],
+            "topics": [
+                {
+                    "name": "About Me"
+                },
+                {
+                    "name": "Weird"
+                }
+            ],
             "answers": [
                 {
+                    "_id": "A1",
+                    "status": "COMPLETE",
+                    "transcript": "Clint Anderson",
                     "question": {
                         "_id": "Q1",
-                        "question": "What is your name?"
-                    },
-                    "status": "Complete",
-                    "transcript": "Clint Anderson",
-                    "video": "https://video.mentorpal.org/videos/mentors/clint/Q1.mp4"
+                        "question": "What is your name?",
+                        "type": null,
+                        "name": null,
+                        "paraphrases": [
+                            "Who are you?"
+                        ],
+                        "topics": [
+                            {
+                                "name": "About Me"
+                            }
+                        ]
+                    }
                 },
                 {
+                    "_id": "A2",
+                    "status": "COMPLETE",
+                    "transcript": "37 years old",
                     "question": {
                         "_id": "Q2",
-                        "question": "How old are you?"
-                    },
-                    "status": "Complete",
-                    "transcript": "37 years old",
-                    "video": "https://video.mentorpal.org/videos/mentors/clint/Q2.mp4"
+                        "question": "How old are you?",
+                        "type": null,
+                        "name": null,
+                        "paraphrases": [
+                            "What's your age?"
+                        ],
+                        "topics": []
+                    }
                 },
                 {
+                    "_id": "A3",
+                    "status": "INCOMPLETE",
+                    "transcript": null,
                     "question": {
                         "_id": "Q3",
-                        "question": "Will you be my friend?"
-                    },
-                    "status": "Incomplete",
-                    "transcript": "Call me",
-                    "video": "https://video.mentorpal.org/videos/mentors/clint/Q3.mp4"
+                        "question": "Will you be my friend?",
+                        "type": null,
+                        "name": null,
+                        "paraphrases": [],
+                        "topics": [
+                            {
+                                "name": "Weird"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "_id": "A4",
+                    "status": "COMPLETE",
+                    "transcript": null,
+                    "question": {
+                        "_id": "Q4",
+                        "question": "Look at the camera.",
+                        "type": "UTTERANCE",
+                        "name": "_IDLE_",
+                        "paraphrases": [],
+                        "topics": []
+                    }
+                },
+                {
+                    "_id": "A5",
+                    "status": "COMPLETE",
+                    "transcript": "Hi I'm Clint",
+                    "question": {
+                        "_id": "Q5",
+                        "question": "Introduce yourself.",
+                        "type": "UTTERANCE",
+                        "name": "_INTRO_",
+                        "paraphrases": [],
+                        "topics": []
+                    }
+                },
+                {
+                    "_id": "A6",
+                    "status": "COMPLETE",
+                    "transcript": "Ask me something else",
+                    "question": {
+                        "_id": "Q6",
+                        "question": "Off topic",
+                        "type": "UTTERANCE",
+                        "name": "_OFF_TOPIC_",
+                        "paraphrases": [],
+                        "topics": []
+                    }
                 }
             ]
         }

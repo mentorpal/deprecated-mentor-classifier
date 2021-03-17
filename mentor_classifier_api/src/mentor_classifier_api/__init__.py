@@ -33,9 +33,9 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     CORS(app)
-    from mentor_classifier_api.blueprints.evaluate import eval_blueprint
+    from mentor_classifier_api.blueprints.questions import questions_blueprint
 
-    app.register_blueprint(eval_blueprint, url_prefix="/classifier/evaluate")
+    app.register_blueprint(questions_blueprint, url_prefix="/classifier/questions")
     from mentor_classifier_api.blueprints.ping import ping_blueprint
 
     app.register_blueprint(ping_blueprint, url_prefix="/classifier/ping")

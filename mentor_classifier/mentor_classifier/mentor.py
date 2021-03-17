@@ -7,42 +7,46 @@
 from mentor_classifier.api import fetch_mentor_data
 from mentor_classifier.utils import sanitize_string
 
-import logging
-
 
 class Mentor(object):
-    def __init__(self, id, data=None):
+    def __init__(self, id):
         self.id = id
-        self.load(data)
-
-    def load(self, data=None):
-        if data is None:
-            data = fetch_mentor_data(self.id)
-        logging.warning("topics hard coded for demo. FIX THIS")
-        self.topics = ["Background", "About Me"]  # TODO
-        # self.topics = []
+        self.topics = []
+        self.utterances_by_type = {}
         self.questions_by_id = {}
         self.questions_by_text = {}
         self.questions_by_answer = {}
-        for answer in data["answers"]:
-            if answer["status"] != "Complete":
-                continue
+        self.load()
+
+    def load(self):
+        data = fetch_mentor_data(self.id)
+        for subject in data.get("subjects", []):
+            self.topics.append(subject["name"])
+        for topic in data.get("topics", []):
+            self.topics.append(topic["name"])
+        for answer in data.get("answers", []):
             question = answer["question"]
-            id = question["_id"]
+            if answer["status"] != "COMPLETE":
+                continue
+            if question["type"] == "UTTERANCE":
+                if question["name"] not in self.utterances_by_type:
+                    self.utterances_by_type[question["name"]] = []
+                self.utterances_by_type[question["name"]].append(
+                    [answer["_id"], answer["transcript"]]
+                )
+                continue
             q = {
-                "id": id,
-                "question": question["question"],
+                "id": question["_id"],
+                "question_text": question["question"],
+                "paraphrases": question["paraphrases"],
                 "answer": answer["transcript"],
-                "video": answer["video"],
+                "answer_id": answer["_id"],
+                "topics": [],
             }
-            q["topics"] = ["Background", "About Me"]  # TODO
-            # q["topics"] = [question["subject"]["name"]]
-            # if question["subject"]["name"] not in self.topics:
-            #     self.topics.append(question["subject"]["name"])
-            # for topic in question["topics"]:
-            #     q["topics"].append(topic["name"])
-            #     if topic["name"] not in self.topics:
-            #         self.topics.append(topic["name"])
-            self.questions_by_id[id] = q
-            self.questions_by_text[sanitize_string(question["question"])] = q
-            self.questions_by_answer[sanitize_string(answer["transcript"])] = q
+            for topic in question["topics"]:
+                q["topics"].append(topic["name"])
+            self.questions_by_id[question["_id"]] = q
+            self.questions_by_text[sanitize_string(q["question_text"])] = q
+            for paraphrase in q["paraphrases"]:
+                self.questions_by_text[sanitize_string(paraphrase)] = q
+            self.questions_by_answer[sanitize_string(q["answer"])] = q
