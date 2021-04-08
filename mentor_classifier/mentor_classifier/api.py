@@ -25,6 +25,14 @@ def fetch_mentor_data(mentor: str) -> dict:
                     topics {{
                         name
                     }}
+                    questions {{
+                        question {{
+                            _id
+                        }}
+                        topics {{
+                            name
+                        }}
+                    }}
                     answers {{
                         _id
                         status
@@ -35,9 +43,6 @@ def fetch_mentor_data(mentor: str) -> dict:
                             type
                             name
                             paraphrases
-                            topics {{
-                                name
-                            }}
                         }}
                     }}
                 }}

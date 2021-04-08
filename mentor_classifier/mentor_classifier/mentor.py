@@ -43,10 +43,13 @@ class Mentor(object):
                 "answer_id": answer["_id"],
                 "topics": [],
             }
-            for topic in question["topics"]:
-                q["topics"].append(topic["name"])
             self.questions_by_id[question["_id"]] = q
-            self.questions_by_text[sanitize_string(q["question_text"])] = q
-            for paraphrase in q["paraphrases"]:
-                self.questions_by_text[sanitize_string(paraphrase)] = q
-            self.questions_by_answer[sanitize_string(q["answer"])] = q
+        for question in data.get("questions", []):
+            q = self.questions_by_id.get(question["question"]["_id"], None)
+            if q is not None:
+                for topic in question["topics"]:
+                    self.questions_by_id[q["id"]]["topics"].append(topic["name"])
+                self.questions_by_text[sanitize_string(q["question_text"])] = q
+                for paraphrase in q["paraphrases"]:
+                    self.questions_by_text[sanitize_string(paraphrase)] = q
+                self.questions_by_answer[sanitize_string(q["answer"])] = q
