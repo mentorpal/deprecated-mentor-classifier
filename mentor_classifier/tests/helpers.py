@@ -34,8 +34,7 @@ class Question:
     question: Optional[str] = None
     type: Optional[str] = None
     name: Optional[str] = None
-    paraphrases: Optional[List[str]] = None
-
+    paraphrases: List[str] = field(default_factory=list)
 
 @dataclass
 class Answer:
@@ -99,7 +98,7 @@ def load_mentor_csv(path: str) -> Mentor:
 
 def parse_mentor_question(csv_line: str) -> MentorQuestion:
     columns = csv_line.split(",")
-    paraphrases = None
+    paraphrases = []
     if columns[2] != "":
         paraphrases = columns[2].split("|")
     return MentorQuestion(
