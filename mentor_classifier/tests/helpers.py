@@ -6,12 +6,12 @@
 #
 from os import path
 from dataclasses import dataclass, asdict, field
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 
 @dataclass
 class MentorQuestion:
-    questionId: str
+    question_id: str
     question: str
     paraphrases: List[str]
     answer: str
@@ -61,49 +61,49 @@ class Mentor:
     def to_dict(self):
         return asdict(self)
 
-    def addMentorQuestion(self, mentorQuestion: MentorQuestion):
-        questionRef = Question(_id=mentorQuestion.questionId)
-        topic = Topic(mentorQuestion.topic)
-        questionAndTopics = QuestionAndTopics(question=questionRef, topics=[topic])
+    def add_mentor_question(self, mentor_question: MentorQuestion):
+        question_ref = Question(_id=mentor_question.question_id)
+        topic = Topic(mentor_question.topic)
+        question_and_topics = QuestionAndTopics(question=question_ref, topics=[topic])
         if topic not in self.topics:
             self.topics.append(topic)
-        self.questions.append(questionAndTopics)
+        self.questions.append(question_and_topics)
         question = Question(
-            _id=mentorQuestion.questionId,
-            question=mentorQuestion.question,
+            _id=mentor_question.question_id,
+            question=mentor_question.question,
             type=None,
             name=None,
-            paraphrases=mentorQuestion.paraphrases,
+            paraphrases=mentor_question.paraphrases,
         )
         answer = Answer(
             _id="A" + str(len(self.answers) + 1),
             status="COMPLETE",
-            transcript=mentorQuestion.answer,
+            transcript=mentor_question.answer,
             question=question,
         )
         self.answers.append(answer)
 
 
-def loadMentorCSV(path: str) -> Mentor:
+def load_mentor_csv(path: str) -> Mentor:
     result = Mentor()
     with open(path) as f:
         lines = f.readlines()
         lines.pop(0)
 
         for line in lines:
-            mentorQuestion = parseMentorQuestion(line)
-            result.addMentorQuestion(mentorQuestion)
+            mentor_question = parse_mentor_question(line)
+            result.add_mentor_question(mentor_question)
 
     return result
 
 
-def parseMentorQuestion(csvLine: str) -> MentorQuestion:
-    columns = csvLine.split(",")
+def parse_mentor_question(csv_line: str) -> MentorQuestion:
+    columns = csv_line.split(",")
     paraphrases = None
     if columns[2] != "":
         paraphrases = columns[2].split("|")
     return MentorQuestion(
-        questionId=columns[0],
+        question_id=columns[0],
         question=columns[1],
         paraphrases=paraphrases,
         answer=columns[3],
