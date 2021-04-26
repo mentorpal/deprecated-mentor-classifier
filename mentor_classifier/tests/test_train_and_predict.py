@@ -7,7 +7,6 @@
 from os import path
 from typing import List
 
-import json
 import pytest
 import responses
 
