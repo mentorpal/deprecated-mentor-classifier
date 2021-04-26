@@ -13,7 +13,7 @@ import responses
 
 from mentor_classifier.classifier.train import train
 from mentor_classifier.classifier.predict import Classifier
-from .helpers import fixture_path
+from .helpers import fixture_path, loadMentorCSV
 
 
 @pytest.fixture(scope="module")
@@ -54,8 +54,8 @@ def test_train_and_predict(
     tmpdir,
     shared_root: str,
 ):
-    with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
+    mentor = loadMentorCSV(fixture_path("csv/{}.csv".format(mentor_id)))
+    data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     scores, accuracy, model_path = train(mentor_id, shared_root, tmpdir)
     assert accuracy == expected_training_accuracy
