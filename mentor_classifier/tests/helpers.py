@@ -36,6 +36,7 @@ class Question:
     name: Optional[str] = None
     paraphrases: List[str] = field(default_factory=list)
 
+
 @dataclass
 class Answer:
     _id: str
