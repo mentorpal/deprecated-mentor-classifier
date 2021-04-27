@@ -9,9 +9,7 @@ from pathlib import Path
 import random
 
 import numpy as np
-from tensorflow.keras.models import load_model
 from sklearn.externals import joblib
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from mentor_classifier.api import (
     create_user_question,
@@ -24,7 +22,7 @@ from .word2vec import W2V
 
 
 def logistic_model_path(models_path: str) -> str:
-    return os.path.join(models_path, "fused_model.pkl")
+    return os.path.join(models_path, "unfused_model.pkl")
 
 
 def get_classifier_last_trained_at(models_path: str) -> float:
@@ -44,7 +42,7 @@ class Classifier:
         self.mentor = mentor
         self.model_path = os.path.join(data_path, mentor.id)
         self.w2v_model = W2V(os.path.join(shared_root, "word2vec.bin"))
-        self.logistic_model, self.topic_model = self.__load_model(self.model_path)
+        self.logistic_model = self.__load_model(self.model_path)
 
     def evaluate(self, question, canned_question_match_disabled=False):
         if not canned_question_match_disabled:
@@ -66,18 +64,10 @@ class Classifier:
 
         preprocessor = NLTKPreprocessor()
         processed_question = preprocessor.transform(question)
-        w2v_vector, lstm_vector = self.w2v_model.w2v_for_question(processed_question)
-        padded_vector = pad_sequences(
-            [lstm_vector],
-            maxlen=25,
-            dtype="float32",
-            padding="post",
-            truncating="post",
-            value=0.0,
-        )
-        topic_vector = self.__get_topic_vector(padded_vector)
+        w2v_vector,lstm_vector = self.w2v_model.w2v_for_question(processed_question)
+
         answer_id, answer_text, highest_confidence = self.__get_prediction(
-            w2v_vector, topic_vector
+            w2v_vector
         )
         feedback_id = create_user_question(
             self.mentor.id,
@@ -95,19 +85,9 @@ class Classifier:
 
     def __load_model(self, model_path):
         logistic_model = None
-        topic_model = None
         print("loading model from path {}...".format(model_path))
         if not os.path.exists(model_path) or not os.listdir(model_path):
             print("Local checkpoint {0} does not exist.".format(model_path))
-        try:
-            path = os.path.join(model_path, "lstm_topic_model.h5")
-            topic_model = load_model(path)
-        except BaseException:
-            print(
-                "Unable to load topic model from {0}. Classifier needs to be retrained before asking questions.".format(
-                    path
-                )
-            )
         try:
             logistic_model = joblib.load(logistic_model_path(model_path))
         except BaseException:
@@ -116,30 +96,15 @@ class Classifier:
                     path
                 )
             )
-        return logistic_model, topic_model
+        return logistic_model
 
-    def __get_topic_vector(self, lstm_vector):
-        if self.topic_model is None:
-            try:
-                self.topic_model = load_model(
-                    os.path.join(self.model_path, "lstm_topic_model.h5")
-                )
-            except BaseException:
-                raise Exception(
-                    "Could not find topic model under {0}. Please train classifier first.".format(
-                        self.model_path
-                    )
-                )
 
-        predicted_vector = self.topic_model.predict(lstm_vector)
-        return predicted_vector[0]
-
-    def __get_prediction(self, w2v_vector, topic_vector):
+    def __get_prediction(self, w2v_vector):
         model_path = self.model_path
         if self.logistic_model is None:
             try:
                 self.logistic_model = joblib.load(
-                    os.path.join(model_path, "fused_model.pkl")
+                    os.path.join(model_path, "unfused_model.pkl")
                 )
             except BaseException:
                 raise Exception(
@@ -147,8 +112,7 @@ class Classifier:
                         model_path
                     )
                 )
-        test_vector = np.concatenate((w2v_vector, topic_vector))
-        test_vector = test_vector.reshape(1, -1)
+        test_vector = w2v_vector.reshape(1, -1)
         prediction = self.logistic_model.predict(test_vector)
         decision = self.logistic_model.decision_function(test_vector)
         confidence_scores = (
