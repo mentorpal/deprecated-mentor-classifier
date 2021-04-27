@@ -31,9 +31,9 @@ class Topic:
 @dataclass
 class Question:
     _id: str
-    question: Optional[str] = None
-    type: Optional[str] = None
-    name: Optional[str] = None
+    question: str = ""
+    type: str = ""
+    name: str = ""
     paraphrases: List[str] = field(default_factory=list)
 
 
@@ -71,12 +71,12 @@ class Mentor:
         question = Question(
             _id=mentor_question.question_id,
             question=mentor_question.question,
-            type=None,
-            name=None,
+            type="",
+            name="",
             paraphrases=mentor_question.paraphrases,
         )
         answer = Answer(
-            _id="A" + str(len(self.answers) + 1),
+            _id=f"A{str(len(self.answers) + 1)}",
             status="COMPLETE",
             transcript=mentor_question.answer,
             question=question,
@@ -99,9 +99,7 @@ def load_mentor_csv(path: str) -> Mentor:
 
 def parse_mentor_question(csv_line: str) -> MentorQuestion:
     columns = csv_line.split(",")
-    paraphrases = []
-    if columns[2] != "":
-        paraphrases = columns[2].split("|")
+    paraphrases = columns[2].split("|") if columns[2] else []
     return MentorQuestion(
         question_id=columns[0],
         question=columns[1],
