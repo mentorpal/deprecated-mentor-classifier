@@ -34,7 +34,5 @@ def test_trains_and_outputs_models(
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     scores, accuracy, model_path = train(mentor_id, shared_root, data_root)
     assert model_path == path.join(data_root, mentor_id)
-    assert path.exists(path.join(model_path, "lstm_topic_model.h5"))
-    assert path.exists(path.join(model_path, "fused_model.pkl"))
     assert path.exists(path.join(model_path, "unfused_model.pkl"))
     assert path.exists(path.join(model_path, "w2v.txt"))
