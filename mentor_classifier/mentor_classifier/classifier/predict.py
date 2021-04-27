@@ -8,7 +8,6 @@ import os
 from pathlib import Path
 import random
 
-import numpy as np
 from sklearn.externals import joblib
 
 from mentor_classifier.api import (
@@ -64,11 +63,9 @@ class Classifier:
 
         preprocessor = NLTKPreprocessor()
         processed_question = preprocessor.transform(question)
-        w2v_vector,lstm_vector = self.w2v_model.w2v_for_question(processed_question)
+        w2v_vector, lstm_vector = self.w2v_model.w2v_for_question(processed_question)
 
-        answer_id, answer_text, highest_confidence = self.__get_prediction(
-            w2v_vector
-        )
+        answer_id, answer_text, highest_confidence = self.__get_prediction(w2v_vector)
         feedback_id = create_user_question(
             self.mentor.id,
             question,
@@ -93,11 +90,10 @@ class Classifier:
         except BaseException:
             print(
                 "Unable to load logistic model from {0}. Classifier needs to be retrained before asking questions.".format(
-                    path
+                    model_path
                 )
             )
         return logistic_model
-
 
     def __get_prediction(self, w2v_vector):
         model_path = self.model_path
