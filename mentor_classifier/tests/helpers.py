@@ -6,7 +6,7 @@
 #
 from os import path
 from dataclasses import dataclass, asdict, field
-from typing import List, Optional
+from typing import List
 
 
 @dataclass
