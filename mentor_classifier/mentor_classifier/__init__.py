@@ -4,3 +4,44 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field, asdict
+from typing import Tuple, List, Dict
+
+class QuestionClassifierTraining(ABC):
+    
+    @abstractmethod
+    def train(self)->Tuple[List[float], float, str]:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def save(self, to_path=None):
+        raise NotImplementedError()
+
+class QuestionClassifierPrediction(ABC):
+
+    @abstractmethod
+    def evaluate(self, question, canned_question_match_disabled=False):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_last_trained_at(self) -> float:
+        raise NotImplementedError()
+
+class ArchClassifierFactory(ABC):
+
+    @abstractmethod
+    def new_training(self, mentor, shared_root: str = "shared", output_dir: str = "out")->QuestionClassifierTraining:
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def new_prediction(self, mentor, shared_root, data_path)->QuestionClassifierPrediction:
+        raise NotImplementedError()
+
+
+_factories_by_arch: Dict[str, ArchClassifierFactory] = {}
+
+def register_classifier_factory(arch: str, fac: ArchClassifierFactory) -> None:
+    _factories_by_arch[arch] = fac
+
+ARCH_DEFAULT = "opentutor_classifier.lr"

@@ -11,8 +11,8 @@ from shutil import copytree
 import responses
 import pytest
 
-from mentor_classifier.classifier.dao import Dao
-from mentor_classifier.classifier.train import train
+from mentor_classifier.lr.dao import Dao
+from mentor_classifier.lr.train import train
 from .helpers import fixture_path
 
 

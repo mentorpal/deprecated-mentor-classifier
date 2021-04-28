@@ -10,7 +10,7 @@ import json
 import pytest
 import responses
 
-from mentor_classifier.classifier.train import train
+from mentor_classifier.lr.train import train
 from .helpers import fixture_path
 
 

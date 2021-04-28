@@ -12,8 +12,8 @@ import responses
 
 from mentor_classifier.api import OFF_TOPIC_THRESHOLD
 from mentor_classifier.mentor import Mentor
-from mentor_classifier.classifier.train import ClassifierTraining
-from mentor_classifier.classifier.predict import Classifier
+from mentor_classifier.lr.train import ClassifierTraining
+from mentor_classifier.lr.predict import Classifier
 from .helpers import fixture_path
 
 

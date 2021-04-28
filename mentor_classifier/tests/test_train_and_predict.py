@@ -10,8 +10,8 @@ from typing import List
 import pytest
 import responses
 
-from mentor_classifier.classifier.train import train
-from mentor_classifier.classifier.predict import Classifier
+from mentor_classifier.lr.train import train
+from mentor_classifier.lr.predict import Classifier
 from .helpers import fixture_path, load_mentor_csv
 
 

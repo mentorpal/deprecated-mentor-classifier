@@ -9,7 +9,7 @@ import logging
 
 from celery import Celery
 
-from mentor_classifier.classifier.train import train
+from mentor_classifier.lr.train import train
 
 config = {
     "broker_url": os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0"),
