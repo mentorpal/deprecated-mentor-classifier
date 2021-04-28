@@ -1,4 +1,4 @@
-FROM python:3.6-slim
+FROM python:3.8-slim
 WORKDIR /opt/mentor_classifier
 COPY . .
 RUN apt-get update && apt-get install -y git

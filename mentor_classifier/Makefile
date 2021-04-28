@@ -6,7 +6,7 @@ $(VENV):
 
 .PHONY: $(VENV)-update
 $(VENV)-update: virtualenv-installed
-	[ -d $(VENV) ] || virtualenv -p python3.6 $(VENV)
+	[ -d $(VENV) ] || virtualenv -p python3.8 $(VENV)
 	$(VENV)/bin/pip install --upgrade pip
 	$(VENV)/bin/pip install -r ./requirements.test.txt
 	$(VENV)/bin/python3 -m nltk.downloader averaged_perceptron_tagger

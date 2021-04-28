@@ -36,11 +36,15 @@ def shared_root(word2vec) -> str:
                 "What's your name?",
                 "Who are you?",
                 "Give me your name.",
+                "Give me your age.",
+                "what do the penguins do?",
             ],
             [
                 "Clint Anderson",
                 "Clint Anderson",
                 "Clint Anderson",
+                "37 years old",
+                "Penguins do important things",
             ],
         )
     ],

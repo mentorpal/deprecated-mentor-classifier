@@ -14,11 +14,11 @@ $(VENV)-installed:
 
 .PHONY: $(VENV)-update
 $(VENV)-update: $(VENV)-installed
-	[ -d $(VENV) ] || virtualenv -p python3.6 $(VENV)
+	[ -d $(VENV) ] || virtualenv -p python3.8 $(VENV)
 	$(VENV_PIP) install --upgrade pip
 	$(VENV_PIP) install -r requirements.test.txt
 	$(VENV_PIP) install ../mentor_classifier
-	$(VENV)/bin/python3.6 -m nltk.downloader averaged_perceptron_tagger
+	$(VENV)/bin/python3.8 -m nltk.downloader averaged_perceptron_tagger
 
 .PHONY clean:
 clean:
