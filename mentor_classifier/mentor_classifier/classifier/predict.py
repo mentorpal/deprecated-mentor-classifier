@@ -6,9 +6,8 @@
 #
 import os
 from pathlib import Path
+import joblib
 import random
-
-from sklearn.externals import joblib
 
 from mentor_classifier.api import (
     create_user_question,

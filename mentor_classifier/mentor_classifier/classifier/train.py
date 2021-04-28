@@ -4,6 +4,7 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+import joblib
 import logging
 import os
 from typing import List, Tuple
@@ -11,7 +12,6 @@ from typing import List, Tuple
 
 import numpy as np
 from sklearn import metrics
-from sklearn.externals import joblib
 from sklearn.linear_model import RidgeClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict
 
