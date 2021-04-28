@@ -20,7 +20,7 @@ from .word2vec import W2V
 
 
 def logistic_model_path(models_path: str) -> str:
-    return os.path.join(models_path, "unfused_model.pkl")
+    return os.path.join(models_path, "model.pkl")
 
 
 def get_classifier_last_trained_at(models_path: str) -> float:
@@ -98,9 +98,7 @@ class Classifier:
         model_path = self.model_path
         if self.logistic_model is None:
             try:
-                self.logistic_model = joblib.load(
-                    os.path.join(model_path, "unfused_model.pkl")
-                )
+                self.logistic_model = joblib.load(os.path.join(model_path, "model.pkl"))
             except BaseException:
                 raise Exception(
                     "Could not find logistic model under {0}. Please train classifier first.".format(

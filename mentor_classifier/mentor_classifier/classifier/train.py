@@ -50,12 +50,12 @@ class ClassifierTraining:
         train_vectors = self.__load_training_vectors(training_data)
         train_vectors = self.__load_topic_vectors(train_vectors)
         (
-            x_train_unfused,
-            y_train_unfused,
-        ) = self.__load_unfused(train_vectors)
-        (scores, accuracy, self.logistic_model_unfused,) = self.__train_lr(
-            x_train_unfused,
-            y_train_unfused,
+            x_train,
+            y_train,
+        ) = self.__load_xy_vectors(train_vectors)
+        (scores, accuracy, self.logistic_model) = self.__train_lr(
+            x_train,
+            y_train,
             num_rows_having_paraphrases,
         )
         update_training(self.mentor.id)
@@ -64,9 +64,7 @@ class ClassifierTraining:
     def save(self, to_path=None):
         to_path = to_path or self.model_path
         os.makedirs(to_path, exist_ok=True)
-        joblib.dump(
-            self.logistic_model_unfused, os.path.join(to_path, "unfused_model.pkl")
-        )
+        joblib.dump(self.logistic_model, os.path.join(to_path, "model.pkl"))
         with open(os.path.join(to_path, "w2v.txt"), "w") as f:
             f.write(self.w2v.get_w2v_file_path())
 
@@ -119,35 +117,31 @@ class ClassifierTraining:
 
         return train_vectors
 
-    def __load_unfused(self, train_data):
-        x_train_unfused = []
-        y_train_unfused = []
-        x_train_unfused = [train_data[i][1] for i in range(len(train_data))]
-        y_train_unfused = [train_data[i][3] for i in range(len(train_data))]
-        x_train_unfused = np.asarray(x_train_unfused)
-        return x_train_unfused, y_train_unfused
+    def __load_xy_vectors(self, train_data):
+        x_train = []
+        y_train = []
+        x_train = [train_data[i][1] for i in range(len(train_data))]
+        y_train = [train_data[i][3] for i in range(len(train_data))]
+        x_train = np.asarray(x_train)
+        return x_train, y_train
 
     def __train_lr(
         self,
-        x_train_unfused,
-        y_train_unfused,
+        x_train,
+        y_train,
         num_rows_having_paraphrases,
     ):
-        logistic_model_unfused = RidgeClassifier(alpha=1.0)
-        logistic_model_unfused.fit(x_train_unfused, y_train_unfused)
+        logistic_model = RidgeClassifier(alpha=1.0)
+        logistic_model.fit(x_train, y_train)
         if num_rows_having_paraphrases < 1:
             logging.warning(
                 "Classifier data had no questions with paraphrases. This makes cross validation checks fail, so they will be skipped"
             )
-            return [], -1, logistic_model_unfused
-        scores = cross_val_score(
-            logistic_model_unfused, x_train_unfused, y_train_unfused, cv=2
-        )
-        predicted = cross_val_predict(
-            logistic_model_unfused, x_train_unfused, y_train_unfused, cv=2
-        )
-        accuracy = metrics.accuracy_score(y_train_unfused, predicted)
-        return scores, accuracy, logistic_model_unfused
+            return [], -1, logistic_model
+        scores = cross_val_score(logistic_model, x_train, y_train, cv=2)
+        predicted = cross_val_predict(logistic_model, x_train, y_train, cv=2)
+        accuracy = metrics.accuracy_score(y_train, predicted)
+        return scores, accuracy, logistic_model
 
 
 def train(
