@@ -67,7 +67,7 @@ def test_returns_400_response_when_question_not_set(client):
                 "query": "What's your name?",
                 "answer_id": "A1",
                 "answer_text": "Clint Anderson",
-                "confidence": 0.4133306484564495,
+                "confidence": 0.33497961553532835,
             },
         ),
     ],
