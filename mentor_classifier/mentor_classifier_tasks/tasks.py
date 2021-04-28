@@ -10,6 +10,7 @@ import logging
 from celery import Celery
 
 from mentor_classifier.lr.train import train
+from mentor_classifier import ClassifierFactory
 
 config = {
     "broker_url": os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0"),
@@ -27,11 +28,9 @@ SHARED_ROOT = os.environ.get("SHARED_ROOT") or "shared"
 
 
 @celery.task()
-def train_task(mentor: str) -> float:
+def train_task(mentor: str, arch:str = "") -> float:
     try:
-        scores, accuracy, model_path = train(
-            mentor, shared_root=SHARED_ROOT, output_dir=OUTPUT_ROOT
-        )
+        scores, accuracy, model_path = ClassifierFactory().new_training(mentor=mentor, shared_root=SHARED_ROOT, data_path=OUTPUT_ROOT, arch=arch).train_and_save()
         return accuracy
     except Exception as err:
         logging.exception(err)

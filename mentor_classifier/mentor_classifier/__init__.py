@@ -7,6 +7,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from typing import Tuple, List, Dict
+from os import environ
 
 class QuestionClassifierTraining(ABC):
     
@@ -16,6 +17,10 @@ class QuestionClassifierTraining(ABC):
 
     @abstractmethod
     def save(self, to_path=None):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def train_and_save(self):
         raise NotImplementedError()
 
 class QuestionClassifierPrediction(ABC):
@@ -44,4 +49,19 @@ _factories_by_arch: Dict[str, ArchClassifierFactory] = {}
 def register_classifier_factory(arch: str, fac: ArchClassifierFactory) -> None:
     _factories_by_arch[arch] = fac
 
-ARCH_DEFAULT = "opentutor_classifier.lr"
+ARCH_LR = "mentorpal_classifier.lr"
+ARCH_DEFAULT = "mentorpal_classifier.lr"
+
+class ClassifierFactory:
+    def _find_arch_fac(self, arch: str) -> ArchClassifierFactory:
+        arch = arch or environ.get("CLASSIFIER_ARCH") or ARCH_DEFAULT
+        if arch not in _factories_by_arch:
+            import_module(arch)
+        f = _factories_by_arch[arch]
+        return f
+
+    def new_prediction(self, mentor:str, shared_root:str, data_path:str, arch="") -> QuestionClassifierPrediction:
+        return self._find_arch_fac(arch).new_prediction(mentor=mentor, shared_root=shared_root, data_path=data_path)
+
+    def new_training(self, mentor:str, shared_root:str, data_path:str, arch="") -> QuestionClassifierTraining:
+        return self._find_arch_fac(arch).new_training(mentor=mentor, shared_root=shared_root, output_dir=data_path)

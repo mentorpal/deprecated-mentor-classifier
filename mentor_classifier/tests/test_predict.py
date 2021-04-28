@@ -12,8 +12,7 @@ import responses
 
 from mentor_classifier.api import OFF_TOPIC_THRESHOLD
 from mentor_classifier.mentor import Mentor
-from mentor_classifier.lr.train import ClassifierTraining
-from mentor_classifier.lr.predict import Classifier
+from mentor_classifier import ClassifierFactory
 from .helpers import fixture_path
 
 
@@ -51,10 +50,10 @@ def test_gets_answer_for_exact_match_and_paraphrases(
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     mentor = Mentor(mentor_id)
     if not path.exists(path.join(data_root, mentor_id)):
-        training = ClassifierTraining(mentor, shared_root, data_root)
+        training = ClassifierFactory().new_training(mentor, shared_root, data_root)
         training.train()
         training.save()
-    classifier = Classifier(mentor, shared_root, data_root)
+    classifier = ClassifierFactory().new_prediction(mentor, shared_root, data_root)
     answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
     assert answer_id == expected_answer_id
     assert answer == expected_answer
@@ -84,10 +83,10 @@ def test_predicts_answer(
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     mentor = Mentor(mentor_id)
     if not path.exists(path.join(data_root, mentor_id)):
-        training = ClassifierTraining(mentor, shared_root, data_root)
+        training = ClassifierFactory().new_training(mentor, shared_root, data_root)
         training.train()
         training.save()
-    classifier = Classifier(mentor, shared_root, data_root)
+    classifier = ClassifierFactory().new_prediction(mentor, shared_root, data_root)
     answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
     assert answer_id == expected_answer_id
     assert answer == expected_answer
@@ -122,10 +121,10 @@ def test_gets_off_topic(
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     mentor = Mentor(mentor_id)
     if not path.exists(path.join(data_root, mentor_id)):
-        training = ClassifierTraining(mentor, shared_root, data_root)
+        training = ClassifierFactory().new_training(mentor, shared_root, data_root)
         training.train()
         training.save()
-    classifier = Classifier(mentor, shared_root, data_root)
+    classifier = ClassifierFactory().new_prediction(mentor, shared_root, data_root)
     answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
     assert confidence < OFF_TOPIC_THRESHOLD
     assert answer_id == expected_answer_id

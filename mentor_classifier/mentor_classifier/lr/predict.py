@@ -13,6 +13,7 @@ from mentor_classifier.api import (
     create_user_question,
     OFF_TOPIC_THRESHOLD,
 )
+from mentor_classifier import QuestionClassifierPrediction
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
@@ -27,7 +28,7 @@ def get_classifier_last_trained_at(models_path: str) -> float:
     return Path(logistic_model_path(models_path)).stat().st_mtime
 
 
-class Classifier:
+class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
     def __init__(self, mentor, shared_root, data_path):
         if isinstance(mentor, str):
             print("loading mentor id {}...".format(mentor))
