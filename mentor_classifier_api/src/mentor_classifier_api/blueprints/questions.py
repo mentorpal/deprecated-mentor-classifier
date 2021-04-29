@@ -7,7 +7,7 @@
 import os
 from flask import Blueprint, jsonify, request
 
-from mentor_classifier.classifier.dao import Dao
+from mentor_classifier.lr.dao import Dao
 
 import re
 
