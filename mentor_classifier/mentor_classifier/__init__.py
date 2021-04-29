@@ -5,26 +5,22 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field, asdict
+from importlib import import_module
 from typing import Tuple, List, Dict
 from os import environ
 
+
 class QuestionClassifierTraining(ABC):
-    
     @abstractmethod
-    def train(self)->Tuple[List[float], float, str]:
+    def train(self) -> Tuple[List[float], float, str]:
         raise NotImplementedError()
 
     @abstractmethod
     def save(self, to_path=None):
         raise NotImplementedError()
 
-    @abstractmethod
-    def train_and_save(self):
-        raise NotImplementedError()
 
 class QuestionClassifierPrediction(ABC):
-
     @abstractmethod
     def evaluate(self, question, canned_question_match_disabled=False):
         raise NotImplementedError()
@@ -33,24 +29,31 @@ class QuestionClassifierPrediction(ABC):
     def get_last_trained_at(self) -> float:
         raise NotImplementedError()
 
+
 class ArchClassifierFactory(ABC):
+    @abstractmethod
+    def new_training(
+        self, mentor, shared_root: str = "shared", output_dir: str = "out"
+    ) -> QuestionClassifierTraining:
+        raise NotImplementedError()
 
     @abstractmethod
-    def new_training(self, mentor, shared_root: str = "shared", output_dir: str = "out")->QuestionClassifierTraining:
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def new_prediction(self, mentor, shared_root, data_path)->QuestionClassifierPrediction:
+    def new_prediction(
+        self, mentor, shared_root, data_path
+    ) -> QuestionClassifierPrediction:
         raise NotImplementedError()
 
 
 _factories_by_arch: Dict[str, ArchClassifierFactory] = {}
 
+
 def register_classifier_factory(arch: str, fac: ArchClassifierFactory) -> None:
     _factories_by_arch[arch] = fac
 
+
 ARCH_LR = "mentorpal_classifier.lr"
 ARCH_DEFAULT = "mentorpal_classifier.lr"
+
 
 class ClassifierFactory:
     def _find_arch_fac(self, arch: str) -> ArchClassifierFactory:
@@ -60,8 +63,16 @@ class ClassifierFactory:
         f = _factories_by_arch[arch]
         return f
 
-    def new_prediction(self, mentor:str, shared_root:str, data_path:str, arch="") -> QuestionClassifierPrediction:
-        return self._find_arch_fac(arch).new_prediction(mentor=mentor, shared_root=shared_root, data_path=data_path)
+    def new_prediction(
+        self, mentor: str, shared_root: str, data_path: str, arch=""
+    ) -> QuestionClassifierPrediction:
+        return self._find_arch_fac(arch).new_prediction(
+            mentor=mentor, shared_root=shared_root, data_path=data_path
+        )
 
-    def new_training(self, mentor:str, shared_root:str, data_path:str, arch="") -> QuestionClassifierTraining:
-        return self._find_arch_fac(arch).new_training(mentor=mentor, shared_root=shared_root, output_dir=data_path)
+    def new_training(
+        self, mentor: str, shared_root: str, data_path: str, arch=""
+    ) -> QuestionClassifierTraining:
+        return self._find_arch_fac(arch).new_training(
+            mentor=mentor, shared_root=shared_root, output_dir=data_path
+        )

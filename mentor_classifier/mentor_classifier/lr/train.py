@@ -59,6 +59,7 @@ class LRQuestionClassifierTraining(QuestionClassifierTraining):
             num_rows_having_paraphrases,
         )
         update_training(self.mentor.id)
+        self.save()
         return scores, accuracy, self.model_path
 
     def save(self, to_path=None):
@@ -67,10 +68,6 @@ class LRQuestionClassifierTraining(QuestionClassifierTraining):
         joblib.dump(self.logistic_model, os.path.join(to_path, "model.pkl"))
         with open(os.path.join(to_path, "w2v.txt"), "w") as f:
             f.write(self.w2v.get_w2v_file_path())
-
-    def train_and_save(self):
-        self.train()
-        self.save()
 
     def __load_training_data(self):
         preprocessor = NLTKPreprocessor()

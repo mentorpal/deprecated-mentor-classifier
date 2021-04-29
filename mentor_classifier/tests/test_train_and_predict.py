@@ -23,7 +23,7 @@ def data_root() -> str:
 def shared_root(word2vec) -> str:
     return path.dirname(word2vec)
 
-@pytest.mark.only
+
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id,expected_training_accuracy,sample_questions,expected_sample_answers",
@@ -59,10 +59,16 @@ def test_train_and_predict(
     mentor = load_mentor_csv(fixture_path("csv/{}.csv".format(mentor_id)))
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    scores, accuracy, model_path = ClassifierFactory().new_training(mentor=mentor_id, shared_root=shared_root, data_path=tmpdir).train_and_save()
+    scores, accuracy, model_path = (
+        ClassifierFactory()
+        .new_training(mentor=mentor_id, shared_root=shared_root, data_path=tmpdir)
+        .train()
+    )
     assert accuracy == expected_training_accuracy
 
-    classifier = ClassifierFactory().new_prediction(mentor=mentor_id, shared_root=shared_root, data_path=tmpdir)
+    classifier = ClassifierFactory().new_prediction(
+        mentor=mentor_id, shared_root=shared_root, data_path=tmpdir
+    )
 
     for sample_question, expected_sample_answer in zip(
         sample_questions, expected_sample_answers

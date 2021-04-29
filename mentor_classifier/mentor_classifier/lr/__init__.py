@@ -7,15 +7,29 @@
 from .predict import LRQuestionClassifierPrediction  # noqa: F401
 from .word2vec import find_or_load_word2vec  # noqa: F401
 from .train import LRQuestionClassifierTraining, train  # noqa: F401
-from mentor_classifier import ArchClassifierFactory, register_classifier_factory, ARCH_LR, QuestionClassifierTraining, QuestionClassifierPrediction
-from mentor_classifier.mentor import Mentor
+from mentor_classifier import (
+    ArchClassifierFactory,
+    register_classifier_factory,
+    ARCH_LR,
+    QuestionClassifierTraining,
+    QuestionClassifierPrediction,
+)
+
 
 class LRClassifierFactory(ArchClassifierFactory):
+    def new_training(
+        self, mentor, shared_root: str = "shared", output_dir: str = "out"
+    ) -> QuestionClassifierTraining:
+        return LRQuestionClassifierTraining(
+            mentor=mentor, shared_root=shared_root, output_dir=output_dir
+        )
 
-    def new_training(self, mentor, shared_root: str = "shared", output_dir: str = "out")->QuestionClassifierTraining:
-        return LRQuestionClassifierTraining(mentor=mentor, shared_root=shared_root, output_dir=output_dir)
-    
-    def new_prediction(self, mentor, shared_root, data_path)->QuestionClassifierPrediction:
-        return LRQuestionClassifierPrediction(mentor=mentor, shared_root=shared_root, data_path=data_path)
+    def new_prediction(
+        self, mentor, shared_root, data_path
+    ) -> QuestionClassifierPrediction:
+        return LRQuestionClassifierPrediction(
+            mentor=mentor, shared_root=shared_root, data_path=data_path
+        )
+
 
 register_classifier_factory(ARCH_LR, LRClassifierFactory())
