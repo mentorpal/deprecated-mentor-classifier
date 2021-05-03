@@ -13,7 +13,10 @@ from mentor_classifier.api import (
     create_user_question,
     OFF_TOPIC_THRESHOLD,
 )
-from mentor_classifier import QuestionClassifierPrediction
+from mentor_classifier import (
+    QuestionClassifierPrediction,
+    QuestionClassiferPredictionResult,
+)
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
@@ -43,7 +46,9 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
         self.w2v_model = W2V(os.path.join(shared_root, "word2vec.bin"))
         self.logistic_model = self.__load_model(self.model_path)
 
-    def evaluate(self, question, canned_question_match_disabled=False):
+    def evaluate(
+        self, question, canned_question_match_disabled=False
+    ) -> QuestionClassiferPredictionResult:
         if not canned_question_match_disabled:
             sanitized_question = sanitize_string(question)
             if sanitized_question in self.mentor.questions_by_text:
@@ -59,7 +64,9 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
                     else "EXACT",
                     1.0,
                 )
-                return answer_id, answer, 1.0, feedback_id
+                return QuestionClassiferPredictionResult(
+                    answer_id, answer, 1.0, feedback_id
+                )
 
         preprocessor = NLTKPreprocessor()
         processed_question = preprocessor.transform(question)
@@ -75,7 +82,9 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
         )
         if highest_confidence < OFF_TOPIC_THRESHOLD:
             answer_id, answer_text = self.__get_offtopic()
-        return answer_id, answer_text, highest_confidence, feedback_id
+        return QuestionClassiferPredictionResult(
+            answer_id, answer_text, highest_confidence, feedback_id
+        )
 
     def get_last_trained_at(self) -> float:
         return get_classifier_last_trained_at(self.model_path)

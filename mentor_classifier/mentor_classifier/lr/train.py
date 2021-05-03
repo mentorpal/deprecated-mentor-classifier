@@ -7,7 +7,6 @@
 import joblib
 import logging
 import os
-from typing import List, Tuple
 
 
 import numpy as np
@@ -15,7 +14,10 @@ from sklearn import metrics
 from sklearn.linear_model import RidgeClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict
 
-from mentor_classifier import QuestionClassifierTraining
+from mentor_classifier import (
+    QuestionClassifierTraining,
+    QuestionClassifierTrainingResult,
+)
 from mentor_classifier.api import update_training
 from mentor_classifier.mentor import Mentor
 from .nltk_preprocessor import NLTKPreprocessor
@@ -43,7 +45,7 @@ class LRQuestionClassifierTraining(QuestionClassifierTraining):
         accuracy: (float) accuracy score for training data
     """
 
-    def train(self) -> Tuple[List[float], float, str]:
+    def train(self) -> QuestionClassifierTrainingResult:
         if not os.path.exists(self.model_path):
             os.makedirs(self.model_path)
         training_data, num_rows_having_paraphrases = self.__load_training_data()
@@ -60,7 +62,7 @@ class LRQuestionClassifierTraining(QuestionClassifierTraining):
         )
         update_training(self.mentor.id)
         self.save()
-        return scores, accuracy, self.model_path
+        return QuestionClassifierTrainingResult(scores, accuracy, self.model_path)
 
     def save(self, to_path=None):
         to_path = to_path or self.model_path

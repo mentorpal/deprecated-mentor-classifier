@@ -29,14 +29,14 @@ SHARED_ROOT = os.environ.get("SHARED_ROOT") or "shared"
 @celery.task()
 def train_task(mentor: str, arch: str = "") -> float:
     try:
-        scores, accuracy, model_path = (
+        result = (
             ClassifierFactory()
             .new_training(
                 mentor=mentor, shared_root=SHARED_ROOT, data_path=OUTPUT_ROOT, arch=arch
             )
             .train()
         )
-        return accuracy
+        return result.accuracy
     except Exception as err:
         logging.exception(err)
         raise (err)

@@ -52,11 +52,11 @@ def test_gets_answer_for_exact_match_and_paraphrases(
         training.train()
         training.save()
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
-    answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
-    assert answer_id == expected_answer_id
-    assert answer == expected_answer
-    assert confidence == 1
-    assert feedback_id is not None
+    result = classifier.evaluate(question)
+    assert result.answer_id == expected_answer_id
+    assert result.answer_text == expected_answer
+    assert result.highest_confidence == 1
+    assert result.feedback_id is not None
 
 
 @responses.activate
@@ -84,11 +84,11 @@ def test_predicts_answer(
         training.train()
         training.save()
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
-    answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
-    assert answer_id == expected_answer_id
-    assert answer == expected_answer
-    assert confidence != 1
-    assert feedback_id is not None
+    result = classifier.evaluate(question)
+    assert result.answer_id == expected_answer_id
+    assert result.answer_text == expected_answer
+    assert result.highest_confidence != 1
+    assert result.feedback_id is not None
 
 
 @responses.activate
@@ -121,8 +121,8 @@ def test_gets_off_topic(
         training.train()
         training.save()
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
-    answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
-    assert confidence < OFF_TOPIC_THRESHOLD
-    assert answer_id == expected_answer_id
-    assert answer == expected_answer
-    assert feedback_id is not None
+    result = classifier.evaluate(question)
+    assert result.highest_confidence < OFF_TOPIC_THRESHOLD
+    assert result.answer_id == expected_answer_id
+    assert result.answer_text == expected_answer
+    assert result.feedback_id is not None

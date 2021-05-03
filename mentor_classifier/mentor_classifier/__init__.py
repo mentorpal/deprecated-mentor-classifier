@@ -6,13 +6,29 @@
 #
 from abc import ABC, abstractmethod
 from importlib import import_module
-from typing import Tuple, List, Dict
+from typing import List, Dict
 from os import environ
+from dataclasses import dataclass
+
+
+@dataclass
+class QuestionClassifierTrainingResult:
+    scores: List[float]
+    accuracy: float
+    model_path: str
+
+
+@dataclass
+class QuestionClassiferPredictionResult:
+    answer_id: str
+    answer_text: str
+    highest_confidence: float
+    feedback_id: str
 
 
 class QuestionClassifierTraining(ABC):
     @abstractmethod
-    def train(self) -> Tuple[List[float], float, str]:
+    def train(self) -> QuestionClassifierTrainingResult:
         raise NotImplementedError()
 
     @abstractmethod
@@ -22,7 +38,9 @@ class QuestionClassifierTraining(ABC):
 
 class QuestionClassifierPrediction(ABC):
     @abstractmethod
-    def evaluate(self, question, canned_question_match_disabled=False):
+    def evaluate(
+        self, question, canned_question_match_disabled=False
+    ) -> QuestionClassiferPredictionResult:
         raise NotImplementedError()
 
     @abstractmethod

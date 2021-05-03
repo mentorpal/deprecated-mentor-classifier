@@ -59,12 +59,12 @@ def test_train_and_predict(
     mentor = load_mentor_csv(fixture_path("csv/{}.csv".format(mentor_id)))
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    scores, accuracy, model_path = (
+    result = (
         ClassifierFactory()
         .new_training(mentor=mentor_id, shared_root=shared_root, data_path=tmpdir)
         .train()
     )
-    assert accuracy == expected_training_accuracy
+    assert result.accuracy == expected_training_accuracy
 
     classifier = ClassifierFactory().new_prediction(
         mentor=mentor_id, shared_root=shared_root, data_path=tmpdir
@@ -73,7 +73,5 @@ def test_train_and_predict(
     for sample_question, expected_sample_answer in zip(
         sample_questions, expected_sample_answers
     ):
-        answer_id, answer_text, highest_confidence, feedback_id = classifier.evaluate(
-            sample_question
-        )
-        assert expected_sample_answer == answer_text
+        prediction_result = classifier.evaluate(sample_question)
+        assert expected_sample_answer == prediction_result.answer_text
