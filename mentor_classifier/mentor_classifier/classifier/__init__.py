@@ -4,3 +4,6 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+from .predict import Classifier  # noqa: F401
+from .word2vec import find_or_load_word2vec  # noqa: F401
+from .train import ClassifierTraining, train  # noqa: F401
