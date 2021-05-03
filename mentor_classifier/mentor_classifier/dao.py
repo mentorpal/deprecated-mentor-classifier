@@ -4,11 +4,16 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from os import environ, path
+from os import environ
 
 import pylru
 from .lr.predict import get_classifier_last_trained_at
-from mentor_classifier import ClassifierFactory, QuestionClassifierPrediction
+from mentor_classifier import (
+    ClassifierFactory,
+    QuestionClassifierPrediction,
+    ARCH_DEFAULT,
+    logistic_model_path,
+)
 
 
 class Entry:
@@ -23,11 +28,13 @@ class Dao:
         self.data_root = data_root
         self.cache = pylru.lrucache(int(environ.get("CACHE_MAX_SIZE", "100")))
 
-    def find_classifier(self, mentor_id: str) -> QuestionClassifierPrediction:
+    def find_classifier(
+        self, mentor_id: str, arch: str = ARCH_DEFAULT
+    ) -> QuestionClassifierPrediction:
         if mentor_id in self.cache:
             e = self.cache[mentor_id]
             if e and e.last_trained_at >= get_classifier_last_trained_at(
-                path.join(self.data_root, mentor_id)
+                logistic_model_path(self.data_root, mentor_id, arch)
             ):
                 return e.classifier
         c = ClassifierFactory().new_prediction(

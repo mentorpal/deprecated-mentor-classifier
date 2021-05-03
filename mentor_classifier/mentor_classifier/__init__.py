@@ -8,7 +8,17 @@ from abc import ABC, abstractmethod
 from importlib import import_module
 from typing import List, Dict
 from os import environ
+import os
 from dataclasses import dataclass
+from pathlib import Path
+
+
+def logistic_model_path(models_path: str, mentor_id: str, arch: str) -> str:
+    return os.path.join(models_path, mentor_id, arch)
+
+
+def get_classifier_last_trained_at(models_path: str) -> float:
+    return Path(os.path.join(models_path, "model.pkl")).stat().st_mtime
 
 
 @dataclass
@@ -29,10 +39,6 @@ class QuestionClassiferPredictionResult:
 class QuestionClassifierTraining(ABC):
     @abstractmethod
     def train(self) -> QuestionClassifierTrainingResult:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def save(self, to_path=None):
         raise NotImplementedError()
 
 

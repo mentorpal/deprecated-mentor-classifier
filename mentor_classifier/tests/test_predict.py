@@ -50,7 +50,6 @@ def test_gets_answer_for_exact_match_and_paraphrases(
     if not path.exists(path.join(data_root, mentor_id)):
         training = ClassifierFactory().new_training(mentor_id, shared_root, data_root)
         training.train()
-        training.save()
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
     result = classifier.evaluate(question)
     assert result.answer_id == expected_answer_id
@@ -82,7 +81,6 @@ def test_predicts_answer(
     if not path.exists(path.join(data_root, mentor_id)):
         training = ClassifierFactory().new_training(mentor_id, shared_root, data_root)
         training.train()
-        training.save()
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
     result = classifier.evaluate(question)
     assert result.answer_id == expected_answer_id
@@ -119,7 +117,6 @@ def test_gets_off_topic(
     if not path.exists(path.join(data_root, mentor_id)):
         training = ClassifierFactory().new_training(mentor_id, shared_root, data_root)
         training.train()
-        training.save()
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
     result = classifier.evaluate(question)
     assert result.highest_confidence < OFF_TOPIC_THRESHOLD

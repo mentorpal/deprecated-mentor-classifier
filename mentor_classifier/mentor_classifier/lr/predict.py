@@ -5,7 +5,6 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 import os
-from pathlib import Path
 import joblib
 import random
 
@@ -16,19 +15,14 @@ from mentor_classifier.api import (
 from mentor_classifier import (
     QuestionClassifierPrediction,
     QuestionClassiferPredictionResult,
+    logistic_model_path,
+    get_classifier_last_trained_at,
+    ARCH_LR,
 )
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
 from .word2vec import W2V
-
-
-def logistic_model_path(models_path: str) -> str:
-    return os.path.join(models_path, "model.pkl")
-
-
-def get_classifier_last_trained_at(models_path: str) -> float:
-    return Path(logistic_model_path(models_path)).stat().st_mtime
 
 
 class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
@@ -42,7 +36,7 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
             type(mentor)
         )
         self.mentor = mentor
-        self.model_path = os.path.join(data_path, mentor.id)
+        self.model_path = logistic_model_path(data_path, mentor.id, ARCH_LR)
         self.w2v_model = W2V(os.path.join(shared_root, "word2vec.bin"))
         self.logistic_model = self.__load_model(self.model_path)
 
@@ -92,10 +86,10 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
     def __load_model(self, model_path):
         logistic_model = None
         print("loading model from path {}...".format(model_path))
-        if not os.path.exists(model_path) or not os.listdir(model_path):
+        if not os.path.exists(model_path):
             print("Local checkpoint {0} does not exist.".format(model_path))
         try:
-            logistic_model = joblib.load(logistic_model_path(model_path))
+            logistic_model = joblib.load(os.path.join(model_path, "model.pkl"))
         except BaseException:
             print(
                 "Unable to load logistic model from {0}. Classifier needs to be retrained before asking questions.".format(
@@ -108,7 +102,9 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
         model_path = self.model_path
         if self.logistic_model is None:
             try:
-                self.logistic_model = joblib.load(os.path.join(model_path, "model.pkl"))
+                self.logistic_model = joblib.load(
+                    os.path.join(self.model_path, "model.pkl")
+                )
             except BaseException:
                 raise Exception(
                     "Could not find logistic model under {0}. Please train classifier first.".format(
