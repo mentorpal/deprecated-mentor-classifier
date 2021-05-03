@@ -4,9 +4,6 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from .predict import LRQuestionClassifierPrediction  # noqa: F401
-from .word2vec import find_or_load_word2vec  # noqa: F401
-from .train import LRQuestionClassifierTraining  # noqa: F401
 from mentor_classifier import (
     ArchClassifierFactory,
     register_classifier_factory,
@@ -14,6 +11,8 @@ from mentor_classifier import (
     QuestionClassifierTraining,
     QuestionClassifierPrediction,
 )
+from .predict import LRQuestionClassifierPrediction
+from .train import LRQuestionClassifierTraining
 
 
 class LRClassifierFactory(ArchClassifierFactory):

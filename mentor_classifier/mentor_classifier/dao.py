@@ -7,7 +7,7 @@
 from os import environ
 
 import pylru
-from .lr.predict import get_classifier_last_trained_at
+from .arch.lr.predict import get_classifier_last_trained_at
 from mentor_classifier import (
     ClassifierFactory,
     QuestionClassifierPrediction,
