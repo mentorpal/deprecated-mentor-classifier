@@ -34,7 +34,8 @@ LICENSE_HEADER:
 .PHONY: license
 license: LICENSE LICENSE_HEADER $(VENV)
 	. $(VENV)/bin/activate \
-		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/src $(args) \
+		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/mentor_classifier $(args) \
+		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/mentor_classifier_tasks $(args) \
 		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/tests $(args) \
 		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier_api/src $(args) \
 		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier_api/tests $(args) \
