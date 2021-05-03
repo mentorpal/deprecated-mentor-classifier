@@ -7,12 +7,10 @@
 from os import environ
 
 import pylru
-from .arch.lr.predict import get_classifier_last_trained_at
 from mentor_classifier import (
     ClassifierFactory,
     QuestionClassifierPrediction,
     ARCH_DEFAULT,
-    logistic_model_path,
 )
 
 
@@ -33,9 +31,7 @@ class Dao:
     ) -> QuestionClassifierPrediction:
         if mentor_id in self.cache:
             e = self.cache[mentor_id]
-            if e and e.last_trained_at >= get_classifier_last_trained_at(
-                logistic_model_path(self.data_root, mentor_id, arch)
-            ):
+            if e and e.last_trained_at >= e.classifier.get_last_trained_at():
                 return e.classifier
         c = ClassifierFactory().new_prediction(
             mentor=mentor_id, shared_root=self.shared_root, data_path=self.data_root

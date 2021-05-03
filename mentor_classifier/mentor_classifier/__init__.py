@@ -10,15 +10,14 @@ from typing import List, Dict
 from os import environ
 import os
 from dataclasses import dataclass
-from pathlib import Path
 
 
-def logistic_model_path(models_path: str, mentor_id: str, arch: str) -> str:
-    return os.path.join(models_path, mentor_id, arch)
-
-
-def get_classifier_last_trained_at(models_path: str) -> float:
-    return Path(os.path.join(models_path, "model.pkl")).stat().st_mtime
+def mentor_model_path(models_path: str, mentor_id: str, arch: str, p: str = "") -> str:
+    return (
+        os.path.join(models_path, mentor_id, arch, p)
+        if p
+        else os.path.join(models_path, mentor_id, arch)
+    )
 
 
 @dataclass
@@ -75,8 +74,8 @@ def register_classifier_factory(arch: str, fac: ArchClassifierFactory) -> None:
     _factories_by_arch[arch] = fac
 
 
-ARCH_LR = "mentorpal_classifier.lr"
-ARCH_DEFAULT = "mentorpal_classifier.lr"
+ARCH_LR = "mentor_classifier.arch.lr"
+ARCH_DEFAULT = ARCH_LR
 
 
 class ClassifierFactory:
