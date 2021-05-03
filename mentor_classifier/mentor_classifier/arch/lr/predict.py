@@ -4,6 +4,7 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+import logging
 import os
 import joblib
 import random
@@ -15,12 +16,11 @@ from mentor_classifier.api import (
 from mentor_classifier import (
     QuestionClassifierPrediction,
     QuestionClassiferPredictionResult,
-    logistic_model_path,
-    get_classifier_last_trained_at,
+    mentor_model_path,
     ARCH_LR,
 )
 from mentor_classifier.mentor import Mentor
-from mentor_classifier.utils import sanitize_string
+from mentor_classifier.utils import file_last_updated_at, sanitize_string
 from .nltk_preprocessor import NLTKPreprocessor
 from .word2vec import W2V
 
@@ -28,7 +28,7 @@ from .word2vec import W2V
 class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
     def __init__(self, mentor, shared_root, data_path):
         if isinstance(mentor, str):
-            print("loading mentor id {}...".format(mentor))
+            logging.info("loading mentor id {}...".format(mentor))
             mentor = Mentor(mentor)
         assert isinstance(
             mentor, Mentor
@@ -36,9 +36,9 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
             type(mentor)
         )
         self.mentor = mentor
-        self.model_path = logistic_model_path(data_path, mentor.id, ARCH_LR)
+        self.model_file = mentor_model_path(data_path, mentor.id, ARCH_LR, "model.pkl")
         self.w2v_model = W2V(os.path.join(shared_root, "word2vec.bin"))
-        self.logistic_model = self.__load_model(self.model_path)
+        self.model = self.__load_model()
 
     def evaluate(
         self, question, canned_question_match_disabled=False
@@ -81,39 +81,18 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
         )
 
     def get_last_trained_at(self) -> float:
-        return get_classifier_last_trained_at(self.model_path)
+        return file_last_updated_at(self.model_file)
 
-    def __load_model(self, model_path):
-        logistic_model = None
-        print("loading model from path {}...".format(model_path))
-        if not os.path.exists(model_path):
-            print("Local checkpoint {0} does not exist.".format(model_path))
-        try:
-            logistic_model = joblib.load(os.path.join(model_path, "model.pkl"))
-        except BaseException:
-            print(
-                "Unable to load logistic model from {0}. Classifier needs to be retrained before asking questions.".format(
-                    model_path
-                )
-            )
-        return logistic_model
+    def __load_model(self):
+        logging.info("loading model from path {}...".format(self.model_file))
+        return joblib.load(self.model_file)
 
     def __get_prediction(self, w2v_vector):
-        model_path = self.model_path
-        if self.logistic_model is None:
-            try:
-                self.logistic_model = joblib.load(
-                    os.path.join(self.model_path, "model.pkl")
-                )
-            except BaseException:
-                raise Exception(
-                    "Could not find logistic model under {0}. Please train classifier first.".format(
-                        model_path
-                    )
-                )
+        if not self.model:
+            self.model = joblib.load(self.model_file)
         test_vector = w2v_vector.reshape(1, -1)
-        prediction = self.logistic_model.predict(test_vector)
-        decision = self.logistic_model.decision_function(test_vector)
+        prediction = self.model.predict(test_vector)
+        decision = self.model.decision_function(test_vector)
         confidence_scores = (
             sorted(decision[0]) if decision.ndim >= 2 else sorted(decision)
         )

@@ -17,7 +17,7 @@ from sklearn.model_selection import cross_val_score, cross_val_predict
 from mentor_classifier import (
     QuestionClassifierTraining,
     QuestionClassifierTrainingResult,
-    logistic_model_path,
+    mentor_model_path,
     ARCH_LR,
 )
 from mentor_classifier.api import update_training
@@ -38,7 +38,7 @@ class LRQuestionClassifierTraining(QuestionClassifierTraining):
         )
         self.mentor = mentor
         self.w2v = W2V(os.path.join(shared_root, "word2vec.bin"))
-        self.model_path = logistic_model_path(output_dir, mentor.id, ARCH_LR)
+        self.model_path = mentor_model_path(output_dir, mentor.id, ARCH_LR)
 
     """
     Trains the classifier updating trained weights to be saved later with save()

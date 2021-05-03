@@ -4,14 +4,19 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+from pathlib import Path
 
 
-def sanitize_string(input_string):
-    input_string = input_string.strip()
-    input_string = input_string.casefold()
-    input_string = input_string.replace("\u00a0", " ")
-    input_string = extract_alphanumeric(input_string)
-    return input_string
+def extract_alphanumeric(input_string):
+    from string import ascii_letters, digits, whitespace
+
+    return "".join(
+        [ch for ch in input_string if ch in (ascii_letters + digits + whitespace)]
+    )
+
+
+def file_last_updated_at(file_path: str) -> int:
+    return int(Path(file_path).stat().st_mtime)
 
 
 def normalize_strings(strings):
@@ -22,9 +27,9 @@ def normalize_strings(strings):
     return ret
 
 
-def extract_alphanumeric(input_string):
-    from string import ascii_letters, digits, whitespace
-
-    return "".join(
-        [ch for ch in input_string if ch in (ascii_letters + digits + whitespace)]
-    )
+def sanitize_string(input_string):
+    input_string = input_string.strip()
+    input_string = input_string.casefold()
+    input_string = input_string.replace("\u00a0", " ")
+    input_string = extract_alphanumeric(input_string)
+    return input_string
