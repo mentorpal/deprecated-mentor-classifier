@@ -90,6 +90,8 @@ def run_model_against_testset(
                     f"expected a confidence of at least {test_set_entry.expected_confidence}, but recieved a confidence of {test_result.highest_confidence}, for question/answer: {test_set_entry.question}/{test_result.answer_text}"
                 )
 
+        if current_result_entry.passing:
+            result.passing_tests = result.passing_tests + 1
         result.results.append(current_result_entry)
 
     return result

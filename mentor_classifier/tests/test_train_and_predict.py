@@ -66,4 +66,7 @@ def test_train_and_predict(
     test_results = run_model_against_testset(classifier, test_set)
 
     print(test_results.errors)
+    print(
+        f"percentage passed = {test_results.passing_tests}/{len(test_results.results)}"
+    )
     assert len(test_results.errors) == 0
