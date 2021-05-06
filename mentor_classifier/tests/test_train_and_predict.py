@@ -5,13 +5,17 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from os import path
-from typing import List
 
 import pytest
 import responses
 
-from mentor_classifier import ClassifierFactory
-from .helpers import fixture_path, load_mentor_csv
+from mentor_classifier import ClassifierFactory, ARCH_LR
+from .helpers import (
+    fixture_path,
+    load_mentor_csv,
+    load_test_csv,
+    run_model_against_testset,
+)
 
 
 @pytest.fixture(scope="module")
@@ -26,52 +30,40 @@ def shared_root(word2vec) -> str:
 
 @responses.activate
 @pytest.mark.parametrize(
-    "mentor_id,expected_training_accuracy,sample_questions,expected_sample_answers",
+    "mentor_id,arch,expected_training_accuracy",
     [
         (
             "clint",
+            ARCH_LR,
             0.5,
-            [
-                "What's your name?",
-                "Who are you?",
-                "Give me your name.",
-                "Give me your age.",
-                "what do the penguins do?",
-            ],
-            [
-                "Clint Anderson",
-                "Clint Anderson",
-                "Clint Anderson",
-                "37 years old",
-                "Penguins do important things",
-            ],
         )
     ],
 )
 def test_train_and_predict(
     mentor_id: str,
+    arch: str,
     expected_training_accuracy: float,
-    sample_questions: List[str],
-    expected_sample_answers: List[str],
     tmpdir,
     shared_root: str,
 ):
-    mentor = load_mentor_csv(fixture_path("csv/{}.csv".format(mentor_id)))
+    mentor = load_mentor_csv(fixture_path("csv/{}/{}.csv".format(mentor_id, mentor_id)))
+    test_set = load_test_csv(fixture_path(f"csv/{mentor_id}/test.csv"))
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     result = (
         ClassifierFactory()
-        .new_training(mentor=mentor_id, shared_root=shared_root, data_path=tmpdir)
+        .new_training(
+            mentor=mentor_id, shared_root=shared_root, data_path=tmpdir, arch=arch
+        )
         .train()
     )
     assert result.accuracy == expected_training_accuracy
 
     classifier = ClassifierFactory().new_prediction(
-        mentor=mentor_id, shared_root=shared_root, data_path=tmpdir
+        mentor=mentor_id, shared_root=shared_root, data_path=tmpdir, arch=arch
     )
 
-    for sample_question, expected_sample_answer in zip(
-        sample_questions, expected_sample_answers
-    ):
-        prediction_result = classifier.evaluate(sample_question)
-        assert expected_sample_answer == prediction_result.answer_text
+    test_results = run_model_against_testset(classifier, test_set)
+
+    print(test_results.errors)
+    assert len(test_results.errors) == 0

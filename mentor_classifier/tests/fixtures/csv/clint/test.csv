@@ -1,0 +1,6 @@
+question,expected_answer,expected_confidence
+What is your name?,Clint Anderson,.5
+Who are you?,Clint Anderson,.5
+Who you?,Clint Anderson,.001
+How old are you?,37 years old,.5
+What do penguins do?,Penguins do important things,.5
