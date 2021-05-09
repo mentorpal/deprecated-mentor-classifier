@@ -16,6 +16,7 @@ from .helpers import (
     load_test_csv,
     run_model_against_testset,
 )
+from .types import _MentorTrainAndTestConfiguration
 
 
 @pytest.fixture(scope="module")
@@ -30,37 +31,47 @@ def shared_root(word2vec) -> str:
 
 @responses.activate
 @pytest.mark.parametrize(
-    "mentor_id,arch,expected_training_accuracy",
+    "training_configuration",
     [
-        (
-            "clint",
-            ARCH_LR,
-            0.5,
+        _MentorTrainAndTestConfiguration(
+            mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
         )
     ],
 )
 def test_train_and_predict(
-    mentor_id: str,
-    arch: str,
-    expected_training_accuracy: float,
+    training_configuration: _MentorTrainAndTestConfiguration,
     tmpdir,
     shared_root: str,
 ):
-    mentor = load_mentor_csv(fixture_path("csv/{}/{}.csv".format(mentor_id, mentor_id)))
-    test_set = load_test_csv(fixture_path(f"csv/{mentor_id}/test.csv"))
+    mentor = load_mentor_csv(
+        fixture_path(
+            "csv/{}/{}.csv".format(
+                training_configuration.mentor_id, training_configuration.mentor_id
+            )
+        )
+    )
+    test_set = load_test_csv(
+        fixture_path(f"csv/{training_configuration.mentor_id}/test.csv")
+    )
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     result = (
         ClassifierFactory()
         .new_training(
-            mentor=mentor_id, shared_root=shared_root, data_path=tmpdir, arch=arch
+            mentor=training_configuration.mentor_id,
+            shared_root=shared_root,
+            data_path=tmpdir,
+            arch=training_configuration.arch,
         )
         .train()
     )
-    assert result.accuracy == expected_training_accuracy
+    assert result.accuracy == training_configuration.expected_training_accuracy
 
     classifier = ClassifierFactory().new_prediction(
-        mentor=mentor_id, shared_root=shared_root, data_path=tmpdir, arch=arch
+        mentor=training_configuration.mentor_id,
+        shared_root=shared_root,
+        data_path=tmpdir,
+        arch=training_configuration.arch,
     )
 
     test_results = run_model_against_testset(classifier, test_set)

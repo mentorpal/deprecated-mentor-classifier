@@ -16,6 +16,13 @@ class ComparisonType(Enum):
 
 
 @dataclass
+class _MentorTrainAndTestConfiguration:
+    mentor_id: str
+    arch: str
+    expected_training_accuracy: float
+
+
+@dataclass
 class _MentorTestSetEntry:
     question: str
     expected_answer: str
