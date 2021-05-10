@@ -8,6 +8,7 @@ from os import path
 
 import pytest
 import responses
+import logging
 
 from mentor_classifier import ClassifierFactory, ARCH_LR
 from .helpers import (
@@ -45,9 +46,7 @@ def test_train_and_predict(
 ):
     mentor = load_mentor_csv(
         fixture_path(
-            "csv/{}/{}.csv".format(
-                training_configuration.mentor_id, training_configuration.mentor_id
-            )
+            f"csv/{training_configuration.mentor_id}/{training_configuration.mentor_id}.csv"
         )
     )
     test_set = load_test_csv(
@@ -76,8 +75,8 @@ def test_train_and_predict(
 
     test_results = run_model_against_testset(classifier, test_set)
 
-    print(test_results.errors)
-    print(
+    logging.warning(test_results.errors)
+    logging.warning(
         f"percentage passed = {test_results.passing_tests}/{len(test_results.results)}"
     )
     assert len(test_results.errors) == 0
