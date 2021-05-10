@@ -7,7 +7,6 @@
 import joblib
 import logging
 import os
-from typing import List, Tuple
 
 
 import numpy as np
@@ -15,14 +14,19 @@ from sklearn import metrics
 from sklearn.linear_model import RidgeClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict
 
-
+from mentor_classifier import (
+    QuestionClassifierTraining,
+    QuestionClassifierTrainingResult,
+    mentor_model_path,
+    ARCH_LR,
+)
 from mentor_classifier.api import update_training
 from mentor_classifier.mentor import Mentor
 from .nltk_preprocessor import NLTKPreprocessor
 from .word2vec import W2V
 
 
-class ClassifierTraining:
+class LRQuestionClassifierTraining(QuestionClassifierTraining):
     def __init__(self, mentor, shared_root: str = "shared", output_dir: str = "out"):
         if isinstance(mentor, str):
             print("loading mentor id {}...".format(mentor))
@@ -34,7 +38,7 @@ class ClassifierTraining:
         )
         self.mentor = mentor
         self.w2v = W2V(os.path.join(shared_root, "word2vec.bin"))
-        self.model_path = os.path.join(output_dir, mentor.id)
+        self.model_path = mentor_model_path(output_dir, mentor.id, ARCH_LR)
 
     """
     Trains the classifier updating trained weights to be saved later with save()
@@ -43,7 +47,7 @@ class ClassifierTraining:
         accuracy: (float) accuracy score for training data
     """
 
-    def train(self) -> Tuple[List[float], float, str]:
+    def train(self) -> QuestionClassifierTrainingResult:
         if not os.path.exists(self.model_path):
             os.makedirs(self.model_path)
         training_data, num_rows_having_paraphrases = self.__load_training_data()
@@ -59,14 +63,11 @@ class ClassifierTraining:
             num_rows_having_paraphrases,
         )
         update_training(self.mentor.id)
-        return scores, accuracy, self.model_path
-
-    def save(self, to_path=None):
-        to_path = to_path or self.model_path
-        os.makedirs(to_path, exist_ok=True)
-        joblib.dump(self.logistic_model, os.path.join(to_path, "model.pkl"))
-        with open(os.path.join(to_path, "w2v.txt"), "w") as f:
+        os.makedirs(self.model_path, exist_ok=True)
+        joblib.dump(self.logistic_model, os.path.join(self.model_path, "model.pkl"))
+        with open(os.path.join(self.model_path, "w2v.txt"), "w") as f:
             f.write(self.w2v.get_w2v_file_path())
+        return QuestionClassifierTrainingResult(scores, accuracy, self.model_path)
 
     def __load_training_data(self):
         preprocessor = NLTKPreprocessor()
@@ -151,8 +152,6 @@ def train(
     save_model: bool = True,
 ):
     m = Mentor(mentor)
-    classifier = ClassifierTraining(m, shared_root, output_dir)
+    classifier = LRQuestionClassifierTraining(m, shared_root, output_dir)
     result = classifier.train()
-    if save_model:
-        classifier.save()
     return result

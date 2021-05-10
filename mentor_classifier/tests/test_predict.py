@@ -11,9 +11,7 @@ import pytest
 import responses
 
 from mentor_classifier.api import OFF_TOPIC_THRESHOLD
-from mentor_classifier.mentor import Mentor
-from mentor_classifier.classifier.train import ClassifierTraining
-from mentor_classifier.classifier.predict import Classifier
+from mentor_classifier import ClassifierFactory
 from .helpers import fixture_path
 
 
@@ -49,17 +47,15 @@ def test_gets_answer_for_exact_match_and_paraphrases(
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    mentor = Mentor(mentor_id)
     if not path.exists(path.join(data_root, mentor_id)):
-        training = ClassifierTraining(mentor, shared_root, data_root)
+        training = ClassifierFactory().new_training(mentor_id, shared_root, data_root)
         training.train()
-        training.save()
-    classifier = Classifier(mentor, shared_root, data_root)
-    answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
-    assert answer_id == expected_answer_id
-    assert answer == expected_answer
-    assert confidence == 1
-    assert feedback_id is not None
+    classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
+    result = classifier.evaluate(question)
+    assert result.answer_id == expected_answer_id
+    assert result.answer_text == expected_answer
+    assert result.highest_confidence == 1
+    assert result.feedback_id is not None
 
 
 @responses.activate
@@ -82,17 +78,15 @@ def test_predicts_answer(
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    mentor = Mentor(mentor_id)
     if not path.exists(path.join(data_root, mentor_id)):
-        training = ClassifierTraining(mentor, shared_root, data_root)
+        training = ClassifierFactory().new_training(mentor_id, shared_root, data_root)
         training.train()
-        training.save()
-    classifier = Classifier(mentor, shared_root, data_root)
-    answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
-    assert answer_id == expected_answer_id
-    assert answer == expected_answer
-    assert confidence != 1
-    assert feedback_id is not None
+    classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
+    result = classifier.evaluate(question)
+    assert result.answer_id == expected_answer_id
+    assert result.answer_text == expected_answer
+    assert result.highest_confidence != 1
+    assert result.feedback_id is not None
 
 
 @responses.activate
@@ -120,14 +114,12 @@ def test_gets_off_topic(
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    mentor = Mentor(mentor_id)
     if not path.exists(path.join(data_root, mentor_id)):
-        training = ClassifierTraining(mentor, shared_root, data_root)
+        training = ClassifierFactory().new_training(mentor_id, shared_root, data_root)
         training.train()
-        training.save()
-    classifier = Classifier(mentor, shared_root, data_root)
-    answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
-    assert confidence < OFF_TOPIC_THRESHOLD
-    assert answer_id == expected_answer_id
-    assert answer == expected_answer
-    assert feedback_id is not None
+    classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
+    result = classifier.evaluate(question)
+    assert result.highest_confidence < OFF_TOPIC_THRESHOLD
+    assert result.answer_id == expected_answer_id
+    assert result.answer_text == expected_answer
+    assert result.feedback_id is not None

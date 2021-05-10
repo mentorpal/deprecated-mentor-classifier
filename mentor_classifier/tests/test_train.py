@@ -10,7 +10,7 @@ import json
 import pytest
 import responses
 
-from mentor_classifier.classifier.train import train
+from mentor_classifier import ClassifierFactory, ARCH_DEFAULT
 from .helpers import fixture_path
 
 
@@ -32,7 +32,8 @@ def test_trains_and_outputs_models(
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    scores, accuracy, model_path = train(mentor_id, shared_root, data_root)
-    assert model_path == path.join(data_root, mentor_id)
-    assert path.exists(path.join(model_path, "model.pkl"))
-    assert path.exists(path.join(model_path, "w2v.txt"))
+    result = ClassifierFactory().new_training(mentor_id, shared_root, data_root).train()
+    print(result)
+    assert result.model_path == path.join(data_root, mentor_id, ARCH_DEFAULT)
+    assert path.exists(path.join(result.model_path, "model.pkl"))
+    assert path.exists(path.join(result.model_path, "w2v.txt"))

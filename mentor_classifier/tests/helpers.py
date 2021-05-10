@@ -5,83 +5,16 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from os import path
-from dataclasses import dataclass, asdict, field
-from typing import List
-
-
-@dataclass
-class MentorQuestion:
-    question_id: str
-    question: str
-    paraphrases: List[str]
-    answer: str
-    topic: str
-
-
-@dataclass
-class Subject:
-    name: str
-
-
-@dataclass
-class Topic:
-    name: str
-
-
-@dataclass
-class Question:
-    _id: str
-    question: str = ""
-    type: str = ""
-    name: str = ""
-    paraphrases: List[str] = field(default_factory=list)
-
-
-@dataclass
-class Answer:
-    _id: str
-    status: str
-    transcript: str
-    question: Question
-
-
-@dataclass
-class QuestionAndTopics:
-    question: Question
-    topics: List[Topic]
-
-
-@dataclass
-class Mentor:
-    subjects: List[Subject] = field(default_factory=list)
-    topics: List[Topic] = field(default_factory=list)
-    questions: List[QuestionAndTopics] = field(default_factory=list)
-    answers: List[Answer] = field(default_factory=list)
-
-    def to_dict(self):
-        return asdict(self)
-
-    def add_mentor_question(self, mentor_question: MentorQuestion):
-        question_ref = Question(_id=mentor_question.question_id)
-        topic = Topic(mentor_question.topic)
-        question_and_topics = QuestionAndTopics(question=question_ref, topics=[topic])
-        if topic not in self.topics:
-            self.topics.append(topic)
-        self.questions.append(question_and_topics)
-        question = Question(
-            _id=mentor_question.question_id,
-            question=mentor_question.question,
-            type="",
-            name="",
-            paraphrases=mentor_question.paraphrases,
-        )
-        answer = Answer(
-            _id=f"A{str(len(self.answers) + 1)}",
-            status="COMPLETE",
-            transcript=mentor_question.answer,
-            question=question,
-        )
-        self.answers.append(answer)
+from .types import (
+    Mentor,
+    MentorQuestion,
+    _MentorTestSet,
+    _MentorTestSetEntry,
+    _MentorTestSetResult,
+    _MentorTestResultEntry,
+    ComparisonType,
+)
+from mentor_classifier import QuestionClassifierPrediction
 
 
 def load_mentor_csv(path: str) -> Mentor:
@@ -95,6 +28,28 @@ def load_mentor_csv(path: str) -> Mentor:
             result.add_mentor_question(mentor_question)
 
     return result
+
+
+def load_test_csv(path: str) -> _MentorTestSet:
+    result = _MentorTestSet()
+
+    with open(path) as f:
+        lines = f.readlines()
+        lines.pop(0)
+
+        for line in lines:
+            result.tests.append(parse_testset_entry(line))
+
+    return result
+
+
+def parse_testset_entry(csv_line: str) -> _MentorTestSetEntry:
+    columns = csv_line.split(",")
+    return _MentorTestSetEntry(
+        question=columns[0],
+        expected_answer=columns[1],
+        expected_confidence=float(columns[2]),
+    )
 
 
 def parse_mentor_question(csv_line: str) -> MentorQuestion:
@@ -111,3 +66,32 @@ def parse_mentor_question(csv_line: str) -> MentorQuestion:
 
 def fixture_path(p: str) -> str:
     return path.abspath(path.join(".", "tests", "fixtures", p))
+
+
+def run_model_against_testset(
+    evaluator: QuestionClassifierPrediction, test_set: _MentorTestSet
+) -> _MentorTestSetResult:
+    result = _MentorTestSetResult()
+
+    for test_set_entry in test_set.tests:
+        current_result_entry = _MentorTestResultEntry(test_set_entry)
+        test_result = evaluator.evaluate(test_set_entry.question)
+
+        if test_result.answer_text != test_set_entry.expected_answer:
+            current_result_entry.passing = False
+            result.errors.append(
+                f"expected {test_set_entry.expected_answer} in response to {test_set_entry.question}, but got {test_result.answer_text} instead"
+            )
+
+        if test_set_entry.comparison_type == ComparisonType.GTE:
+            if test_result.highest_confidence < test_set_entry.expected_confidence:
+                current_result_entry.passing = False
+                result.errors.append(
+                    f"expected a confidence of at least {test_set_entry.expected_confidence}, but recieved a confidence of {test_result.highest_confidence}, for question/answer: {test_set_entry.question}/{test_result.answer_text}"
+                )
+
+        if current_result_entry.passing:
+            result.passing_tests = result.passing_tests + 1
+        result.results.append(current_result_entry)
+
+    return result

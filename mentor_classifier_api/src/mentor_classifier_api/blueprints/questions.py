@@ -7,7 +7,7 @@
 import os
 from flask import Blueprint, jsonify, request
 
-from mentor_classifier.classifier.dao import Dao
+from mentor_classifier.dao import Dao
 
 import re
 
@@ -42,15 +42,15 @@ def answer():
     if not os.path.isdir(mentor_models):
         return (jsonify({"message": f"No models found for mentor {mentor}."}), 404)
     classifier = _get_dao().find_classifier(mentor)
-    answer_id, answer, confidence, feedback_id = classifier.evaluate(question)
+    result = classifier.evaluate(question)
     return (
         jsonify(
             {
                 "query": question,
-                "answer_id": answer_id,
-                "answer_text": answer,
-                "confidence": confidence,
-                "feedback_id": feedback_id,
+                "answer_id": result.answer_id,
+                "answer_text": result.answer_text,
+                "confidence": result.highest_confidence,
+                "feedback_id": result.feedback_id,
                 "classifier": "",
             }
         ),

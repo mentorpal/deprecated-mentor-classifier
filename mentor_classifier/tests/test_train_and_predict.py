@@ -5,14 +5,19 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from os import path
-from typing import List
 
 import pytest
 import responses
+import logging
 
-from mentor_classifier.classifier.train import train
-from mentor_classifier.classifier.predict import Classifier
-from .helpers import fixture_path, load_mentor_csv
+from mentor_classifier import ClassifierFactory, ARCH_LR
+from .helpers import (
+    fixture_path,
+    load_mentor_csv,
+    load_test_csv,
+    run_model_against_testset,
+)
+from .types import _MentorTrainAndTestConfiguration
 
 
 @pytest.fixture(scope="module")
@@ -27,48 +32,55 @@ def shared_root(word2vec) -> str:
 
 @responses.activate
 @pytest.mark.parametrize(
-    "mentor_id,expected_training_accuracy,sample_questions,expected_sample_answers",
+    "training_configuration",
     [
-        (
-            "clint",
-            0.5,
-            [
-                "What's your name?",
-                "Who are you?",
-                "Give me your name.",
-                "Give me your age.",
-                "what do the penguins do?",
-            ],
-            [
-                "Clint Anderson",
-                "Clint Anderson",
-                "Clint Anderson",
-                "37 years old",
-                "Penguins do important things",
-            ],
+        _MentorTrainAndTestConfiguration(
+            mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
         )
     ],
 )
 def test_train_and_predict(
-    mentor_id: str,
-    expected_training_accuracy: float,
-    sample_questions: List[str],
-    expected_sample_answers: List[str],
+    training_configuration: _MentorTrainAndTestConfiguration,
     tmpdir,
     shared_root: str,
 ):
-    mentor = load_mentor_csv(fixture_path("csv/{}.csv".format(mentor_id)))
+    mentor = load_mentor_csv(
+        fixture_path(
+            path.join(
+                "csv",
+                training_configuration.mentor_id,
+                f"{training_configuration.mentor_id}.csv",
+            )
+        )
+    )
+    test_set = load_test_csv(
+        fixture_path(path.join("csv", training_configuration.mentor_id, "test.csv"))
+    )
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    scores, accuracy, model_path = train(mentor_id, shared_root, tmpdir)
-    assert accuracy == expected_training_accuracy
-
-    classifier = Classifier(mentor=mentor_id, shared_root=shared_root, data_path=tmpdir)
-
-    for sample_question, expected_sample_answer in zip(
-        sample_questions, expected_sample_answers
-    ):
-        answer_id, answer_text, highest_confidence, feedback_id = classifier.evaluate(
-            sample_question
+    result = (
+        ClassifierFactory()
+        .new_training(
+            mentor=training_configuration.mentor_id,
+            shared_root=shared_root,
+            data_path=tmpdir,
+            arch=training_configuration.arch,
         )
-        assert expected_sample_answer == answer_text
+        .train()
+    )
+    assert result.accuracy == training_configuration.expected_training_accuracy
+
+    classifier = ClassifierFactory().new_prediction(
+        mentor=training_configuration.mentor_id,
+        shared_root=shared_root,
+        data_path=tmpdir,
+        arch=training_configuration.arch,
+    )
+
+    test_results = run_model_against_testset(classifier, test_set)
+
+    logging.warning(test_results.errors)
+    logging.warning(
+        f"percentage passed = {test_results.passing_tests}/{len(test_results.results)}"
+    )
+    assert len(test_results.errors) == 0
