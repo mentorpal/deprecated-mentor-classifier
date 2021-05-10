@@ -46,11 +46,15 @@ def test_train_and_predict(
 ):
     mentor = load_mentor_csv(
         fixture_path(
-            f"csv/{training_configuration.mentor_id}/{training_configuration.mentor_id}.csv"
+            path.join(
+                "csv",
+                training_configuration.mentor_id,
+                f"{training_configuration.mentor_id}.csv",
+            )
         )
     )
     test_set = load_test_csv(
-        fixture_path(f"csv/{training_configuration.mentor_id}/test.csv")
+        fixture_path(path.join("csv", training_configuration.mentor_id, "test.csv"))
     )
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
