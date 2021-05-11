@@ -68,6 +68,10 @@ def fixture_path(p: str) -> str:
     return path.abspath(path.join(".", "tests", "fixtures", p))
 
 
+def fixture_mentor_data(mentor_id: str, p: str) -> str:
+    return fixture_path(path.join("data", mentor_id, p))
+
+
 def run_model_against_testset(
     evaluator: QuestionClassifierPrediction, test_set: _MentorTestSet
 ) -> _MentorTestSetResult:

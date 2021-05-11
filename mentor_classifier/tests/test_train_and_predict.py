@@ -7,11 +7,12 @@
 from os import path
 
 import pytest
-import responses
 import logging
+import responses
 
 from mentor_classifier import ClassifierFactory, ARCH_LR
 from .helpers import (
+    fixture_mentor_data,
     fixture_path,
     load_mentor_csv,
     load_test_csv,
@@ -45,16 +46,10 @@ def test_train_and_predict(
     shared_root: str,
 ):
     mentor = load_mentor_csv(
-        fixture_path(
-            path.join(
-                "csv",
-                training_configuration.mentor_id,
-                f"{training_configuration.mentor_id}.csv",
-            )
-        )
+        fixture_mentor_data(training_configuration.mentor_id, "data.csv")
     )
     test_set = load_test_csv(
-        fixture_path(path.join("csv", training_configuration.mentor_id, "test.csv"))
+        fixture_mentor_data(training_configuration.mentor_id, "test.csv")
     )
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
