@@ -16,6 +16,7 @@ class Mentor(object):
         self.questions_by_id = {}
         self.questions_by_text = {}
         self.questions_by_answer = {}
+        self.answer_id_by_answer = {}
         self.load()
 
     def load(self):
@@ -43,6 +44,7 @@ class Mentor(object):
                 "answer_id": answer["_id"],
                 "topics": [],
             }
+            self.answer_id_by_answer[answer["_id"]] = answer["transcript"]
             self.questions_by_id[question["_id"]] = q
         for question in data.get("questions", []):
             q = self.questions_by_id.get(question["question"]["_id"], None)

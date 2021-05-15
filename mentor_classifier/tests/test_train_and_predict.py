@@ -10,7 +10,7 @@ import pytest
 import logging
 import responses
 
-from mentor_classifier import ClassifierFactory, ARCH_LR
+from mentor_classifier import ClassifierFactory, ARCH_LR, ARCH_TRANSFORMERS
 from .helpers import (
     fixture_mentor_data,
     fixture_path,
@@ -64,6 +64,56 @@ def test_train_and_predict(
         .train()
     )
     assert result.accuracy == training_configuration.expected_training_accuracy
+
+    classifier = ClassifierFactory().new_prediction(
+        mentor=training_configuration.mentor_id,
+        shared_root=shared_root,
+        data_path=tmpdir,
+        arch=training_configuration.arch,
+    )
+
+    test_results = run_model_against_testset(classifier, test_set)
+
+    logging.warning(test_results.errors)
+    logging.warning(
+        f"percentage passed = {test_results.passing_tests}/{len(test_results.results)}"
+    )
+    assert len(test_results.errors) == 0
+
+
+@responses.activate
+@pytest.mark.parametrize(
+    "training_configuration",
+    [
+        _MentorTrainAndTestConfiguration(
+            mentor_id="clint", arch=ARCH_TRANSFORMERS, expected_training_accuracy=0.5
+        )
+    ],
+)
+def test_train_and_predict_transformers(
+    training_configuration: _MentorTrainAndTestConfiguration,
+    tmpdir,
+    shared_root: str,
+):
+    mentor = load_mentor_csv(
+        fixture_mentor_data(training_configuration.mentor_id, "data.csv")
+    )
+    test_set = load_test_csv(
+        fixture_mentor_data(training_configuration.mentor_id, "test.csv")
+    )
+    data = {"data": {"mentor": mentor.to_dict()}}
+    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    result = (
+        ClassifierFactory()
+        .new_training(
+            mentor=training_configuration.mentor_id,
+            shared_root=shared_root,
+            data_path=tmpdir,
+            arch=training_configuration.arch,
+        )
+        .train()
+    )
+    assert result.accuracy >= training_configuration.expected_training_accuracy
 
     classifier = ClassifierFactory().new_prediction(
         mentor=training_configuration.mentor_id,
