@@ -17,7 +17,7 @@ def fetch_mentor_data(mentor: str) -> dict:
     res = requests.post(
         GRAPHQL_ENDPOINT,
         json={
-            "query": f"""query Mentor($id: ID!) {{
+            "query": """query Mentor($id: ID!) {{
                 mentor(id: $id) {{
                     subjects {{
                         name
@@ -64,7 +64,7 @@ def update_training(mentor: str):
     res = requests.post(
         GRAPHQL_ENDPOINT,
         json={
-            "query": f"""mutation($id: ID!) {{
+            "query": """mutation($id: ID!) {{
                 updateMentorTraining(id: $id) {{
                     _id
                 }}
@@ -87,7 +87,7 @@ def create_user_question(
     res = requests.post(
         GRAPHQL_ENDPOINT,
         json={
-            "query": f"""mutation($id: ID!, $question: String!, $answer_id: ID!, $answer_type: String!, $confidence: String!) {{
+            "query": """mutation($id: ID!, $question: String!, $answer_id: ID!, $answer_type: String!, $confidence: String!) {{
                 userQuestionCreate(userQuestion: {{
                     mentor: $id,
                     question: $question,
