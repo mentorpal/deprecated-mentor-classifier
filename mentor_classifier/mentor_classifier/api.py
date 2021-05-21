@@ -49,7 +49,7 @@ def fetch_mentor_data(mentor: str) -> dict:
             }}""",
             "variables": {
                 "id": mentor,
-            }
+            },
         },
     )
     res.raise_for_status()
@@ -71,7 +71,7 @@ def update_training(mentor: str):
             }}""",
             "variables": {
                 "id": mentor,
-            }
+            },
         },
     )
     res.raise_for_status()
@@ -104,7 +104,7 @@ def create_user_question(
                 "answer_id": answer_id,
                 "answer_type": answer_type,
                 "condifence": confidence,
-            }
+            },
         },
     )
     res.raise_for_status()
