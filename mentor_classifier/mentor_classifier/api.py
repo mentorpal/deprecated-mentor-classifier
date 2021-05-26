@@ -17,8 +17,8 @@ def fetch_mentor_data(mentor: str) -> dict:
     res = requests.post(
         GRAPHQL_ENDPOINT,
         json={
-            "query": f"""query {{
-                mentor(id: "{mentor}") {{
+            "query": """query Mentor($id: ID!) {{
+                mentor(id: $id) {{
                     subjects {{
                         name
                     }}
@@ -46,7 +46,10 @@ def fetch_mentor_data(mentor: str) -> dict:
                         }}
                     }}
                 }}
-            }}"""
+            }}""",
+            "variables": {
+                "id": mentor,
+            },
         },
     )
     res.raise_for_status()
@@ -61,11 +64,14 @@ def update_training(mentor: str):
     res = requests.post(
         GRAPHQL_ENDPOINT,
         json={
-            "query": f"""mutation {{
-                updateMentorTraining(id: "{mentor}") {{
+            "query": """mutation($id: ID!) {{
+                updateMentorTraining(id: $id) {{
                     _id
                 }}
-            }}"""
+            }}""",
+            "variables": {
+                "id": mentor,
+            },
         },
     )
     res.raise_for_status()
@@ -81,17 +87,24 @@ def create_user_question(
     res = requests.post(
         GRAPHQL_ENDPOINT,
         json={
-            "query": f"""mutation {{
+            "query": """mutation($id: ID!, $question: String!, $answer_id: ID!, $answer_type: String!, $confidence: String!) {{
                 userQuestionCreate(userQuestion: {{
-                    mentor: "{mentor}",
-                    question: "{question}",
-                    classifierAnswer: "{answer_id}",
-                    classifierAnswerType: "{answer_type}",
-                    confidence: {confidence}
+                    mentor: $id,
+                    question: $question,
+                    classifierAnswer: $answer_id,
+                    classifierAnswerType: $answer_type,
+                    confidence: $confidence
                 }}) {{
                     _id
                 }}
-            }}"""
+            }}""",
+            "variables": {
+                "id": mentor,
+                "question": question,
+                "answer_id": answer_id,
+                "answer_type": answer_type,
+                "condifence": confidence,
+            },
         },
     )
     res.raise_for_status()
