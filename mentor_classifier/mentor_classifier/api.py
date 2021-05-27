@@ -7,53 +7,100 @@
 import json
 import os
 import requests
+from typing import TypedDict
+
+
+class GQLQueryBody(TypedDict):
+    query: str
+    variables: dict
 
 
 GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql"
 OFF_TOPIC_THRESHOLD = -0.55  # todo: put this in graphql and have it be configurable
+GQL_QUERY_MENTOR = """
+query Mentor($id: ID!) {
+    mentor(id: $id) {
+        subjects {
+            name
+        }
+        topics {
+            name
+        }
+        questions {
+            question {
+                _id
+            }
+            topics {
+                name
+            }
+        }
+        answers {
+            _id
+            status
+            transcript
+            question {
+                _id
+                question
+                type
+                name
+                paraphrases
+            }
+        }
+    }
+}
+"""
+GQL_UPDATE_MENTOR_TRAINING = """
+mutation UpdateMentorTraining($id: ID!) {
+    updateMentorTraining(id: $id) {
+        _id
+    }
+}
+"""
+GQL_CREATE_USER_QUESTION = """
+mutation UserQuestionCreate($userQuestion: UserQuestionCreateInput!) {
+    userQuestionCreate(userQuestion: $userQuestion) {
+        _id
+    }
+}
+"""
+
+
+def __auth_gql(query: GQLQueryBody) -> dict:
+    res = requests.post(
+        GRAPHQL_ENDPOINT,
+        json=query,
+    )
+    res.raise_for_status()
+    return res.json()
+
+
+def query_mentor(mentor: str) -> GQLQueryBody:
+    return {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor}}
+
+
+def mutation_update_training(mentor: str) -> GQLQueryBody:
+    return {"query": GQL_UPDATE_MENTOR_TRAINING, "variables": {"id": mentor}}
+
+
+def mutation_create_user_question(
+    mentor: str, question: str, answer_id: str, answer_type: str, confidence: float
+) -> GQLQueryBody:
+    return {
+        "query": GQL_CREATE_USER_QUESTION,
+        "variables": {
+            "userQuestion": {
+                "mentor": mentor,
+                "question": question,
+                "classifierAnswer": answer_id,
+                "classifierAnswerType": answer_type,
+                "confidence": confidence,
+            }
+        },
+    }
 
 
 def fetch_mentor_data(mentor: str) -> dict:
-    res = requests.post(
-        GRAPHQL_ENDPOINT,
-        json={
-            "query": """query Mentor($id: ID!) {{
-                mentor(id: $id) {{
-                    subjects {{
-                        name
-                    }}
-                    topics {{
-                        name
-                    }}
-                    questions {{
-                        question {{
-                            _id
-                        }}
-                        topics {{
-                            name
-                        }}
-                    }}
-                    answers {{
-                        _id
-                        status
-                        transcript
-                        question {{
-                            _id
-                            question
-                            type
-                            name
-                            paraphrases
-                        }}
-                    }}
-                }}
-            }}""",
-            "variables": {
-                "id": mentor,
-            },
-        },
-    )
-    res.raise_for_status()
-    tdjson = res.json()
+    tdjson = __auth_gql(query_mentor(mentor))
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
     data = tdjson["data"]["mentor"]
@@ -61,20 +108,9 @@ def fetch_mentor_data(mentor: str) -> dict:
 
 
 def update_training(mentor: str):
-    res = requests.post(
-        GRAPHQL_ENDPOINT,
-        json={
-            "query": """mutation($id: ID!) {{
-                updateMentorTraining(id: $id) {{
-                    _id
-                }}
-            }}""",
-            "variables": {
-                "id": mentor,
-            },
-        },
-    )
-    res.raise_for_status()
+    tdjson = __auth_gql(mutation_update_training(mentor))
+    if "errors" in tdjson:
+        raise Exception(json.dumps(tdjson.get("errors")))
 
 
 def create_user_question(
@@ -84,34 +120,13 @@ def create_user_question(
     answer_type: str,
     confidence: float,
 ) -> str:
-    res = requests.post(
-        GRAPHQL_ENDPOINT,
-        json={
-            "query": """mutation($id: ID!, $question: String!, $answer_id: ID!, $answer_type: String!, $confidence: String!) {{
-                userQuestionCreate(userQuestion: {{
-                    mentor: $id,
-                    question: $question,
-                    classifierAnswer: $answer_id,
-                    classifierAnswerType: $answer_type,
-                    confidence: $confidence
-                }}) {{
-                    _id
-                }}
-            }}""",
-            "variables": {
-                "id": mentor,
-                "question": question,
-                "answer_id": answer_id,
-                "answer_type": answer_type,
-                "condifence": confidence,
-            },
-        },
+    tdjson = __auth_gql(
+        mutation_create_user_question(
+            mentor, question, answer_id, answer_type, confidence
+        )
     )
-    res.raise_for_status()
-    tdjson = res.json()
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
-    # TODO: should throw an error but need to figure out how to mock 2 different GQL queries...
     try:
         return tdjson["data"]["userQuestionCreate"]["_id"]
     except KeyError:
