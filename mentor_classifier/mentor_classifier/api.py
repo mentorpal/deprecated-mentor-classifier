@@ -7,6 +7,7 @@
 import json
 import os
 import requests
+
 from typing import TypedDict
 
 
@@ -44,6 +45,11 @@ query Mentor($id: ID!) {
                 type
                 name
                 paraphrases
+            }
+            media {
+                type
+                tag
+                url
             }
         }
     }

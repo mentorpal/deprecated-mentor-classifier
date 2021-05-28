@@ -49,6 +49,7 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
                 q = self.mentor.questions_by_text[sanitized_question]
                 answer_id = q["answer_id"]
                 answer = q["answer"]
+                answer_media = q["media"]
                 feedback_id = create_user_question(
                     self.mentor.id,
                     question,
@@ -59,14 +60,19 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
                     1.0,
                 )
                 return QuestionClassiferPredictionResult(
-                    answer_id, answer, 1.0, feedback_id
+                    answer_id, answer, answer_media, 1.0, feedback_id
                 )
 
         preprocessor = NLTKPreprocessor()
         processed_question = preprocessor.transform(question)
         w2v_vector, lstm_vector = self.w2v_model.w2v_for_question(processed_question)
 
-        answer_id, answer_text, highest_confidence = self.__get_prediction(w2v_vector)
+        (
+            answer_id,
+            answer_text,
+            answer_media,
+            highest_confidence,
+        ) = self.__get_prediction(w2v_vector)
         feedback_id = create_user_question(
             self.mentor.id,
             question,
@@ -75,9 +81,9 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
             highest_confidence,
         )
         if highest_confidence < OFF_TOPIC_THRESHOLD:
-            answer_id, answer_text = self.__get_offtopic()
+            answer_id, answer_text, answer_media = self.__get_offtopic()
         return QuestionClassiferPredictionResult(
-            answer_id, answer_text, highest_confidence, feedback_id
+            answer_id, answer_text, answer_media, highest_confidence, feedback_id
         )
 
     def get_last_trained_at(self) -> float:
@@ -108,11 +114,16 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
             if answer_key in self.mentor.questions_by_answer
             else ""
         )
+        answer_media = (
+            self.mentor.questions_by_answer[answer_key].get("media", [])
+            if answer_key in self.mentor.questions_by_answer
+            else []
+        )
         if not answer_id:
             raise Exception(
                 f"No answer id found for answer text (classifier_data may be out of sync with trained model): {answer_text}"
             )
-        return answer_id, answer_text, highest_confidence
+        return answer_id, answer_text, answer_media, highest_confidence
 
     def __get_offtopic(self):
         try:
@@ -122,6 +133,7 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
             return (
                 self.mentor.utterances_by_type["_OFF_TOPIC_"][i][0],
                 self.mentor.utterances_by_type["_OFF_TOPIC_"][i][1],
+                self.mentor.utterances_by_type["_OFF_TOPIC_"][i][2],
             )
         except KeyError:
             return (

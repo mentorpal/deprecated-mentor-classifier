@@ -11,6 +11,8 @@ from os import environ
 import os
 from dataclasses import dataclass
 
+from mentor_classifier.mentor import Media
+
 
 def mentor_model_path(models_path: str, mentor_id: str, arch: str, p: str = "") -> str:
     return (
@@ -31,6 +33,7 @@ class QuestionClassifierTrainingResult:
 class QuestionClassiferPredictionResult:
     answer_id: str
     answer_text: str
+    answer_media: List[Media]
     highest_confidence: float
     feedback_id: str
 
