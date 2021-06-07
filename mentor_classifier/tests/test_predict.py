@@ -12,7 +12,7 @@ import pytest
 import responses
 
 from mentor_classifier.mentor import Media
-from mentor_classifier.api import OFF_TOPIC_THRESHOLD
+from mentor_classifier.api import get_off_topic_threshold
 from mentor_classifier import ClassifierFactory
 from .helpers import fixture_path
 
@@ -132,7 +132,6 @@ def test_predicts_answer(
 
 
 @responses.activate
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "mentor_id,question,expected_answer_id,expected_answer,expected_media",
     [
@@ -147,6 +146,7 @@ def test_predicts_answer(
 )
 def test_gets_off_topic(
     tmpdir,
+    monkeypatch,
     data_root: str,
     shared_root: str,
     mentor_id: str,
@@ -155,6 +155,7 @@ def test_gets_off_topic(
     expected_answer: str,
     expected_media: List[Media],
 ):
+    monkeypatch.setenv("OFF_TOPIC_THRESHOLD", "1.0")  # everything is offtopic
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
@@ -163,7 +164,7 @@ def test_gets_off_topic(
         training.train()
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
     result = classifier.evaluate(question)
-    assert result.highest_confidence < OFF_TOPIC_THRESHOLD
+    assert result.highest_confidence < get_off_topic_threshold()
     assert result.answer_id == expected_answer_id
     assert result.answer_text == expected_answer
     assert result.answer_media == expected_media
