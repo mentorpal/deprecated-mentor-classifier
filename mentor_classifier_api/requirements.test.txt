@@ -1,9 +1,9 @@
 -r requirements.txt
 coverage==5.5
 pip-upgrader
-pytest==6.2.3
+pytest==6.2.4
 pytest-env==0.6.2
-pytest-mock==3.6.0
+pytest-mock==3.6.1
 pytest-only==1.2.2
 pytest-flask==1.2.0
 requests==2.25.1
