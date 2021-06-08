@@ -47,6 +47,10 @@ def test_returns_400_response_when_question_not_set(client):
                 "query": "What is your name?",
                 "answer_id": "A1",
                 "answer_text": "Clint Anderson",
+                "answer_media": [
+                    {"type": "video", "tag": "web", "url": "q1_web.mp4"},
+                    {"type": "video", "tag": "mobile", "url": "q1_mobile.mp4"},
+                ],
                 "confidence": 1,
             },
         ),
@@ -57,6 +61,7 @@ def test_returns_400_response_when_question_not_set(client):
                 "query": "How old are you?",
                 "answer_id": "A2",
                 "answer_text": "37 years old",
+                "answer_media": [],
                 "confidence": 1,
             },
         ),
@@ -67,6 +72,10 @@ def test_returns_400_response_when_question_not_set(client):
                 "query": "What's your name?",
                 "answer_id": "A1",
                 "answer_text": "Clint Anderson",
+                "answer_media": [
+                    {"type": "video", "tag": "web", "url": "q1_web.mp4"},
+                    {"type": "video", "tag": "mobile", "url": "q1_mobile.mp4"},
+                ],
                 "confidence": 0.33497961553532835,
             },
         ),
@@ -81,8 +90,12 @@ def test_evaluate_classifies_user_questions(
     res = client.get(
         f"/classifier/questions/?mentor={input_mentor}&query={input_question}"
     )
+    import logging
+
+    logging.warning(f"res={res.json}")
     assert res.json["query"] == expected_results["query"]
     assert res.json["answer_id"] == expected_results["answer_id"]
     assert res.json["answer_text"] == expected_results["answer_text"]
+    assert res.json["answer_media"] == expected_results["answer_media"]
     assert res.json["confidence"] == expected_results["confidence"]
     assert res.json["feedback_id"] is not None

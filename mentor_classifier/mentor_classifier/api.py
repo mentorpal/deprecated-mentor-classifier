@@ -7,6 +7,7 @@
 import json
 import os
 import requests
+
 from typing import TypedDict
 
 
@@ -15,8 +16,23 @@ class GQLQueryBody(TypedDict):
     variables: dict
 
 
+OFF_TOPIC_THRESHOLD_DEFAULT = (
+    -0.55
+)  # todo: this should probably be specific to the classifier arch?
+
+
+def get_off_topic_threshold() -> float:
+    try:
+        return (
+            float(str(os.environ.get("OFF_TOPIC_THRESHOLD") or ""))
+            if "OFF_TOPIC_THRESHOLD" in os.environ
+            else OFF_TOPIC_THRESHOLD_DEFAULT
+        )
+    except ValueError:
+        return OFF_TOPIC_THRESHOLD_DEFAULT
+
+
 GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql"
-OFF_TOPIC_THRESHOLD = -0.55  # todo: put this in graphql and have it be configurable
 GQL_QUERY_MENTOR = """
 query Mentor($id: ID!) {
     mentor(id: $id) {
@@ -44,6 +60,11 @@ query Mentor($id: ID!) {
                 type
                 name
                 paraphrases
+            }
+            media {
+                type
+                tag
+                url
             }
         }
     }
