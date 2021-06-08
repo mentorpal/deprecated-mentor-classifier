@@ -90,6 +90,9 @@ def test_evaluate_classifies_user_questions(
     res = client.get(
         f"/classifier/questions/?mentor={input_mentor}&query={input_question}"
     )
+    import logging
+
+    logging.warning(f"res={res.json}")
     assert res.json["query"] == expected_results["query"]
     assert res.json["answer_id"] == expected_results["answer_id"]
     assert res.json["answer_text"] == expected_results["answer_text"]

@@ -59,13 +59,13 @@ class QuestionClassifierPrediction(ABC):
 class ArchClassifierFactory(ABC):
     @abstractmethod
     def new_training(
-        self, mentor, shared_root: str = "shared", output_dir: str = "out"
+        self, mentor: str, shared_root: str = "shared", output_dir: str = "out"
     ) -> QuestionClassifierTraining:
         raise NotImplementedError()
 
     @abstractmethod
     def new_prediction(
-        self, mentor, shared_root, data_path
+        self, mentor: str, shared_root: str, data_path: str
     ) -> QuestionClassifierPrediction:
         raise NotImplementedError()
 
