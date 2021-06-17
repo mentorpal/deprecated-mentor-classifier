@@ -5,6 +5,7 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 import logging
+from mentor_classifier.mentor_classifier.api import OFF_TOPIC_THRESHOLD_DEFAULT
 import os
 import random
 
@@ -16,7 +17,7 @@ from mentor_classifier import (
     mentor_model_path,
     ARCH_TRANSFORMERS,
 )
-from mentor_classifier.api import create_user_question, OFF_TOPIC_THRESHOLD
+from mentor_classifier.api import create_user_question
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import file_last_updated_at, sanitize_string
 
@@ -49,6 +50,7 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
                 q = self.mentor.questions_by_text[sanitized_question]
                 answer_id = q["answer_id"]
                 answer = q["answer"]
+                answer_media = q["media"]
                 feedback_id = create_user_question(
                     self.mentor.id,
                     question,
@@ -59,21 +61,25 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
                     1.0,
                 )
                 return QuestionClassiferPredictionResult(
-                    answer_id, answer, 1.0, feedback_id
+                    answer_id, answer, answer_media, 1.0, feedback_id
                 )
         embedded_question = self.transformer.get_embeddings(question)
-        answer_id, answer, highest_confidence = self.__get_prediction(embedded_question)
+        answer_id, answer, answer_media, highest_confidence = self.__get_prediction(
+            embedded_question
+        )
         feedback_id = create_user_question(
             self.mentor.id,
             question,
             answer_id,
-            "OFF_TOPIC" if highest_confidence < OFF_TOPIC_THRESHOLD else "CLASSIFIER",
+            "OFF_TOPIC"
+            if highest_confidence < OFF_TOPIC_THRESHOLD_DEFAULT
+            else "CLASSIFIER",
             highest_confidence,
         )
-        if highest_confidence < OFF_TOPIC_THRESHOLD:
+        if highest_confidence < OFF_TOPIC_THRESHOLD_DEFAULT:
             answer_id, answer = self.__get_offtopic()
         return QuestionClassiferPredictionResult(
-            answer_id, answer, highest_confidence, feedback_id
+            answer_id, answer, answer_media, highest_confidence, feedback_id
         )
 
     def get_last_trained_at(self) -> float:
@@ -88,7 +94,13 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
         decision = self.model.decision_function([embedded_question])
         highest_confidence = max(decision[0])
         answer_text = self.mentor.answer_id_by_answer[prediction[0]]
-        return prediction[0], answer_text, highest_confidence
+        answer_key = sanitize_string(answer_text)
+        answer_media = (
+            self.mentor.questions_by_answer[answer_key].get("media", [])
+            if answer_key in self.mentor.questions_by_answer
+            else []
+        )
+        return prediction[0], answer_text, answer_media, highest_confidence
 
     def __get_offtopic(self):
         try:
