@@ -12,8 +12,8 @@ from flask import Blueprint, jsonify
 healthcheck_blueprint = Blueprint("healthcheck", __name__)
 
 GQL_QUERY_STATUS = """
-    query {
-        message,
+    query Healthcheck {
+        message
         status
     }
     """
