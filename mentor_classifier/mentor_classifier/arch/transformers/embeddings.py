@@ -5,7 +5,7 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
-
+from sentence_transformer import SentenceTransformer
 
 class TransformerEmbeddings:
     def __init__(self, shared_root):
