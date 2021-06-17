@@ -1,6 +1,8 @@
 {
     "data": {
-        "message":"",
-        "status":"Internal error"
+        "health": {
+            "message": "",
+            "status": "Internal Error"
+        }
     }
 }

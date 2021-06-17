@@ -13,10 +13,12 @@ healthcheck_blueprint = Blueprint("healthcheck", __name__)
 
 GQL_QUERY_STATUS = """
     query Healthcheck {
-        message
-        status
+        health {
+            message
+            status
+        }
     }
-    """
+"""
 
 
 @healthcheck_blueprint.route("", methods=["GET"])
