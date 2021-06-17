@@ -62,6 +62,9 @@ test: $(VENV)
 		&& coverage run \
 			--omit="$(PWD)/tests $(VENV)" \
 			-m py.test -vv $(args)
+			
+	cd $(ROOT)/sentence-transformer/ \
+		&& $(MAKE) sentence_transformer
 
 .PHONY: test-all
 test-all:

@@ -5,11 +5,13 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from sentence_transformers import SentenceTransformer  # type: ignore
+from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
 
 
 class TransformerEmbeddings:
-    def __init__(self):
-        self.transformer = SentenceTransformer("distilbert-base-nli-mean-tokens")
+    def __init__(self, shared_root):
+        self.transformer: SentenceTransformer = find_or_load_sentence_transformer(
+             shared_root + "/../sentence-transformer")
         # self.transformer = SentenceTransformer('distilbert-base-nli-mean-tokens', device=0)  # This is to use GPU
 
     def get_embeddings(self, data):

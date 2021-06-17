@@ -129,3 +129,69 @@ def test_train_and_predict_transformers(
         f"percentage passed = {test_results.passing_tests}/{len(test_results.results)}"
     )
     assert len(test_results.errors) == 0
+
+
+@pytest.mark.only
+@responses.activate
+@pytest.mark.parametrize(
+    "training_configuration,compare_configuration,example",
+    [
+        (
+        _MentorTrainAndTestConfiguration(
+            mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=1
+        ),
+        _MentorTrainAndTestConfiguration(
+            mentor_id="clint", arch=ARCH_TRANSFORMERS, expected_training_accuracy=1
+        ),
+         "who you is?",
+        )
+    ],
+)
+
+def test_confidence(
+    training_configuration: _MentorTrainAndTestConfiguration,
+    compare_configuration: _MentorTrainAndTestConfiguration,
+    tmpdir,
+    shared_root: str,
+    example: str
+):
+    mentor = load_mentor_csv(
+        fixture_mentor_data(training_configuration.mentor_id, "data.csv")
+    )
+    data = {"data": {"mentor": mentor.to_dict()}}
+    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    lr_result = (
+        ClassifierFactory()
+        .new_training(
+            mentor=training_configuration.mentor_id,
+            shared_root=shared_root,
+            data_path=tmpdir,
+            arch=training_configuration.arch,
+        )
+        .train()
+    )
+    hf_result = (
+        ClassifierFactory()
+        .new_training(
+            mentor=compare_configuration.mentor_id,
+            shared_root=shared_root,
+            data_path=tmpdir,
+            arch=compare_configuration.arch,
+        )
+        .train()
+    )
+    hf_classifier = ClassifierFactory().new_prediction(
+        mentor=compare_configuration.mentor_id,
+        shared_root=shared_root,
+        data_path=tmpdir,
+        arch=compare_configuration.arch,
+    )
+    lr_classifier = ClassifierFactory().new_prediction(
+        mentor=training_configuration.mentor_id,
+        shared_root=shared_root,
+        data_path=tmpdir,
+        arch=training_configuration.arch,
+    )
+    hf_result = hf_classifier.evaluate(example)
+    lr_result = lr_classifier.evaluate(example)
+    assert hf_result.highest_confidence >= lr_result.highest_confidence

@@ -37,7 +37,7 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
         )
         self.mentor = mentor
         self.model_path = mentor_model_path(output_dir, mentor.id, ARCH_TRANSFORMERS)
-        self.transformer = TransformerEmbeddings()
+        self.transformer = TransformerEmbeddings(shared_root)
 
     def train(self) -> QuestionClassifierTrainingResult:
         x_train, y_train = self.__load_training_data()
