@@ -137,7 +137,7 @@ def test_train_and_predict_transformers(
     [
         (
             _MentorTrainAndTestConfiguration(
-                mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=1
+                mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
             ),
             _MentorTrainAndTestConfiguration(
                 mentor_id="clint", arch=ARCH_TRANSFORMERS, expected_training_accuracy=1
@@ -168,6 +168,8 @@ def test_confidence(
         )
         .train()
     )
+    assert lr_train.accuracy is not None
+
     hf_train = (
         ClassifierFactory()
         .new_training(
@@ -178,6 +180,8 @@ def test_confidence(
         )
         .train()
     )
+    assert hf_train.accuracy is not None
+
     hf_classifier = ClassifierFactory().new_prediction(
         mentor=compare_configuration.mentor_id,
         shared_root=shared_root,
