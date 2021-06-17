@@ -144,7 +144,7 @@ def test_train_and_predict_transformers(
                 arch=ARCH_LR_TRANSFORMER,
                 expected_training_accuracy=1,
             ),
-            "who you is?",
+            "who you is mr?",
         )
     ],
 )
