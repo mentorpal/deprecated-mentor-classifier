@@ -5,7 +5,6 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 import logging
-from mentor_classifier.mentor_classifier.api import OFF_TOPIC_THRESHOLD_DEFAULT
 import os
 import random
 
@@ -17,7 +16,7 @@ from mentor_classifier import (
     mentor_model_path,
     ARCH_TRANSFORMERS,
 )
-from mentor_classifier.api import create_user_question
+from mentor_classifier.api import create_user_question, OFF_TOPIC_THRESHOLD_DEFAULT
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import file_last_updated_at, sanitize_string
 

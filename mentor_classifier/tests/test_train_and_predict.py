@@ -158,7 +158,7 @@ def test_confidence(
     )
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    lr_result = (
+    lr_train = (
         ClassifierFactory()
         .new_training(
             mentor=training_configuration.mentor_id,
@@ -168,7 +168,7 @@ def test_confidence(
         )
         .train()
     )
-    hf_result = (
+    hf_train = (
         ClassifierFactory()
         .new_training(
             mentor=compare_configuration.mentor_id,
