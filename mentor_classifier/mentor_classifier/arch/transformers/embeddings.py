@@ -7,6 +7,7 @@
 from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
 from sentence_transformer import SentenceTransformer
 
+
 class TransformerEmbeddings:
     def __init__(self, shared_root):
         self.transformer: SentenceTransformer = find_or_load_sentence_transformer(
