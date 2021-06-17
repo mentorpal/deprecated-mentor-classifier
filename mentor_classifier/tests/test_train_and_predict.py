@@ -10,7 +10,7 @@ import pytest
 import logging
 import responses
 
-from mentor_classifier import ClassifierFactory, ARCH_LR, ARCH_TRANSFORMERS
+from mentor_classifier import ClassifierFactory, ARCH_LR, ARCH_LR_TRANSFORMER
 from .helpers import (
     fixture_mentor_data,
     fixture_path,
@@ -86,7 +86,7 @@ def test_train_and_predict(
     "training_configuration",
     [
         _MentorTrainAndTestConfiguration(
-            mentor_id="clint", arch=ARCH_TRANSFORMERS, expected_training_accuracy=0.5
+            mentor_id="clint", arch=ARCH_LR_TRANSFORMER, expected_training_accuracy=0.5
         )
     ],
 )
@@ -140,7 +140,7 @@ def test_train_and_predict_transformers(
                 mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
             ),
             _MentorTrainAndTestConfiguration(
-                mentor_id="clint", arch=ARCH_TRANSFORMERS, expected_training_accuracy=1
+                mentor_id="clint", arch=ARCH_LR_TRANSFORMER, expected_training_accuracy=1
             ),
             "who you is?",
         )

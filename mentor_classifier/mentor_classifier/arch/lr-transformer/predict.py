@@ -14,7 +14,7 @@ from mentor_classifier import (
     QuestionClassifierPrediction,
     QuestionClassiferPredictionResult,
     mentor_model_path,
-    ARCH_TRANSFORMERS,
+    ARCH_LR_TRANSFORMER,
 )
 from mentor_classifier.api import create_user_question, OFF_TOPIC_THRESHOLD_DEFAULT
 from mentor_classifier.mentor import Mentor
@@ -33,10 +33,10 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
         )
         self.mentor = mentor
         self.model_file = mentor_model_path(
-            data_path, mentor.id, ARCH_TRANSFORMERS, "model.pkl"
+            data_path, mentor.id, ARCH_LR_TRANSFORMER, "model.pkl"
         )
         self.transformer = self.__load_transformer(
-            os.path.join(data_path, mentor.id, ARCH_TRANSFORMERS, "transformer.pkl")
+            os.path.join(data_path, mentor.id, ARCH_LR_TRANSFORMER, "transformer.pkl")
         )
         self.model = self.__load_model()
 

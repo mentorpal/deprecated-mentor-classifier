@@ -9,7 +9,7 @@ from mentor_classifier import (
     QuestionClassifierTraining,
     QuestionClassifierPrediction,
     register_classifier_factory,
-    ARCH_TRANSFORMERS,
+    ARCH_LR_TRANSFORMER,
 )
 from .predict import TransformersQuestionClassifierPrediction
 from .train import TransformersQuestionClassifierTraining
@@ -31,4 +31,4 @@ class TransformerClassifierFactory(ArchClassifierFactory):
         )
 
 
-register_classifier_factory(ARCH_TRANSFORMERS, TransformerClassifierFactory())
+register_classifier_factory(ARCH_LR_TRANSFORMER, TransformerClassifierFactory())

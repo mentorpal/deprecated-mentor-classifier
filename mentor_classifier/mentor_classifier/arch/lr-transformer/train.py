@@ -17,7 +17,7 @@ from mentor_classifier import (
     QuestionClassifierTraining,
     QuestionClassifierTrainingResult,
     mentor_model_path,
-    ARCH_TRANSFORMERS,
+    ARCH_LR_TRANSFORMER,
 )
 from mentor_classifier.mentor import Mentor
 from .embeddings import TransformerEmbeddings
@@ -36,7 +36,7 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
             type(mentor)
         )
         self.mentor = mentor
-        self.model_path = mentor_model_path(output_dir, mentor.id, ARCH_TRANSFORMERS)
+        self.model_path = mentor_model_path(output_dir, mentor.id, ARCH_LR_TRANSFORMER)
         self.transformer = TransformerEmbeddings(shared_root)
 
     def train(self) -> QuestionClassifierTrainingResult:
