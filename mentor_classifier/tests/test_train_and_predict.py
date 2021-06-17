@@ -131,29 +131,27 @@ def test_train_and_predict_transformers(
     assert len(test_results.errors) == 0
 
 
-@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "training_configuration,compare_configuration,example",
     [
         (
-        _MentorTrainAndTestConfiguration(
-            mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=1
-        ),
-        _MentorTrainAndTestConfiguration(
-            mentor_id="clint", arch=ARCH_TRANSFORMERS, expected_training_accuracy=1
-        ),
-         "who you is?",
+            _MentorTrainAndTestConfiguration(
+                mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=1
+            ),
+            _MentorTrainAndTestConfiguration(
+                mentor_id="clint", arch=ARCH_TRANSFORMERS, expected_training_accuracy=1
+            ),
+            "who you is?",
         )
     ],
 )
-
 def test_confidence(
     training_configuration: _MentorTrainAndTestConfiguration,
     compare_configuration: _MentorTrainAndTestConfiguration,
     tmpdir,
     shared_root: str,
-    example: str
+    example: str,
 ):
     mentor = load_mentor_csv(
         fixture_mentor_data(training_configuration.mentor_id, "data.csv")
