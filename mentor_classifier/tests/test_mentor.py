@@ -21,9 +21,22 @@ from .helpers import fixture_path
             {
                 "topics": ["Advice", "Background", "Utterances", "About Me", "Weird"],
                 "utterances_by_type": {
-                    "_IDLE_": [["A4", None]],
-                    "_INTRO_": [["A5", "Hi I'm Clint"]],
-                    "_OFF_TOPIC_": [["A6", "Ask me something else"]],
+                    "_IDLE_": [
+                        [
+                            "A4",
+                            None,
+                            [
+                                {"type": "video", "tag": "web", "url": "idle_web.mp4"},
+                                {
+                                    "type": "video",
+                                    "tag": "mobile",
+                                    "url": "idle_mobile.mp4",
+                                },
+                            ],
+                        ]
+                    ],
+                    "_INTRO_": [["A5", "Hi I'm Clint", []]],
+                    "_OFF_TOPIC_": [["A6", "Ask me something else", []]],
                 },
                 "questions_by_id": {
                     "Q1": {
@@ -33,6 +46,10 @@ from .helpers import fixture_path
                         "answer_id": "A1",
                         "topics": ["About Me"],
                         "paraphrases": ["Who are you?"],
+                        "media": [
+                            {"type": "video", "tag": "web", "url": "q1_web.mp4"},
+                            {"type": "video", "tag": "mobile", "url": "q1_mobile.mp4"},
+                        ],
                     },
                     "Q2": {
                         "id": "Q2",
@@ -41,6 +58,7 @@ from .helpers import fixture_path
                         "answer_id": "A2",
                         "topics": [],
                         "paraphrases": ["What's your age?"],
+                        "media": [],
                     },
                 },
                 "questions_by_text": {
@@ -51,6 +69,10 @@ from .helpers import fixture_path
                         "answer_id": "A1",
                         "topics": ["About Me"],
                         "paraphrases": ["Who are you?"],
+                        "media": [
+                            {"type": "video", "tag": "web", "url": "q1_web.mp4"},
+                            {"type": "video", "tag": "mobile", "url": "q1_mobile.mp4"},
+                        ],
                     },
                     "who are you": {
                         "id": "Q1",
@@ -59,6 +81,10 @@ from .helpers import fixture_path
                         "answer_id": "A1",
                         "topics": ["About Me"],
                         "paraphrases": ["Who are you?"],
+                        "media": [
+                            {"type": "video", "tag": "web", "url": "q1_web.mp4"},
+                            {"type": "video", "tag": "mobile", "url": "q1_mobile.mp4"},
+                        ],
                     },
                     "how old are you": {
                         "id": "Q2",
@@ -67,6 +93,7 @@ from .helpers import fixture_path
                         "answer_id": "A2",
                         "topics": [],
                         "paraphrases": ["What's your age?"],
+                        "media": [],
                     },
                     "whats your age": {
                         "id": "Q2",
@@ -75,6 +102,7 @@ from .helpers import fixture_path
                         "answer_id": "A2",
                         "topics": [],
                         "paraphrases": ["What's your age?"],
+                        "media": [],
                     },
                 },
                 "questions_by_answer": {
@@ -85,6 +113,10 @@ from .helpers import fixture_path
                         "answer_id": "A1",
                         "topics": ["About Me"],
                         "paraphrases": ["Who are you?"],
+                        "media": [
+                            {"type": "video", "tag": "web", "url": "q1_web.mp4"},
+                            {"type": "video", "tag": "mobile", "url": "q1_mobile.mp4"},
+                        ],
                     },
                     "37 years old": {
                         "id": "Q2",
@@ -93,6 +125,7 @@ from .helpers import fixture_path
                         "answer_id": "A2",
                         "topics": [],
                         "paraphrases": ["What's your age?"],
+                        "media": [],
                     },
                 },
             },

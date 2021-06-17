@@ -4,8 +4,17 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+from dataclasses import dataclass
+
 from mentor_classifier.api import fetch_mentor_data
 from mentor_classifier.utils import sanitize_string
+
+
+@dataclass
+class Media:
+    type: str
+    tag: str
+    url: str
 
 
 class Mentor(object):
@@ -33,7 +42,7 @@ class Mentor(object):
                 if question["name"] not in self.utterances_by_type:
                     self.utterances_by_type[question["name"]] = []
                 self.utterances_by_type[question["name"]].append(
-                    [answer["_id"], answer["transcript"]]
+                    [answer["_id"], answer["transcript"], answer.get("media", [])]
                 )
                 continue
             q = {
@@ -42,6 +51,7 @@ class Mentor(object):
                 "paraphrases": question["paraphrases"],
                 "answer": answer["transcript"],
                 "answer_id": answer["_id"],
+                "media": answer.get("media", []),
                 "topics": [],
             }
             self.answer_id_by_answer[answer["_id"]] = answer["transcript"]
