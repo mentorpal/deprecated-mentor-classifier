@@ -140,7 +140,9 @@ def test_train_and_predict_transformers(
                 mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
             ),
             _MentorTrainAndTestConfiguration(
-                mentor_id="clint", arch=ARCH_LR_TRANSFORMER, expected_training_accuracy=1
+                mentor_id="clint",
+                arch=ARCH_LR_TRANSFORMER,
+                expected_training_accuracy=1,
             ),
             "who you is?",
         )
