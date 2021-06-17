@@ -141,19 +141,6 @@
             "paraphrases": []
           },
           "media": []
-        },
-        {
-          "_id": "A6",
-          "status": "COMPLETE",
-          "transcript": "Ask me something else",
-          "question": {
-            "_id": "Q6",
-            "question": "Off topic",
-            "type": "UTTERANCE",
-            "name": "_OFF_TOPIC_",
-            "paraphrases": []
-          },
-          "media": ["/clint/offtopic.mp4"]
         }
       ]
     }
