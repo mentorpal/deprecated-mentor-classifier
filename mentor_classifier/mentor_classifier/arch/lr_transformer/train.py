@@ -23,10 +23,16 @@ from mentor_classifier.mentor import Mentor
 from .embeddings import TransformerEmbeddings
 from ...api import update_training
 from ...utils import sanitize_string
+from typing import Union, Tuple, List
 
 
 class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
-    def __init__(self, mentor, shared_root: str = "shared", output_dir: str = "out"):
+    def __init__(
+        self,
+        mentor: Union[str, Mentor],
+        shared_root: str = "shared",
+        output_dir: str = "out",
+    ):
         if isinstance(mentor, str):
             print("loading mentor id {}...".format(mentor))
             mentor = Mentor(mentor)
@@ -58,7 +64,7 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
             scores, training_accuracy, self.model_path
         )
 
-    def __load_training_data(self):
+    def __load_training_data(self) -> Tuple[List(str), List[str]]:
         x_train = []
         y_train = []
         for key in self.mentor.questions_by_id:
@@ -74,23 +80,27 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
                 y_train.append(answer_id)
         return x_train, y_train
 
-    def __load_transformer_embeddings(self, x_train, y_train):
+    def __load_transformer_embeddings(
+        self, x_train: List(str), y_train: List(str)
+    ) -> np.array:
         return np.array(self.transformer.get_embeddings(x_train)), np.array(y_train)
 
-    def train_ridge_classifier(self, x_train, y_train, alpha=1.0):
+    def train_ridge_classifier(
+        self, x_train: List(str), y_train: List(str), alpha: float = 1.0
+    ) -> RidgeClassifier:
         classifier = RidgeClassifier(alpha=alpha)
         classifier.fit(x_train, y_train)
         return classifier
 
     def train_lr_classifier(
         self,
-        x_train,
-        y_train,
+        x_train: List(str),
+        y_train: List(str),
         solver="lbfgs",
         multi_class="multinomial",
         max_iter=1000,
         c=0.1,
-    ):
+    ) -> LogisticRegression:
         classifier = LogisticRegression(
             solver=solver, multi_class=multi_class, max_iter=max_iter, C=c
         )
@@ -98,11 +108,11 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
         return classifier
 
     @staticmethod
-    def calculate_accuracy(predictions, labels):
+    def calculate_accuracy(predictions: str, labels: str) -> float:
         return accuracy_score(labels, predictions)
 
     @staticmethod
-    def calculate_relevant_accuracy(predictions, labels):
+    def calculate_relevant_accuracy(predictions: str, labels: str) -> float:
         cnt = 0
         for pred, label in zip(predictions, labels):
             if pred in label:

@@ -10,9 +10,11 @@ from mentor_classifier import (
     QuestionClassifierPrediction,
     register_classifier_factory,
     ARCH_LR_TRANSFORMER,
+    Mentor,
 )
 from .predict import TransformersQuestionClassifierPrediction
 from .train import TransformersQuestionClassifierTraining
+from typing import Union
 
 
 class TransformerClassifierFactory(ArchClassifierFactory):
@@ -24,7 +26,7 @@ class TransformerClassifierFactory(ArchClassifierFactory):
         )
 
     def new_prediction(
-        self, mentor, shared_root, data_path
+        self, mentor: Union(str, Mentor), shared_root: str, data_path: str
     ) -> QuestionClassifierPrediction:
         return TransformersQuestionClassifierPrediction(
             mentor=mentor, shared_root=shared_root, data_path=data_path

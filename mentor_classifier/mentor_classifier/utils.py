@@ -5,9 +5,10 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from pathlib import Path
+from typing import List
 
 
-def extract_alphanumeric(input_string):
+def extract_alphanumeric(input_string: str) -> str:
     from string import ascii_letters, digits, whitespace
 
     return "".join(
@@ -19,7 +20,7 @@ def file_last_updated_at(file_path: str) -> int:
     return int(Path(file_path).stat().st_mtime)
 
 
-def normalize_strings(strings):
+def normalize_strings(strings: List[str]) -> str:
     ret = []
     for string in strings:
         string = sanitize_string(string)
@@ -27,7 +28,7 @@ def normalize_strings(strings):
     return ret
 
 
-def sanitize_string(input_string):
+def sanitize_string(input_string: str) -> str:
     input_string = input_string.strip()
     input_string = input_string.casefold()
     input_string = input_string.replace("\u00a0", " ")

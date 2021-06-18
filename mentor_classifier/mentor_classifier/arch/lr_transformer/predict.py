@@ -15,14 +15,16 @@ from mentor_classifier import (
     QuestionClassiferPredictionResult,
     mentor_model_path,
     ARCH_LR_TRANSFORMER,
+    Media,
 )
 from mentor_classifier.api import create_user_question, OFF_TOPIC_THRESHOLD_DEFAULT
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import file_last_updated_at, sanitize_string
+from typing import Union, Tuple, List
 
 
 class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
-    def __init__(self, mentor, shared_root, data_path):
+    def __init__(self, mentor: Union[str, Mentor], shared_root: str, data_path: str):
         if isinstance(mentor, str):
             logging.info("loading mentor id {}...".format(mentor))
             mentor = Mentor(mentor)
@@ -41,7 +43,7 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
         self.model = self.__load_model()
 
     def evaluate(
-        self, question, canned_question_match_disabled=False
+        self, question: str, canned_question_match_disabled: bool = False
     ) -> QuestionClassiferPredictionResult:
         sanitized_question = sanitize_string(question)
         if not canned_question_match_disabled:
@@ -88,7 +90,9 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
         logging.info("loading model from path {}...".format(self.model_file))
         return joblib.load(self.model_file)
 
-    def __get_prediction(self, embedded_question):
+    def __get_prediction(
+        self, embedded_question
+    ) -> Tuple[str, str, List[Media], float, str]:
         prediction = self.model.predict([embedded_question])
         decision = self.model.decision_function([embedded_question])
         highest_confidence = max(decision[0])
@@ -101,7 +105,7 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
         )
         return prediction[0], answer_text, answer_media, highest_confidence
 
-    def __get_offtopic(self):
+    def __get_offtopic(self) -> str:
         try:
             i = random.randint(
                 0, len(self.mentor.utterances_by_type["_OFF_TOPIC_"]) - 1

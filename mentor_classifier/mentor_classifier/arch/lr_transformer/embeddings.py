@@ -6,15 +6,17 @@
 #
 from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
 from sentence_transformer import SentenceTransformer
+from os import path
+from typing import List
 
 
 class TransformerEmbeddings:
-    def __init__(self, shared_root):
+    def __init__(self, shared_root: str):
         self.transformer: SentenceTransformer = find_or_load_sentence_transformer(
-            shared_root + "/../sentence-transformer"
+            path.join(shared_root + "/../sentence-transformer")
         )
         # self.transformer = SentenceTransformer('distilbert-base-nli-mean-tokens', device=0)  # This is to use GPU
 
-    def get_embeddings(self, data):
+    def get_embeddings(self, data: List(str)):
         embeddings = self.transformer.encode(data, show_progress_bar=True)
         return embeddings

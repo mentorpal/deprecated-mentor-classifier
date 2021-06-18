@@ -4,8 +4,8 @@ $(VENV):
 	$(MAKE) $(VENV)-update
 
 .PHONY: $(VENV)-update
-$(VENV)-update: virtualenv-installed
-	[ -d $(VENV) ] || virtualenv -p python3.8 $(VENV)
+$(VENV)-update: 
+	[ -d $(VENV) ] || venv -p python3.8 $(VENV)
 	$(VENV)/bin/pip install --upgrade pip
 	$(VENV)/bin/pip install -r ./requirements.txt
 
@@ -17,8 +17,8 @@ clean:
 update-deps: $(VENV)
 	. $(VENV)/bin/activate && pip-upgrade requirements*
 
-virtualenv-installed:
-	$(ROOT)/tools/virtualenv_ensure_installed.sh
+# virtualenv-installed:
+# 	$(ROOT)/tools/virtualenv_ensure_installed.sh
 
 sentence_transformer: $(VENV)
 	. $(VENV)/bin/activate && python transformer_download.py
