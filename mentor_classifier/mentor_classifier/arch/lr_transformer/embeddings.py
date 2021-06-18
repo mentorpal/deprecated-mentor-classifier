@@ -17,6 +17,6 @@ class TransformerEmbeddings:
         )
         # self.transformer = SentenceTransformer('distilbert-base-nli-mean-tokens', device=0)  # This is to use GPU
 
-    def get_embeddings(self, data: List(str)):
+    def get_embeddings(self, data: List[str]):
         embeddings = self.transformer.encode(data, show_progress_bar=True)
         return embeddings

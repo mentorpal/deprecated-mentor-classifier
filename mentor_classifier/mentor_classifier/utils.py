@@ -20,7 +20,7 @@ def file_last_updated_at(file_path: str) -> int:
     return int(Path(file_path).stat().st_mtime)
 
 
-def normalize_strings(strings: List[str]) -> str:
+def normalize_strings(strings: List[str]) -> List[str]:
     ret = []
     for string in strings:
         string = sanitize_string(string)

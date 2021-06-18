@@ -92,7 +92,7 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
 
     def __get_prediction(
         self, embedded_question
-    ) -> Tuple[str, str, List[Media], float, str]:
+    ) -> Tuple[str, str, List[Media], float]:
         prediction = self.model.predict([embedded_question])
         decision = self.model.decision_function([embedded_question])
         highest_confidence = max(decision[0])
@@ -105,7 +105,7 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
         )
         return prediction[0], answer_text, answer_media, highest_confidence
 
-    def __get_offtopic(self) -> str:
+    def __get_offtopic(self) -> Tuple[str, str]:
         try:
             i = random.randint(
                 0, len(self.mentor.utterances_by_type["_OFF_TOPIC_"]) - 1

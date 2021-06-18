@@ -64,7 +64,7 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
             scores, training_accuracy, self.model_path
         )
 
-    def __load_training_data(self) -> Tuple[List(str), List[str]]:
+    def __load_training_data(self) -> Tuple[List[str], List[str]]:
         x_train = []
         y_train = []
         for key in self.mentor.questions_by_id:
@@ -81,12 +81,12 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
         return x_train, y_train
 
     def __load_transformer_embeddings(
-        self, x_train: List(str), y_train: List(str)
+        self, x_train: List[str], y_train: List[str]
     ) -> np.array:
         return np.array(self.transformer.get_embeddings(x_train)), np.array(y_train)
 
     def train_ridge_classifier(
-        self, x_train: List(str), y_train: List(str), alpha: float = 1.0
+        self, x_train: List[str], y_train: List[str], alpha: float = 1.0
     ) -> RidgeClassifier:
         classifier = RidgeClassifier(alpha=alpha)
         classifier.fit(x_train, y_train)
@@ -94,8 +94,8 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
 
     def train_lr_classifier(
         self,
-        x_train: List(str),
-        y_train: List(str),
+        x_train: List[str],
+        y_train: List[str],
         solver="lbfgs",
         multi_class="multinomial",
         max_iter=1000,
@@ -108,11 +108,11 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
         return classifier
 
     @staticmethod
-    def calculate_accuracy(predictions: str, labels: str) -> float:
+    def calculate_accuracy(predictions: List[str], labels: List[str]) -> float:
         return accuracy_score(labels, predictions)
 
     @staticmethod
-    def calculate_relevant_accuracy(predictions: str, labels: str) -> float:
+    def calculate_relevant_accuracy(predictions: List[str], labels: List[str]) -> float:
         cnt = 0
         for pred, label in zip(predictions, labels):
             if pred in label:
