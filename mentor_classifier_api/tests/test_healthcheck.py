@@ -71,9 +71,7 @@ def test_503_if_not_healthy(client):
         assert res.status_code == 503
 
 
-def test_can_override_healthcheck_admin_url(
-    client, monkeypatch
-) -> None:
+def test_can_override_healthcheck_admin_url(client, monkeypatch) -> None:
     with _mock_healthchecks("admin_ok", admin_url="http://someadmin", admin_status=418):
         monkeypatch.setenv("HEALTHCHECK_ADMIN", "http://someadmin")
         res = client.get("/classifier/healthcheck/")
@@ -81,9 +79,7 @@ def test_can_override_healthcheck_admin_url(
         assert res.status_code == 503
 
 
-def test_can_override_healthcheck_home_url(
-    client, monkeypatch
-) -> None:
+def test_can_override_healthcheck_home_url(client, monkeypatch) -> None:
     with _mock_healthchecks("admin_ok", home_url="http://somehome", home_status=418):
         monkeypatch.setenv("HEALTHCHECK_HOME", "http://somehome")
         res = client.get("/classifier/healthcheck/")
@@ -91,9 +87,7 @@ def test_can_override_healthcheck_home_url(
         assert res.status_code == 503
 
 
-def test_can_override_healthcheck_tutor_url(
-    client, monkeypatch
-) -> None:
+def test_can_override_healthcheck_tutor_url(client, monkeypatch) -> None:
     with _mock_healthchecks("admin_ok", tutor_url="http://sometutor", tutor_status=418):
         monkeypatch.setenv("HEALTHCHECK_TUTOR", "http://sometutor")
         res = client.get("/classifier/healthcheck/")
