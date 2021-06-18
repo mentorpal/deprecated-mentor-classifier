@@ -17,7 +17,7 @@ update-deps: $(VENV)
 	. $(VENV)/bin/activate && pip-upgrade requirements*
 
 venv-activate:
-	python3 -m venv .venv
+	python3 -m venv $(VENV)
 
 sentence_transformer: $(VENV)
 	. $(VENV)/bin/activate && python transformer_download.py
