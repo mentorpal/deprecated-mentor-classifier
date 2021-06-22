@@ -138,10 +138,10 @@ def fetch_training_data(mentor: str) -> pd.DataFrame:
         }
         data_dict[question["_id"]] = q
     for question in data.get("questions", []):
-        question = data_dict.get(question["question"]["_id"], None)
-        if question is not None:
+        dict_question = data_dict.get(question["question"]["_id"], None)
+        if dict_question is not None:
             for topic in question["topics"]:
-                data_dict[question["id"]]["topics"].append(topic["name"])
+                data_dict[dict_question["id"]]["topics"].append(topic["name"])
     for key in data_dict:
         question = data_dict[key]
         topics = question["topics"]
