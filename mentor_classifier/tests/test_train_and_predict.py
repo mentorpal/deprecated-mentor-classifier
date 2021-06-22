@@ -32,7 +32,6 @@ def shared_root(word2vec) -> str:
 
 
 @responses.activate
-
 @pytest.mark.parametrize(
     "training_configuration",
     [
