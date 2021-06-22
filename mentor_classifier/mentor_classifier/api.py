@@ -5,9 +5,9 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 import json
-import os
+from os import path
 import requests
-
+import pandas as pd
 from typing import TypedDict
 
 
@@ -119,7 +119,45 @@ def mutation_create_user_question(
         },
     }
 
+def fetch_training_data(mentor: str)-> pd.DataFrame:
+    data = fetch_mentor_data(mentor)
+    data_dict = {}
+    data_list = []
+    for answer in data.get("answers", []):
+        question = answer["question"] 
+        q = {
+            "id": question["_id"],
+            "question_text": question["question"],
+            "paraphrases": question["paraphrases"],
+            "answer": answer["transcript"],
+            "answer_id": answer["_id"],
+            "media": answer.get("media", []),
+            "topics": [],
+        }
+        data_dict[question["_id"]] = q
+        for question in data.get("questions", []):
+            q = data_dict.get(question["question"]["_id"], None)
+            if q is not None:
+                for topic in question["topics"]:
+                    data_dict[q["id"]]["topics"].append(topic["name"])
+        for key in data_dict:
+            question = data_dict[key]
+            topics = question["topics"]
+            current_question = question["question_text"]
+            paraphrases = question["paraphrases"]
+            answer = question["answer"]
+            answer_id = key
+            data_list.append(
+                [answer_id, current_question, paraphrases, answer, topics]
+            )
+        data_df = pd.DataFrame(data_list, columns = ['id', 'question', 'paraphrases', 'answer', 'topic']) 
+        return data_df
 
+def mentor_data_to_csv(mentor:str, data:pd.DataFrame):
+    data_path = path.join(".", "tests", "fixtures", "data", mentor, "data.csv")
+    data.to_csv(data_path)
+
+    
 def fetch_mentor_data(mentor: str) -> dict:
     tdjson = __auth_gql(query_mentor(mentor))
     if "errors" in tdjson:
