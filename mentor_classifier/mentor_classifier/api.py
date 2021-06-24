@@ -120,7 +120,7 @@ def mutation_create_user_question(
     }
 
 
-def fetch_training_data(mentor: str) -> pd.DataFrame:
+def _training_data(mentor: str) -> pd.DataFrame:
     data = fetch_mentor_data(mentor)
     data_dict = {}
     data_list = []

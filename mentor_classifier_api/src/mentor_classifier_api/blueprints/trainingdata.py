@@ -8,10 +8,10 @@ from mentor_classifier.api import fetch_training_data
 from flask import Blueprint, make_response
 
 
-fetch_blueprint = Blueprint("trainingdata", __name__)
+trainingdata_blueprint = Blueprint("trainingdata", __name__)
 
 
-@fetch_blueprint.route("/<mentor>", methods=["GET"])
+@trainingdata_blueprint.route("/<mentor>", methods=["GET"])
 def get_data(mentor: str):
     data = fetch_training_data(mentor)
     data_csv = data.to_csv(index=False)
