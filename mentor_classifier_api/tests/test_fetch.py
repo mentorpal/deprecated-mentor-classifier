@@ -23,6 +23,7 @@ def python_path_env(monkeypatch, shared_root):
     monkeypatch.setenv("MODEL_ROOT", fixture_path("models"))
     monkeypatch.setenv("SHARED_ROOT", shared_root)
 
+
 @responses.activate
 @pytest.mark.parametrize(
     "input_mentor,",
@@ -37,6 +38,6 @@ def test_fetch_data(
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
         res = client.get(f"/classifier/trainingdata/{input_mentor}")
         import logging
+
         logging.warning(f"res: {res.data}")
         assert res.data is not None
-
