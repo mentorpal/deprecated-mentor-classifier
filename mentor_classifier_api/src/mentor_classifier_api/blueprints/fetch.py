@@ -1,6 +1,7 @@
 # import os
 from mentor_classifier.api import fetch_training_data
 from flask import Blueprint, make_response
+
 # from os.path import expanduser
 
 # HOME = expanduser("~")
