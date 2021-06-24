@@ -8,7 +8,7 @@ from mentor_classifier.api import fetch_training_data
 from flask import Blueprint, make_response
 
 
-fetch_blueprint = Blueprint("fetch", __name__)
+fetch_blueprint = Blueprint("trainingdata", __name__)
 
 
 @fetch_blueprint.route("/<mentor>", methods=["GET"])

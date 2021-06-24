@@ -78,5 +78,4 @@ def test_train_and_predict(
     logging.warning(
         f"percentage passed = {test_results.passing_tests}/{len(test_results.results)}"
     )
-    assert 0 == 1
     assert len(test_results.errors) == 0
