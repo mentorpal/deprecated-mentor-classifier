@@ -48,9 +48,9 @@ def create_app():
     from mentor_classifier_api.blueprints.healthcheck import healthcheck_blueprint
 
     app.register_blueprint(healthcheck_blueprint, url_prefix="/classifier/healthcheck")
-    
+
     from mentor_classifier_api.blueprints.fetch import fetch_blueprint
- 
+
     app.register_blueprint(fetch_blueprint, url_prefix="/classifier/trainingdata/")
 
     return app

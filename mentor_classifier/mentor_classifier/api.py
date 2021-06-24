@@ -6,7 +6,6 @@
 #
 import json
 import os
-from os import path
 import requests
 import pandas as pd
 from typing import TypedDict
@@ -154,11 +153,6 @@ def fetch_training_data(mentor: str) -> pd.DataFrame:
         data_list, columns=["id", "question", "paraphrases", "answer", "topic"]
     )
     return data_df
-
-
-def mentor_data_to_csv(mentor: str, data: pd.DataFrame):
-    data_path = path.join(".", "tests", "fixtures", "data", mentor, "data.csv")
-    data.to_csv(data_path)
 
 
 def fetch_mentor_data(mentor: str) -> dict:

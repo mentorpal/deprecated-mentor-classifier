@@ -23,28 +23,23 @@ def python_path_env(monkeypatch, shared_root):
     monkeypatch.setenv("MODEL_ROOT", fixture_path("models"))
     monkeypatch.setenv("SHARED_ROOT", shared_root)
 
+
 @pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "input_mentor,",
-    [
-       "clint"
-    ],
+    ["clint"],
 )
 def test_fetch_data(
-    client, input_mentor,
+    client,
+    input_mentor,
 ):
- with open(fixture_path("graphql/{}.json".format(input_mentor))) as f:
-    data = json.load(f)
-    responses.add(responses.GET, "http://graphql/graphql", json=data, status=200)
-    res = client.get(
-        f"/classifier/trainingdata/{input_mentor}"
-    )
-    import logging
-    
-    import logging
-    logging.warning(f"res: {res.data}")
-    logging.warning("HELLLLLLOOOOO")
-    assert 0 == 1
-  
-  
+    with open(fixture_path("graphql/{}.json".format(input_mentor))) as f:
+        data = json.load(f)
+        responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+        res = client.get(f"/classifier/trainingdata/{input_mentor}")
+        import logging
+
+        logging.warning(f"res: {res.data}")
+
+        assert 0 == 1
