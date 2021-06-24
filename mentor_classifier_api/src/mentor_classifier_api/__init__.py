@@ -51,6 +51,8 @@ def create_app():
 
     from mentor_classifier_api.blueprints.trainingdata import trainingdata_blueprint
 
-    app.register_blueprint(trainingdata_blueprint, url_prefix="/classifier/trainingdata/")
+    app.register_blueprint(
+        trainingdata_blueprint, url_prefix="/classifier/trainingdata/"
+    )
 
     return app
