@@ -1,0 +1,7 @@
+id,question,paraphrases,answer,topic
+Q1,What is your name?,['Who are you?'],Clint Anderson,['About Me']
+Q2,How old are you?,"[""What's your age?""]",37 years old,[]
+Q3,Will you be my friend?,[],,['Weird']
+Q4,Look at the camera.,[],,[]
+Q5,Introduce yourself.,[],Hi I'm Clint,[]
+Q6,Off topic,[],Ask me something else,[]
