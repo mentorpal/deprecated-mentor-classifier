@@ -4,13 +4,9 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-import os
 from mentor_classifier.api import fetch_training_data
 from flask import Blueprint, make_response
 
-from os.path import expanduser
-
-# HOME = expanduser("~")
 
 fetch_blueprint = Blueprint("fetch", __name__)
 
@@ -19,12 +15,6 @@ fetch_blueprint = Blueprint("fetch", __name__)
 def get_data(mentor: str):
     data = fetch_training_data(mentor)
     data_csv = data.to_csv(index=False)
-    import logging
-
-    logging.warning("\n\n\n\nin bp, what is data_csv?")
-    logging.warning(type(data_csv))
-    logging.warning(data_csv)
-    # data.to_csv(os.path.join(HOME, "Downloads", "mentor.csv"), index=False)
     output = make_response(data_csv)
     output.headers["Content-Disposition"] = "attachment; filename=mentor.csv"
     output.headers["Content-type"] = "text/csv"

@@ -4,7 +4,7 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from io import StringIO  
+from io import StringIO
 import json
 import os
 
@@ -41,6 +41,8 @@ def test_fetch_data(
         data = json.load(f)
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     res = client.get(f"/classifier/trainingdata/{input_mentor}")
-    expected_data = pd.read_csv(fixture_path(os.path.join("fetched_training_data", f"{input_mentor}.csv")))
+    expected_data = pd.read_csv(
+        fixture_path(os.path.join("fetched_training_data", f"{input_mentor}.csv"))
+    )
     actual_data = pd.read_csv(StringIO(res.data.decode("utf-8")))
     pandas.testing.assert_frame_equal(actual_data, expected_data)

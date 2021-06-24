@@ -144,11 +144,25 @@ def fetch_training_data(mentor: str) -> pd.DataFrame:
     for key in data_dict:
         question = data_dict[key]
         topics = question["topics"]
+        topic_str = ""
+        if not len(topics) == 1:
+            for topic in topics:
+                topic_str = topic_str + topic + "|"
+        else:
+            topic_str = topics[0]
         current_question = question["question_text"]
         paraphrases = question["paraphrases"]
+        paraphrase_str = ""
+        if not len(paraphrases) == 1:
+            for paraphrase in paraphrases:
+                paraphrase_str = paraphrase_str + paraphrase + "|"
+        else:
+            paraphrase_str = paraphrases[0]
         answer = question["answer"]
         answer_id = key
-        data_list.append([answer_id, current_question, paraphrases, answer, topics])
+        data_list.append(
+            [answer_id, current_question, paraphrase_str, answer, topic_str]
+        )
     data_df = pd.DataFrame(
         data_list, columns=["id", "question", "paraphrases", "answer", "topic"]
     )
