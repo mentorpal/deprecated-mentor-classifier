@@ -27,7 +27,6 @@ def python_path_env(monkeypatch, shared_root):
     monkeypatch.setenv("SHARED_ROOT", shared_root)
 
 
-@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "input_mentor,",
