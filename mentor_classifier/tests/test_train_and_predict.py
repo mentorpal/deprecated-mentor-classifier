@@ -144,11 +144,22 @@ def test_train_and_predict_transformers(
                 arch=ARCH_LR_TRANSFORMER,
                 expected_training_accuracy=1,
             ),
-            "who you is mr?",
+            "who you is?",
+        )
+        (
+            _MentorTrainAndTestConfiguration(
+                mentor_id="covid", arch=ARCH_LR, expected_training_accuracy=0.5
+            ),
+            _MentorTrainAndTestConfiguration(
+                mentor_id="covid",
+                arch=ARCH_LR_TRANSFORMER,
+                expected_training_accuracy=1,
+            ),
+            "What are some symptoms?",
         )
     ],
 )
-def test_confidence(
+def test_compare_models(
     training_configuration: _MentorTrainAndTestConfiguration,
     compare_configuration: _MentorTrainAndTestConfiguration,
     tmpdir,
@@ -157,6 +168,9 @@ def test_confidence(
 ):
     mentor = load_mentor_csv(
         fixture_mentor_data(training_configuration.mentor_id, "data.csv")
+    )
+    test_set = load_test_csv(
+        fixture_mentor_data(training_configuration.mentor_id, "test.csv")
     )
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
@@ -170,7 +184,7 @@ def test_confidence(
         )
         .train()
     )
-    assert lr_train.accuracy is not None
+    assert lr_train.accuracy == 1
 
     hf_train = (
         ClassifierFactory()
@@ -182,7 +196,7 @@ def test_confidence(
         )
         .train()
     )
-    assert hf_train.accuracy is not None
+    assert hf_train.accuracy == 1
 
     hf_classifier = ClassifierFactory().new_prediction(
         mentor=compare_configuration.mentor_id,
@@ -190,12 +204,19 @@ def test_confidence(
         data_path=tmpdir,
         arch=compare_configuration.arch,
     )
+    hf_test_results = run_model_against_testset(hf_classifier, test_set)
+    hf_test_accuracy = hf_test_results.passing_tests / len(hf_test_results.results)
+    assert hf_test_accuracy == 1
     lr_classifier = ClassifierFactory().new_prediction(
         mentor=training_configuration.mentor_id,
         shared_root=shared_root,
         data_path=tmpdir,
         arch=training_configuration.arch,
     )
+    lr_test_results = run_model_against_testset(lr_classifier, test_set)
+    lr_test_accuracy = lr_test_results.passing_tests / len(lr_test_results.results)
+    assert lr_test_accuracy == 1
+
     hf_result = hf_classifier.evaluate(example)
     lr_result = lr_classifier.evaluate(example)
     assert hf_result.highest_confidence >= lr_result.highest_confidence
