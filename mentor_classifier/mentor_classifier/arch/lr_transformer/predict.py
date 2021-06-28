@@ -45,6 +45,8 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
     def evaluate(
         self, question: str, canned_question_match_disabled: bool = False
     ) -> QuestionClassiferPredictionResult:
+        import logging
+        logging.warning(f"QUESTION: {question}") 
         sanitized_question = sanitize_string(question)
         if not canned_question_match_disabled:
             if sanitized_question in self.mentor.questions_by_text:
@@ -93,10 +95,12 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
     def __get_prediction(
         self, embedded_question
     ) -> Tuple[str, str, List[Media], float]:
+        import logging
         prediction = self.model.predict([embedded_question])
         decision = self.model.decision_function([embedded_question])
         highest_confidence = max(decision[0])
         answer_text = self.mentor.answer_id_by_answer[prediction[0]]
+        logging.warning(f"ANSWER: {answer_text}")
         answer_key = sanitize_string(answer_text)
         answer_media = (
             self.mentor.questions_by_answer[answer_key].get("media", [])

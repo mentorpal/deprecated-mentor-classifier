@@ -23,4 +23,5 @@ docker-test-train-out
 htmlcov
 htmlcov
 models
-sentence-transformer/distilbert-base-nli-mean-tokens/*
+word2vec/sentence-transformer/distilbert-base-nli-mean-tokens/*
+

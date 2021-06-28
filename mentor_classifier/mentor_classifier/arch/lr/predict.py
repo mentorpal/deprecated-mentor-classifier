@@ -46,6 +46,9 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
     def evaluate(
         self, question, canned_question_match_disabled=False
     ) -> QuestionClassiferPredictionResult:
+         
+        import logging
+        logging.warning(f"QUESTION: {question}") 
         if not canned_question_match_disabled:
             sanitized_question = sanitize_string(question)
             if sanitized_question in self.mentor.questions_by_text:
@@ -110,7 +113,9 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
             raise Exception(
                 f"Prediction should be a list with at least one element (answer text) but found {prediction}"
             )
-        answer_text = prediction[0]
+        answer_text = prediction[0] 
+       
+        logging.warning(f"ANSWER: {answer_text}")
         answer_key = sanitize_string(answer_text)
         answer_id = (
             self.mentor.questions_by_answer[answer_key].get("answer_id", "")
