@@ -36,10 +36,23 @@ def create_app():
     from mentor_classifier_api.blueprints.questions import questions_blueprint
 
     app.register_blueprint(questions_blueprint, url_prefix="/classifier/questions")
+
     from mentor_classifier_api.blueprints.ping import ping_blueprint
 
     app.register_blueprint(ping_blueprint, url_prefix="/classifier/ping")
+
     from mentor_classifier_api.blueprints.train import train_blueprint
 
     app.register_blueprint(train_blueprint, url_prefix="/classifier/train")
+
+    from mentor_classifier_api.blueprints.healthcheck import healthcheck_blueprint
+
+    app.register_blueprint(healthcheck_blueprint, url_prefix="/classifier/healthcheck")
+
+    from mentor_classifier_api.blueprints.trainingdata import trainingdata_blueprint
+
+    app.register_blueprint(
+        trainingdata_blueprint, url_prefix="/classifier/trainingdata/"
+    )
+
     return app
