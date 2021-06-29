@@ -21,11 +21,6 @@ def data_root() -> str:
     return fixture_path("data")
 
 
-@pytest.fixture(scope="module")
-def shared_root(word2vec) -> str:
-    return path.dirname(word2vec)
-
-
 @responses.activate
 @pytest.mark.parametrize("mentor_id", [("clint")])
 def test_find_classifier_caches(data_root: str, shared_root: str, mentor_id: str):

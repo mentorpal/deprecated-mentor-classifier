@@ -47,7 +47,6 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
         self, question, canned_question_match_disabled=False
     ) -> QuestionClassiferPredictionResult:
 
-       
         if not canned_question_match_disabled:
             sanitized_question = sanitize_string(question)
             if sanitized_question in self.mentor.questions_by_text:

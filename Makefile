@@ -5,8 +5,8 @@ $(VENV):
 	$(MAKE) $(VENV)-update
 
 .PHONY: $(VENV)-update
-$(VENV)-update: virtualenv-installed
-	[ -d $(VENV) ] || virtualenv -p python3.8 $(VENV)
+$(VENV)-update:
+	[ -d $(VENV) ] || python3.8 -m venv $(VENV)
 	$(VENV)/bin/pip install --upgrade pip
 	$(VENV)/bin/pip install -r ./requirements.txt
 
@@ -19,9 +19,14 @@ docker-build:
 	cd mentor_classifier && $(MAKE) docker-build
 	cd mentor_classifier_api && $(MAKE) docker-build
 
-.PHONY: format
-format: $(VENV)
+.PHONY: black
+black: $(VENV)
 	$(VENV)/bin/black .
+
+.PHONY: format
+format:
+	$(MAKE) license
+	$(MAKE) black
 
 LICENSE:
 	@echo "you must have a LICENSE file" 1>&2
@@ -40,7 +45,7 @@ license: LICENSE LICENSE_HEADER $(VENV)
 		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier_api/src $(args) \
 		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier_api/tests $(args) \
 		&& python -m licenseheaders -t LICENSE_HEADER -d tools $(args) \
-		&& python -m licenseheaders -t LICENSE_HEADER -d word2vec $(args)
+		&& python -m licenseheaders -t LICENSE_HEADER -d shared $(args)
 
 .PHONY: test
 test:
@@ -71,8 +76,4 @@ test-license: LICENSE LICENSE_HEADER
 test-types: $(VENV)
 	. $(VENV)/bin/activate \
 		&& mypy mentor_classifier \
-		&& mypy mentor_classifier_api \
-		&& mypy word2vec
-
-virtualenv-installed:
-	tools/virtualenv_ensure_installed.sh
+		&& mypy mentor_classifier_api

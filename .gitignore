@@ -21,7 +21,7 @@ build
 dist
 docker-test-train-out
 htmlcov
-htmlcov
+installed
 models
-word2vec/sentence-transformer/distilbert-base-nli-mean-tokens/*
+shared/installed/sentence-transformer/distilbert-base-nli-mean-tokens/*
 

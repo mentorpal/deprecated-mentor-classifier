@@ -4,8 +4,6 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from os import path
-
 import pytest
 import logging
 import responses
@@ -25,11 +23,6 @@ from .types import _MentorTrainAndTestConfiguration
 @pytest.fixture(scope="module")
 def data_root() -> str:
     return fixture_path("data_out")
-
-
-@pytest.fixture(scope="module")
-def shared_root(word2vec) -> str:
-    return path.dirname(word2vec)
 
 
 @responses.activate
@@ -134,7 +127,7 @@ def test_train_and_predict_transformers(
 
 @responses.activate
 @pytest.mark.parametrize(
-    "training_configuration,compare_configuration,example, test_set",
+    "training_configuration,compare_configuration,example,test_set_file",
     [
         (
             _MentorTrainAndTestConfiguration(
@@ -146,7 +139,7 @@ def test_train_and_predict_transformers(
                 expected_training_accuracy=1,
             ),
             "who you is?",
-            "test.csv"
+            "",
         ),
         (
             _MentorTrainAndTestConfiguration(
@@ -158,7 +151,7 @@ def test_train_and_predict_transformers(
                 expected_training_accuracy=0.98,
             ),
             "What are some symptoms?",
-            "test.csv"
+            "",
         ),
         (
             _MentorTrainAndTestConfiguration(
@@ -170,7 +163,7 @@ def test_train_and_predict_transformers(
                 expected_training_accuracy=0.98,
             ),
             "How do the vaccines work?",
-            "synonym_test.csv"
+            "synonym_test.csv",
         ),
     ],
 )
@@ -180,13 +173,15 @@ def test_compare_test_accuracy(
     tmpdir,
     shared_root: str,
     example: str,
-    test_set:str
+    test_set_file: str,
 ):
     mentor = load_mentor_csv(
         fixture_mentor_data(training_configuration.mentor_id, "data.csv")
     )
     test_set = load_test_csv(
-        fixture_mentor_data(training_configuration.mentor_id, test_set)
+        fixture_mentor_data(
+            training_configuration.mentor_id, test_set_file or "test.csv"
+        )
     )
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
