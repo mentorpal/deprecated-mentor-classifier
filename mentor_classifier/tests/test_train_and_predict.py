@@ -132,35 +132,34 @@ def test_train_and_predict_transformers(
     assert len(test_results.errors) == 0
 
 
-@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "training_configuration,compare_configuration,example, test_set",
     [
-        # (
-        #     _MentorTrainAndTestConfiguration(
-        #         mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
-        #     ),
-        #     _MentorTrainAndTestConfiguration(
-        #         mentor_id="clint",
-        #         arch=ARCH_LR_TRANSFORMER,
-        #         expected_training_accuracy=1,
-        #     ),
-        #     "who you is?",
-        #     "test.csv"
-        # ),
-        # (
-        #     _MentorTrainAndTestConfiguration(
-        #         mentor_id="covid", arch=ARCH_LR, expected_training_accuracy=0.32
-        #     ),
-        #     _MentorTrainAndTestConfiguration(
-        #         mentor_id="covid",
-        #         arch=ARCH_LR_TRANSFORMER,
-        #         expected_training_accuracy=0.98,
-        #     ),
-        #     "What are some symptoms?",
-        #     "test.csv"
-        # ),
+        (
+            _MentorTrainAndTestConfiguration(
+                mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
+            ),
+            _MentorTrainAndTestConfiguration(
+                mentor_id="clint",
+                arch=ARCH_LR_TRANSFORMER,
+                expected_training_accuracy=1,
+            ),
+            "who you is?",
+            "test.csv"
+        ),
+        (
+            _MentorTrainAndTestConfiguration(
+                mentor_id="covid", arch=ARCH_LR, expected_training_accuracy=0.32
+            ),
+            _MentorTrainAndTestConfiguration(
+                mentor_id="covid",
+                arch=ARCH_LR_TRANSFORMER,
+                expected_training_accuracy=0.98,
+            ),
+            "What are some symptoms?",
+            "test.csv"
+        ),
         (
             _MentorTrainAndTestConfiguration(
                 mentor_id="covid", arch=ARCH_LR, expected_training_accuracy=0.32
