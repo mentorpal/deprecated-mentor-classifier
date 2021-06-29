@@ -1,0 +1,41 @@
+id,question,paraphrases,answer,topic
+606cebab4deb58685de5bb4e,"Please give a short introduction about yourself. Include your name, age, job title, where you work, and what you do.",,"Hello, I am a chatbot for COVID-19 questions and answers. You can ask me about COVID-19 symptoms, guidelines, vaccines, and testing. Please type in a question, or you can browse the questions using the topic buttons below.",
+606d025d0092bd664b85bcb9,"Please repeat the following: ""Sorry, I didn't understand the question. Try asking me something else.""",,"Sorry, I couldn't find an answer for that. Try asking a different way, or pick a question from the FAQ. You can ask about vaccination, fall plans, testing, or other topics.",
+6098b41257ab183da46cf777,This is an idle calibration video. Please get into position and look at the camera without speaking or moving.,,,
+6075d0d17dae6085f3d8063a,test mentor question...,,,Post-Vaccination
+606b49f57340da2a6bce1d68,When does the Spring 2021 semester begin and end?,,"The Spring 2021 semester will begin on January 15, with classes ending on April 30, and exams concluding on May 12 for undergraduate students.  Graduate programs may elect to follow the revised calendar as detailed above or adhere to their original calendars. Please consult with your individual programs if you are unsure.",Academics
+606b4b4f7340dab556ce1d78,What are the deadlines for electing Pass/No Pass or dropping a class in Spring 2021?,,today,Academics
+606b4b4f7340da33a3ce1d79,What phase of the restart are we in currently?,,phase 1,Campus Restart
+606be4cdff6df93ab9bb3866,What are the guidelines for face masks?,Do I need to wear two masks?,Wear them all the time even in the shower,COVID-19 Guidelines
+606beb0dff6df9c588bb3878,Do people need to wear a mask after getting vaccinated?,,Yes,Recovery
+606bebe9ff6df91c69bb388b,What are the guidelines for returning to regular activities after recovering from COVID-19?,,Don't,Recovery
+606bebe9ff6df95048bb388c,Will USC provide quarantine space for students?,,yes,Housing
+606bebe9ff6df93c50bb388d,Can students live in USC Housing in the 2020-2021 academic year?,,no,Housing
+606bebe9ff6df981b5bb388e,"If I have recovered from COVID-19, does it mean I have immunity now?",,No,Recovery
+606bebeaff6df9d86ebb388f,"If I've recovered from COVID-19, when can I return to USC?","If I've recovered from COVID-19, when can I return to USC?",in 2 weeks,Recovery
+606bebeaff6df9fcd6bb3890,Should I re-test for COVID-19 after I recover from COVID-19?,,Probably not,Recovery
+606bebeaff6df9d318bb3891,"If I tested positive for antibodies, am I immune to COVID-19?",,Who knows,Recovery
+606bec28ff6df92223bb38ab,What are the symptoms of COVID-19?,,"Fever, loss of taste, muscle aches",Testing & Symptoms
+606bec28ff6df913cdbb38ac,"I have respiratory symptoms (fever, cough, congestion, sore throat, other symptoms as described on this page). What should I do?",,See a doctor and quarantine,Testing & Symptoms
+606bec93ff6df97846bb38c8,My provider recommended that I be tested for COVID-19. What happens now?,,Test yourself,Testing & Symptoms
+606bec93ff6df94ac3bb38c9,Someone I know was tested for COVID-19. What should I do?,,"Household, intimate, and close contacts should practice self-isolation until test results are known or as advised by your health care provider.  For employees (faculty and staff): Within the workplace, thorough cleaning of surfaces is a proactive step while awaiting final test results. Please contact the hotline at 213-740-6291 for guidance on this issue. If you are unsure if you should practice self-isolation, please contact the hotline at 213-740-6291.",Testing & Symptoms
+606e34d27dae607b64d804c8,Someone I know was diagnosed with COVID-19. What should I do?,,,Testing & Symptoms
+606e34d27dae60fe92d804c9,I was diagnosed or tested for COVID-19 and have been on campus in the past 14 days. What should I do?,,,Recovery
+606e34d27dae6056a2d804ca,"My friend’s roommate is sick, and I’m unsure of what to do. Should I notify someone?",,,Testing & Symptoms
+606e34d27dae60d949d804cb,Where can I find additional information about population testing of COVID-19 at USC?,,,Testing & Symptoms
+606e34d27dae603f99d804cc,Where can I find the current COVID-19 testing data at USC Student Health?,,Idk look for it,Testing & Symptoms
+606e34d27dae60b1e0d804cd,Will you allow university travel during the spring?,,,Travel
+606e34d27dae60d87cd804ce,"Do students, faculty and staff need to self-quarantine before returning to campus following travel outside of Southern California?",,,Travel
+606e34d27dae606e7dd804cf,How long does the vaccine's protection last?,,At least 3 days,Vaccine Effectiveness
+606e34d27dae606321d804d0,Will the vaccine work against new COVID-19 variants?,,Ask again later,Vaccine Effectiveness
+606e34d27dae60b88fd804d1,What side effects should people expect after receiving the COVID-19 vaccine?,,,Vaccine Safety
+606e34d27dae607a7cd804d2,Why are some people getting sick after receiving the first dose of the vaccine?,,,Vaccine Safety
+606e34d27dae607297d804d3,Who shouldn't get the vaccine right away?,,,Vaccine Safety
+606e34d27dae605c47d804d4,Can children receive the COVID-19 vaccine?,,,Vaccine Safety
+606e34d27dae605951d804d5,I am immunocompromised - can I receive the COVID-19 vaccine?,,,Vaccine Safety
+606e34d27dae60f3f3d804d6,I am receiving cancer treatment - can I get the COVID-19 vaccine?,,,Vaccine Safety
+606e34d27dae6087cad804d7,"If I have a history of Bell's palsy, should I get the coronavirus vaccine?",,,Vaccine Safety
+606e34d27dae603b4cd804d8,"If I am a solid organ or stem cell transplant recipient, should I get the vaccine?",,,Vaccine Safety
+606e34d27dae609a8bd804d9,What is the procedure for visitors in Phase 2?,,,Campus Restart
+606e34d27dae600127d804da,Where can I find the university's phase 3 guidance?,,,Campus Restart
+606e34d27dae603e6cd804db,What is the current CA State Tier for COVID-19 risk?,,,Testing & Symptoms

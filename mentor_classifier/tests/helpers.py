@@ -21,7 +21,7 @@ from mentor_classifier import QuestionClassifierPrediction
 def load_mentor_csv(path: str) -> Mentor:
     result = Mentor()
     with open(path) as f:
-        csv_reader = csv.reader(f, delimiter=',')
+        csv_reader = csv.reader(f, delimiter=",")
         next(csv_reader)
         for row in csv_reader:
             mentor_question = parse_mentor_question(row)
@@ -34,7 +34,7 @@ def load_test_csv(path: str) -> _MentorTestSet:
     result = _MentorTestSet()
 
     with open(path) as f:
-        csv_reader = csv.reader(f, delimiter=',')
+        csv_reader = csv.reader(f, delimiter=",")
         next(csv_reader)
         for row in csv_reader:
             result.tests.append(parse_testset_entry(row))
@@ -43,7 +43,7 @@ def load_test_csv(path: str) -> _MentorTestSet:
 
 
 def parse_testset_entry(csv_line) -> _MentorTestSetEntry:
-   return _MentorTestSetEntry(
+    return _MentorTestSetEntry(
         question=csv_line[0],
         expected_answer=csv_line[1],
         expected_confidence=float(csv_line[2]),
@@ -51,6 +51,9 @@ def parse_testset_entry(csv_line) -> _MentorTestSetEntry:
 
 
 def parse_mentor_question(csv_line) -> MentorQuestion:
+    import logging
+
+    logging.warning(csv_line)
     paraphrases = csv_line[2].split("|") if csv_line[2] else []
     return MentorQuestion(
         question_id=csv_line[0],
@@ -67,6 +70,7 @@ def fixture_path(p: str) -> str:
 
 def fixture_mentor_data(mentor_id: str, p: str) -> str:
     return fixture_path(path.join("data", mentor_id, p))
+
 
 def run_model_against_testset_ignore_confidence(
     evaluator: QuestionClassifierPrediction, test_set: _MentorTestSet
@@ -85,6 +89,7 @@ def run_model_against_testset_ignore_confidence(
             result.passing_tests = result.passing_tests + 1
         result.results.append(current_result_entry)
     return result
+
 
 def run_model_against_testset(
     evaluator: QuestionClassifierPrediction, test_set: _MentorTestSet
@@ -105,6 +110,7 @@ def run_model_against_testset(
             if test_result.highest_confidence < test_set_entry.expected_confidence:
                 current_result_entry.passing = False
                 import logging
+
                 logging.warning(f"expected conf {test_result.highest_confidence}")
                 result.errors.append(
                     f"expected a confidence of at least {test_set_entry.expected_confidence}, but recieved a confidence of {test_result.highest_confidence}, for question/answer: {test_set_entry.question}/{test_result.answer_text}"

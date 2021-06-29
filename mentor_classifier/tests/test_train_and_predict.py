@@ -132,36 +132,35 @@ def test_train_and_predict_transformers(
     assert len(test_results.errors) == 0
 
 
-@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "training_configuration,compare_configuration,example",
     [
-        # (
-        #     _MentorTrainAndTestConfiguration(
-        #         mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
-        #     ),
-        #     _MentorTrainAndTestConfiguration(
-        #         mentor_id="clint",
-        #         arch=ARCH_LR_TRANSFORMER,
-        #         expected_training_accuracy=1,
-        #     ),
-        #     "who you is?",
-        # ),
         (
             _MentorTrainAndTestConfiguration(
-                mentor_id="covid", arch=ARCH_LR, expected_training_accuracy=0.5
+                mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
+            ),
+            _MentorTrainAndTestConfiguration(
+                mentor_id="clint",
+                arch=ARCH_LR_TRANSFORMER,
+                expected_training_accuracy=1,
+            ),
+            "who you is?",
+        ),
+        (
+            _MentorTrainAndTestConfiguration(
+                mentor_id="covid", arch=ARCH_LR, expected_training_accuracy=0.32
             ),
             _MentorTrainAndTestConfiguration(
                 mentor_id="covid",
                 arch=ARCH_LR_TRANSFORMER,
-                expected_training_accuracy=1,
+                expected_training_accuracy=0.98,
             ),
             "What are some symptoms?",
-        )
+        ),
     ],
 )
-def test_compare_models(
+def test_compare_test_accuracy(
     training_configuration: _MentorTrainAndTestConfiguration,
     compare_configuration: _MentorTrainAndTestConfiguration,
     tmpdir,
@@ -186,7 +185,85 @@ def test_compare_models(
         )
         .train()
     )
-    assert lr_train.accuracy >= 0.30
+    hf_train = (
+        ClassifierFactory()
+        .new_training(
+            mentor=compare_configuration.mentor_id,
+            shared_root=shared_root,
+            data_path=tmpdir,
+            arch=compare_configuration.arch,
+        )
+        .train()
+    )
+    assert hf_train.accuracy >= lr_train.accuracy
+
+    hf_classifier = ClassifierFactory().new_prediction(
+        mentor=compare_configuration.mentor_id,
+        shared_root=shared_root,
+        data_path=tmpdir,
+        arch=compare_configuration.arch,
+    )
+    hf_test_results = run_model_against_testset_ignore_confidence(
+        hf_classifier, test_set
+    )
+    hf_test_accuracy = hf_test_results.passing_tests / len(hf_test_results.results)
+    lr_classifier = ClassifierFactory().new_prediction(
+        mentor=training_configuration.mentor_id,
+        shared_root=shared_root,
+        data_path=tmpdir,
+        arch=training_configuration.arch,
+    )
+    lr_test_results = run_model_against_testset_ignore_confidence(
+        lr_classifier, test_set
+    )
+    import logging
+
+    logging.warning(f"passing tests: {lr_test_results.passing_tests}")
+    lr_test_accuracy = lr_test_results.passing_tests / len(lr_test_results.results)
+    assert lr_test_accuracy <= hf_test_accuracy
+    hf_result = hf_classifier.evaluate(example)
+    lr_result = lr_classifier.evaluate(example)
+    assert hf_result.highest_confidence >= lr_result.highest_confidence
+
+
+@responses.activate
+@pytest.mark.parametrize(
+    "training_configuration,compare_configuration",
+    [
+        (
+            _MentorTrainAndTestConfiguration(
+                mentor_id="clint_long", arch=ARCH_LR, expected_training_accuracy=0.28
+            ),
+            _MentorTrainAndTestConfiguration(
+                mentor_id="clint_long",
+                arch=ARCH_LR_TRANSFORMER,
+                expected_training_accuracy=0.96,
+            ),
+        ),
+    ],
+)
+def test_compare_cross_validation(
+    training_configuration: _MentorTrainAndTestConfiguration,
+    compare_configuration: _MentorTrainAndTestConfiguration,
+    tmpdir,
+    shared_root: str,
+):
+    mentor = load_mentor_csv(
+        fixture_mentor_data(training_configuration.mentor_id, "data.csv")
+    )
+    data = {"data": {"mentor": mentor.to_dict()}}
+    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    lr_train = (
+        ClassifierFactory()
+        .new_training(
+            mentor=training_configuration.mentor_id,
+            shared_root=shared_root,
+            data_path=tmpdir,
+            arch=training_configuration.arch,
+        )
+        .train()
+    )
+    assert lr_train.accuracy >= training_configuration.expected_training_accuracy
 
     hf_train = (
         ClassifierFactory()
@@ -198,29 +275,4 @@ def test_compare_models(
         )
         .train()
     )
-    assert hf_train.accuracy >= 0.98
-
-    hf_classifier = ClassifierFactory().new_prediction(
-        mentor=compare_configuration.mentor_id,
-        shared_root=shared_root,
-        data_path=tmpdir,
-        arch=compare_configuration.arch,
-    )
-    hf_test_results = run_model_against_testset_ignore_confidence(hf_classifier, test_set)
-    hf_test_accuracy = hf_test_results.passing_tests / len(hf_test_results.results)
-    assert hf_test_accuracy >= .78
-    lr_classifier = ClassifierFactory().new_prediction(
-        mentor=training_configuration.mentor_id,
-        shared_root=shared_root,
-        data_path=tmpdir,
-        arch=training_configuration.arch,
-    )
-    lr_test_results = run_model_against_testset_ignore_confidence(lr_classifier, test_set)
-    import logging
-    logging.warning(f"passing tests: {lr_test_results.passing_tests}")
-    lr_test_accuracy = lr_test_results.passing_tests / len(lr_test_results.results)
-    assert lr_test_accuracy >= 0.57
-    assert lr_test_accuracy <= hf_test_accuracy
-    hf_result = hf_classifier.evaluate(example)
-    lr_result = lr_classifier.evaluate(example)
-    assert hf_result.highest_confidence >= lr_result.highest_confidence
+    assert hf_train.accuracy >= compare_configuration.expected_training_accuracy
