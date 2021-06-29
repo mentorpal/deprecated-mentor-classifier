@@ -51,9 +51,6 @@ def parse_testset_entry(csv_line) -> _MentorTestSetEntry:
 
 
 def parse_mentor_question(csv_line) -> MentorQuestion:
-    import logging
-
-    logging.warning(csv_line)
     paraphrases = csv_line[2].split("|") if csv_line[2] else []
     return MentorQuestion(
         question_id=csv_line[0],

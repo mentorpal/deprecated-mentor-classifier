@@ -11,7 +11,6 @@ import pytest
 from mentor_classifier.mentor import Mentor
 from .helpers import fixture_path
 
-
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id,expected_data",

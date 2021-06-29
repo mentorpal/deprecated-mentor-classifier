@@ -132,21 +132,35 @@ def test_train_and_predict_transformers(
     assert len(test_results.errors) == 0
 
 
+@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
-    "training_configuration,compare_configuration,example",
+    "training_configuration,compare_configuration,example, test_set",
     [
-        (
-            _MentorTrainAndTestConfiguration(
-                mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
-            ),
-            _MentorTrainAndTestConfiguration(
-                mentor_id="clint",
-                arch=ARCH_LR_TRANSFORMER,
-                expected_training_accuracy=1,
-            ),
-            "who you is?",
-        ),
+        # (
+        #     _MentorTrainAndTestConfiguration(
+        #         mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
+        #     ),
+        #     _MentorTrainAndTestConfiguration(
+        #         mentor_id="clint",
+        #         arch=ARCH_LR_TRANSFORMER,
+        #         expected_training_accuracy=1,
+        #     ),
+        #     "who you is?",
+        #     "test.csv"
+        # ),
+        # (
+        #     _MentorTrainAndTestConfiguration(
+        #         mentor_id="covid", arch=ARCH_LR, expected_training_accuracy=0.32
+        #     ),
+        #     _MentorTrainAndTestConfiguration(
+        #         mentor_id="covid",
+        #         arch=ARCH_LR_TRANSFORMER,
+        #         expected_training_accuracy=0.98,
+        #     ),
+        #     "What are some symptoms?",
+        #     "test.csv"
+        # ),
         (
             _MentorTrainAndTestConfiguration(
                 mentor_id="covid", arch=ARCH_LR, expected_training_accuracy=0.32
@@ -156,7 +170,8 @@ def test_train_and_predict_transformers(
                 arch=ARCH_LR_TRANSFORMER,
                 expected_training_accuracy=0.98,
             ),
-            "What are some symptoms?",
+            "How do the vaccines work?",
+            "synonym_test.csv"
         ),
     ],
 )
@@ -166,12 +181,13 @@ def test_compare_test_accuracy(
     tmpdir,
     shared_root: str,
     example: str,
+    test_set:str
 ):
     mentor = load_mentor_csv(
         fixture_mentor_data(training_configuration.mentor_id, "data.csv")
     )
     test_set = load_test_csv(
-        fixture_mentor_data(training_configuration.mentor_id, "test.csv")
+        fixture_mentor_data(training_configuration.mentor_id, test_set)
     )
     data = {"data": {"mentor": mentor.to_dict()}}
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
@@ -216,9 +232,6 @@ def test_compare_test_accuracy(
     lr_test_results = run_model_against_testset_ignore_confidence(
         lr_classifier, test_set
     )
-    import logging
-
-    logging.warning(f"passing tests: {lr_test_results.passing_tests}")
     lr_test_accuracy = lr_test_results.passing_tests / len(lr_test_results.results)
     assert lr_test_accuracy <= hf_test_accuracy
     hf_result = hf_classifier.evaluate(example)
