@@ -8,13 +8,9 @@ VENV_PIP=$(VENV)/bin/pip
 $(VENV):
 	$(MAKE) $(VENV)-update
 
-.PHONY $(VENV)-installed:
-$(VENV)-installed:
-	$(ROOT)/tools/virtualenv_ensure_installed.sh
-
 .PHONY: $(VENV)-update
-$(VENV)-update: $(VENV)-installed
-	[ -d $(VENV) ] || virtualenv -p python3.8 $(VENV)
+$(VENV)-update:
+	[ -d $(VENV) ] || python3.8 -m venv $(VENV)
 	$(VENV_PIP) install --upgrade pip
 	$(VENV_PIP) install -r requirements.test.txt
 	$(VENV_PIP) install ../mentor_classifier
@@ -56,15 +52,13 @@ license:
 
 .PHONY: test
 test: $(VENV)
-	cd $(ROOT)/word2vec/ && $(MAKE) word2vec.bin
+	cd $(ROOT)/shared/ && $(MAKE) installed/word2vec.bin
+	cd $(ROOT)/shared/ && $(MAKE) installed/sentence-transformer
 	. $(VENV)/bin/activate \
 		&& export PYTHONPATH=$${PYTHONPATH}:$(PWD)/src \
 		&& coverage run \
 			--omit="$(PWD)/tests $(VENV)" \
 			-m py.test -vv $(args)
-			
-	cd $(ROOT)/sentence-transformer/ \
-		&& $(MAKE) sentence_transformer
 
 .PHONY: test-all
 test-all:
