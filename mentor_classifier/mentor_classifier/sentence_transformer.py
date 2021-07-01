@@ -6,7 +6,7 @@
 #
 from os import path
 from sentence_transformers import SentenceTransformer
-from typing import Dict 
+from typing import Dict
 
 SENTENCE_TRANSFORMER_MODELS: Dict[str, SentenceTransformer] = {}
 
