@@ -16,11 +16,6 @@ import pandas.testing
 from . import fixture_path
 
 
-@pytest.fixture(scope="module")
-def shared_root(word2vec) -> str:
-    return os.path.dirname(word2vec)
-
-
 @pytest.fixture(autouse=True)
 def python_path_env(monkeypatch, shared_root):
     monkeypatch.setenv("MODEL_ROOT", fixture_path("models"))

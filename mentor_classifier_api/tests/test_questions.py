@@ -5,17 +5,11 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 import json
-import os
 
 import pytest
 import responses
 
 from . import fixture_path
-
-
-@pytest.fixture(scope="module")
-def shared_root(word2vec) -> str:
-    return os.path.dirname(word2vec)
 
 
 @pytest.fixture(autouse=True)
@@ -90,9 +84,6 @@ def test_evaluate_classifies_user_questions(
     res = client.get(
         f"/classifier/questions/?mentor={input_mentor}&query={input_question}"
     )
-    import logging
-
-    logging.warning(f"res={res.json}")
     assert res.json["query"] == expected_results["query"]
     assert res.json["answer_id"] == expected_results["answer_id"]
     assert res.json["answer_text"] == expected_results["answer_text"]

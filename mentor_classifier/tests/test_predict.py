@@ -22,11 +22,6 @@ def data_root() -> str:
     return fixture_path("data")
 
 
-@pytest.fixture(scope="module")
-def shared_root(word2vec) -> str:
-    return path.dirname(word2vec)
-
-
 def _ensure_trained(mentor_id: str, shared_root: str, output_dir: str) -> None:
     """
     NOTE: we don't want this test to do any training.
@@ -42,7 +37,6 @@ def _ensure_trained(mentor_id: str, shared_root: str, output_dir: str) -> None:
     training.train()
 
 
-@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id,question,expected_answer_id,expected_answer,expected_media",
@@ -211,7 +205,7 @@ def test_gets_off_topic(
             "any user question",
             "_OFF_TOPIC_",
             "_OFF_TOPIC_",
-            [],
+            "",
         )
     ],
 )

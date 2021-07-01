@@ -4,29 +4,18 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
+from sentence_transformers import SentenceTransformer
 from os import path
-
-import json
-import pytest
-import responses
-
-from mentor_classifier import ClassifierFactory, ARCH_DEFAULT
-from .helpers import fixture_path
+from typing import List
 
 
-@pytest.fixture(scope="module")
-def data_root() -> str:
-    return fixture_path("data_out")
+class TransformerEmbeddings:
+    def __init__(self, shared_root: str):
+        self.transformer: SentenceTransformer = find_or_load_sentence_transformer(
+            path.join(shared_root, "sentence-transformer")
+        )
 
-
-@responses.activate
-@pytest.mark.parametrize("mentor_id", [("clint")])
-def test_trains_and_outputs_models(data_root: str, shared_root: str, mentor_id: str):
-    with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    result = ClassifierFactory().new_training(mentor_id, shared_root, data_root).train()
-    print(result)
-    assert result.model_path == path.join(data_root, mentor_id, ARCH_DEFAULT)
-    assert path.exists(path.join(result.model_path, "model.pkl"))
-    assert path.exists(path.join(result.model_path, "w2v.txt"))
+    def get_embeddings(self, data: List[str]):
+        embeddings = self.transformer.encode(data, show_progress_bar=True)
+        return embeddings

@@ -5,31 +5,26 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 import logging
-import joblib
 import os
 import random
-from typing import Tuple
 
-from mentor_classifier.api import (
-    create_user_question,
-    get_off_topic_threshold,
-)
+import joblib
+
 from mentor_classifier import (
     QuestionClassifierPrediction,
     QuestionClassiferPredictionResult,
     mentor_model_path,
-    ARCH_LR,
+    ARCH_LR_TRANSFORMER,
+    Media,
 )
+from mentor_classifier.api import create_user_question, OFF_TOPIC_THRESHOLD_DEFAULT
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import file_last_updated_at, sanitize_string
-from .nltk_preprocessor import NLTKPreprocessor
-from .word2vec import W2V
-
-AnswerIdTextAndMedia = Tuple[str, str, str]
+from typing import Union, Tuple, List
 
 
-class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
-    def __init__(self, mentor, shared_root, data_path):
+class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
+    def __init__(self, mentor: Union[str, Mentor], shared_root: str, data_path: str):
         if isinstance(mentor, str):
             logging.info("loading mentor id {}...".format(mentor))
             mentor = Mentor(mentor)
@@ -39,15 +34,20 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
             type(mentor)
         )
         self.mentor = mentor
-        self.model_file = mentor_model_path(data_path, mentor.id, ARCH_LR, "model.pkl")
-        self.w2v_model = W2V(os.path.join(shared_root, "word2vec.bin"))
+        self.model_file = mentor_model_path(
+            data_path, mentor.id, ARCH_LR_TRANSFORMER, "model.pkl"
+        )
+        self.transformer = self.__load_transformer(
+            os.path.join(data_path, mentor.id, ARCH_LR_TRANSFORMER, "transformer.pkl")
+        )
         self.model = self.__load_model()
 
     def evaluate(
-        self, question, canned_question_match_disabled=False
+        self, question: str, canned_question_match_disabled: bool = False
     ) -> QuestionClassiferPredictionResult:
+
+        sanitized_question = sanitize_string(question)
         if not canned_question_match_disabled:
-            sanitized_question = sanitize_string(question)
             if sanitized_question in self.mentor.questions_by_text:
                 q = self.mentor.questions_by_text[sanitized_question]
                 answer_id = q["answer_id"]
@@ -65,28 +65,23 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
                 return QuestionClassiferPredictionResult(
                     answer_id, answer, answer_media, 1.0, feedback_id
                 )
-
-        preprocessor = NLTKPreprocessor()
-        processed_question = preprocessor.transform(question)
-        w2v_vector, lstm_vector = self.w2v_model.w2v_for_question(processed_question)
-        off_topic_threshold = get_off_topic_threshold()
-        (
-            answer_id,
-            answer_text,
-            answer_media,
-            highest_confidence,
-        ) = self.__get_prediction(w2v_vector)
+        embedded_question = self.transformer.get_embeddings(question)
+        answer_id, answer, answer_media, highest_confidence = self.__get_prediction(
+            embedded_question
+        )
         feedback_id = create_user_question(
             self.mentor.id,
             question,
             answer_id,
-            "OFF_TOPIC" if highest_confidence < off_topic_threshold else "CLASSIFIER",
+            "OFF_TOPIC"
+            if highest_confidence < OFF_TOPIC_THRESHOLD_DEFAULT
+            else "CLASSIFIER",
             highest_confidence,
         )
-        if highest_confidence < off_topic_threshold:
-            answer_id, answer_text, answer_media = self.__get_offtopic()
+        if highest_confidence < OFF_TOPIC_THRESHOLD_DEFAULT:
+            answer_id, answer = self.__get_offtopic()
         return QuestionClassiferPredictionResult(
-            answer_id, answer_text, answer_media, highest_confidence, feedback_id
+            answer_id, answer, answer_media, highest_confidence, feedback_id
         )
 
     def get_last_trained_at(self) -> float:
@@ -96,45 +91,36 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
         logging.info("loading model from path {}...".format(self.model_file))
         return joblib.load(self.model_file)
 
-    def __get_prediction(self, w2v_vector):
-        if not self.model:
-            self.model = joblib.load(self.model_file)
-        test_vector = w2v_vector.reshape(1, -1)
-        prediction = self.model.predict(test_vector)
-        decision = self.model.decision_function(test_vector)
-        confidence_scores = (
-            sorted(decision[0]) if decision.ndim >= 2 else sorted(decision)
-        )
-        highest_confidence = confidence_scores[-1]
-        if not (prediction and prediction[0]):
-            raise Exception(
-                f"Prediction should be a list with at least one element (answer text) but found {prediction}"
-            )
-        answer_text = prediction[0]
-
+    def __get_prediction(
+        self, embedded_question
+    ) -> Tuple[str, str, List[Media], float]:
+        prediction = self.model.predict([embedded_question])
+        decision = self.model.decision_function([embedded_question])
+        highest_confidence = max(decision[0])
+        answer_text = self.mentor.answer_id_by_answer[prediction[0]]
         answer_key = sanitize_string(answer_text)
-        answer_id = (
-            self.mentor.questions_by_answer[answer_key].get("answer_id", "")
-            if answer_key in self.mentor.questions_by_answer
-            else ""
-        )
         answer_media = (
             self.mentor.questions_by_answer[answer_key].get("media", [])
             if answer_key in self.mentor.questions_by_answer
             else []
         )
-        if not answer_id:
-            raise Exception(
-                f"No answer id found for answer text (classifier_data may be out of sync with trained model): {answer_text}"
-            )
-        return answer_id, answer_text, answer_media, highest_confidence
+        return prediction[0], answer_text, answer_media, highest_confidence
 
-    def __get_offtopic(self) -> AnswerIdTextAndMedia:
+    def __get_offtopic(self) -> Tuple[str, str]:
         try:
-            id, text, media = random.choice(
-                self.mentor.utterances_by_type["_OFF_TOPIC_"]
+            i = random.randint(
+                0, len(self.mentor.utterances_by_type["_OFF_TOPIC_"]) - 1
             )
-            return (id, text, media)
-
+            return (
+                self.mentor.utterances_by_type["_OFF_TOPIC_"][i][0],
+                self.mentor.utterances_by_type["_OFF_TOPIC_"][i][1],
+            )
         except KeyError:
-            return ("_OFF_TOPIC_", "_OFF_TOPIC_", "")
+            return (
+                "_OFF_TOPIC_",
+                "_OFF_TOPIC_",
+            )
+
+    @staticmethod
+    def __load_transformer(path):
+        return joblib.load(path)
