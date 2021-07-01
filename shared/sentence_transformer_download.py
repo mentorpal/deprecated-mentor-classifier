@@ -5,31 +5,14 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 import os
-import requests
-from tqdm import tqdm
 from zipfile import ZipFile
 
+from utils import download
 
-def download(url: str, to_path: str):
-    print("downloading sentence_transformer")
-    print(f"\tfrom {url}")
-    print(f"\tto {to_path}")
-    r = requests.get(url, stream=True)
-    total_size_in_bytes = int(r.headers.get("content-length", 0))
-    block_size = 1024
-    progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
-    os.makedirs(os.path.dirname(to_path), exist_ok=True)
-    with open(to_path, "wb") as f:
-        for chunk in r.iter_content(chunk_size=block_size):
-            if chunk:
-                progress_bar.update(len(chunk))
-                f.write(chunk)
-    progress_bar.close()
-    if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-        raise Exception("failed to fully download sentence_transformer")
+DEFAULT_TO_PATH = os.path.join("installed", "sentence-transformer")
 
 
-def transformer_download(to_path=".", replace_existing=False) -> str:
+def transformer_download(to_path=DEFAULT_TO_PATH, replace_existing=False) -> str:
     transformer_path = os.path.abspath(
         os.path.join(to_path, "distilbert-base-nli-mean-tokens")
     )
@@ -42,7 +25,7 @@ def transformer_download(to_path=".", replace_existing=False) -> str:
         transformer_zip,
     )
     with ZipFile(transformer_zip, "r") as z:
-        z.extractall("distilbert-base-nli-mean-tokens")
+        z.extractall(transformer_path)
     os.remove(transformer_zip)
     return transformer_path
 
