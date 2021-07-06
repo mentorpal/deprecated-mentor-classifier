@@ -36,7 +36,9 @@ from .helpers import fixture_path
                         ]
                     ],
                     "_INTRO_": [["A5", "Hi I'm Clint", []]],
-                    "_OFF_TOPIC_": [["A6", "Ask me something else", []]],
+                    "_OFF_TOPIC_": [
+                        ["A6", "Ask me something else", ["/clint/offtopic.mp4"]]
+                    ],
                 },
                 "questions_by_id": {
                     "Q1": {

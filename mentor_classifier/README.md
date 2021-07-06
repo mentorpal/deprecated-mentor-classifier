@@ -14,7 +14,7 @@ Any changes made to this repo should be covered by tests. To run the existing te
 
 ```
 # NOTE: the first time you run this will take a few minutes
-# because it downloads the 300+MB word2vec file one time
+# because it downloads large shared/installed files (e.g. word2vec models)
 make test
 ```
 
