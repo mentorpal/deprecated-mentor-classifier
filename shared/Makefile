@@ -24,6 +24,10 @@ installed/sentence-transformer: $(VENV)
 	$(MAKE) installed
 	. $(VENV)/bin/activate && python sentence_transformer_download.py 
 
+installed/spacy-model: $(VENV)
+	$(MAKE) installed
+	. $(VENV)/bin/activate && python spacy_download.py 
+
 .PHONY: update-deps
 update-deps: $(VENV)
 	. $(VENV)/bin/activate && pip-upgrade requirements*

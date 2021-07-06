@@ -8,7 +8,7 @@ import string
 from nltk.tokenize import RegexpTokenizer
 from nltk import pos_tag
 from nltk.stem import PorterStemmer
-nlp = spacy.load('en_core_web_sm')
+
 """
 This class contains the methods that operate on the questions to normalize them. The questions are tokenized, punctuations are
 removed and words are stemmed to bring them to a common platform

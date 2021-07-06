@@ -5,38 +5,20 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from os import path
+from spacy import load
 
-import pytest
-import responses
-
-
-from mentor_classifier import ClassifierFactory, ARCH_LR
-from .helpers import (
-    fixture_mentor_data,
-    load_mentor_csv,
-)
-from mentor_classifier.ner import NamedEntities
-from .helpers import get_answers
-from typing import List, Dict
+SPACY_MODELS = {}
 
 
-@pytest.fixture(scope="module")
-def shared_root() -> str:
-    root = path.abspath(path.join("..", "shared", "installed"))
-    return root
-
-
-@responses.activate
-@pytest.mark.parametrize(
-    "mentor_id, expected_answer",
-    [("clint", {"people": ["Clint Anderson"], "places": [], "acronyms": []})],
-)
-def test_ner(
-    mentor_id: str,
-    expected_answer: Dict[str, List[str]],
-    shared_root: str,
-):
-    mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
-    answers = get_answers(mentor)
-    ents = NamedEntities(answers, shared_root)
-    assert NamedEntities.to_dict(ents) == expected_answer
+def find_or_load_spacy(file_path: str):
+    abs_path = path.abspath(file_path)
+    if abs_path not in SPACY_MODELS:
+        SPACY_MODELS[abs_path] = load(
+            path.join(
+                file_path,
+                "en_core_web_sm-3.0.0",
+                "en_core_web_sm",
+                "en_core_web_sm-3.0.0",
+            )
+        )
+    return SPACY_MODELS[abs_path]
