@@ -104,7 +104,7 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
             if answer_key in self.mentor.questions_by_answer
             else []
         )
-        return prediction[0], answer_text, answer_media, highest_confidence
+        return prediction[0], answer_text, answer_media, float(highest_confidence)
 
     def __get_offtopic(self) -> Tuple[str, str]:
         try:
