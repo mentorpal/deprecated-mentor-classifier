@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from mentor_classifier.api import fetch_mentor_data
 from mentor_classifier.utils import sanitize_string
 
-
 @dataclass
 class Media:
     type: str
@@ -63,3 +62,4 @@ class Mentor(object):
                 for paraphrase in q["paraphrases"]:
                     self.questions_by_text[sanitize_string(paraphrase)] = q
                 self.questions_by_answer[sanitize_string(q["answer"])] = q
+

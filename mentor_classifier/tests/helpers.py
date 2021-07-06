@@ -15,7 +15,8 @@ from .types import (
     ComparisonType,
 )
 from mentor_classifier import QuestionClassifierPrediction
-
+from .types import Mentor 
+from typing import List
 
 def load_mentor_csv(path: str) -> Mentor:
     result = Mentor()
@@ -29,6 +30,8 @@ def load_mentor_csv(path: str) -> Mentor:
 
     return result
 
+def get_answers(mentor: Mentor) -> List[str]:
+    return mentor.answers
 
 def load_test_csv(path: str) -> _MentorTestSet:
     result = _MentorTestSet()
@@ -61,7 +64,7 @@ def parse_mentor_question(csv_line: str) -> MentorQuestion:
         paraphrases=paraphrases,
         answer=columns[3],
         topic=columns[4],
-    )
+    ) 
 
 
 def fixture_path(p: str) -> str:

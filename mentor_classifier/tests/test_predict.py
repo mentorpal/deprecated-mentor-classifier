@@ -42,7 +42,6 @@ def _ensure_trained(mentor_id: str, shared_root: str, output_dir: str) -> None:
     training.train()
 
 
-@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id,question,expected_answer_id,expected_answer,expected_media",
