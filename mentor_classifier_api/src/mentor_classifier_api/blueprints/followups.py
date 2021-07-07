@@ -5,13 +5,12 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from flask import Blueprint, jsonify
-from typing import List, Union
 
 followups_blueprint = Blueprint("followups", __name__)
 
 
 @followups_blueprint.route("/<mentor>/<category>", methods=["GET"])
-def followup(mentor:str, category:str):
+def followup(mentor: str, category: str):
     return jsonify(
         {
             "errors": {},
