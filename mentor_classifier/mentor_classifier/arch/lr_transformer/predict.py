@@ -43,7 +43,7 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
         self.model = self.__load_model()
 
     def evaluate(
-        self, question: str, shared_root, canned_question_match_disabled: bool = False
+        self, question: str, canned_question_match_disabled: bool = False
     ) -> QuestionClassiferPredictionResult:
 
         sanitized_question = sanitize_string(question)

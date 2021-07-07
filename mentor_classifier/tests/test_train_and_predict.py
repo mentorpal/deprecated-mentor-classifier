@@ -105,7 +105,7 @@ def test_train_and_predict_transformers(
             data_path=tmpdir,
             arch=training_configuration.arch,
         )
-        .train(shared_root)
+        .train()
     )
     assert result.accuracy >= training_configuration.expected_training_accuracy
 
@@ -123,7 +123,6 @@ def test_train_and_predict_transformers(
         f"percentage passed = {test_results.passing_tests}/{len(test_results.results)}"
     )
     assert len(test_results.errors) == 0
-
 
 @responses.activate
 @pytest.mark.parametrize(
@@ -203,7 +202,7 @@ def test_compare_test_accuracy(
             data_path=tmpdir,
             arch=compare_configuration.arch,
         )
-        .train(shared_root)
+        .train()
     )
     assert hf_train.accuracy >= lr_train.accuracy
 
@@ -228,7 +227,7 @@ def test_compare_test_accuracy(
     )
     lr_test_accuracy = lr_test_results.passing_tests / len(lr_test_results.results)
     assert lr_test_accuracy <= hf_test_accuracy
-    hf_result = hf_classifier.evaluate(example, shared_root)
+    hf_result = hf_classifier.evaluate(example)
     lr_result = lr_classifier.evaluate(example, shared_root)
     assert hf_result.highest_confidence >= lr_result.highest_confidence
 
@@ -280,6 +279,6 @@ def test_compare_cross_validation(
             data_path=tmpdir,
             arch=compare_configuration.arch,
         )
-        .train(shared_root)
+        .train()
     )
     assert hf_train.accuracy >= compare_configuration.expected_training_accuracy
