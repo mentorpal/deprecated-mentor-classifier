@@ -25,7 +25,11 @@ def test_trains_and_outputs_models(data_root: str, shared_root: str, mentor_id: 
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    result = ClassifierFactory().new_training(mentor_id, shared_root, data_root).train()
+    result = (
+        ClassifierFactory()
+        .new_training(mentor_id, shared_root, data_root)
+        .train(shared_root)
+    )
     print(result)
     assert result.model_path == path.join(data_root, mentor_id, ARCH_DEFAULT)
     assert path.exists(path.join(result.model_path, "model.pkl"))

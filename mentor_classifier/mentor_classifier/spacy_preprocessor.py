@@ -7,6 +7,7 @@
 from mentor_classifier.spacy_model import find_or_load_spacy
 import string
 from os import path
+
 """
 This class contains the methods that operate on the questions to normalize them. The questions are tokenized, punctuations are
 removed and words are stemmed to bring them to a common platform

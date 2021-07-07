@@ -4,12 +4,12 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from dataclasses import dataclass
 import logging
 from os import path
 from typing import List, Dict
 from mentor_classifier.spacy_model import find_or_load_spacy
 from tests.types import Answer
+
 
 class NamedEntities:
     def __init__(self, answers: List[Answer], shared_root: str):
@@ -19,7 +19,7 @@ class NamedEntities:
         # "jobs":[]
         self.load(answers, shared_root)
 
-    def load(self, answers: List[str], shared_root: str):
+    def load(self, answers: List[Answer], shared_root: str):
         nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
         for answer in answers:
             answer = nlp(answer.transcript)

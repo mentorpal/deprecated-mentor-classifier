@@ -9,8 +9,6 @@ from os import path
 import pytest
 import responses
 
-
-from mentor_classifier import ClassifierFactory, ARCH_LR
 from .helpers import (
     fixture_mentor_data,
     load_mentor_csv,

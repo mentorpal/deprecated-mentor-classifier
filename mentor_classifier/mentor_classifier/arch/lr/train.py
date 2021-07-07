@@ -50,7 +50,9 @@ class LRQuestionClassifierTraining(QuestionClassifierTraining):
     def train(self, shared_root) -> QuestionClassifierTrainingResult:
         if not os.path.exists(self.model_path):
             os.makedirs(self.model_path)
-        training_data, num_rows_having_paraphrases = self.__load_training_data(shared_root)
+        training_data, num_rows_having_paraphrases = self.__load_training_data(
+            shared_root
+        )
         train_vectors = self.__load_training_vectors(training_data)
         train_vectors = self.__load_topic_vectors(train_vectors)
         (

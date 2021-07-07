@@ -17,7 +17,4 @@ def find_or_load_sentence_transformer(file_path: str) -> SentenceTransformer:
         SENTENCE_TRANSFORMER_MODELS[abs_path] = SentenceTransformer(
             path.join(file_path, "distilbert-base-nli-mean-tokens")
         )
-        import logging
-
-        logging.warn(path.join(file_path, "distilbert-base-nli-mean-tokens"))
     return SENTENCE_TRANSFORMER_MODELS[abs_path]

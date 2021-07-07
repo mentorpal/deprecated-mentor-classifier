@@ -14,9 +14,9 @@ from .types import (
     _MentorTestSetResult,
     _MentorTestResultEntry,
     ComparisonType,
+    Answer,
 )
 from mentor_classifier import QuestionClassifierPrediction
-from .types import Mentor, Answer
 from typing import List
 
 

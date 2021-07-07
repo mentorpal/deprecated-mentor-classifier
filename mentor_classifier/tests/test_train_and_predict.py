@@ -30,7 +30,7 @@ def data_root() -> str:
     "training_configuration",
     [
         _MentorTrainAndTestConfiguration(
-            mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
+            mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.66
         )
     ],
 )
@@ -57,7 +57,7 @@ def test_train_and_predict(
         )
         .train(shared_root)
     )
-    assert result.accuracy == training_configuration.expected_training_accuracy
+    assert result.accuracy >= training_configuration.expected_training_accuracy
 
     classifier = ClassifierFactory().new_prediction(
         mentor=training_configuration.mentor_id,
@@ -105,7 +105,7 @@ def test_train_and_predict_transformers(
             data_path=tmpdir,
             arch=training_configuration.arch,
         )
-        .train(shared_root)
+        .train()
     )
     assert result.accuracy >= training_configuration.expected_training_accuracy
 
@@ -123,7 +123,6 @@ def test_train_and_predict_transformers(
         f"percentage passed = {test_results.passing_tests}/{len(test_results.results)}"
     )
     assert len(test_results.errors) == 0
-
 
 @responses.activate
 @pytest.mark.parametrize(
@@ -214,7 +213,7 @@ def test_compare_test_accuracy(
         arch=compare_configuration.arch,
     )
     hf_test_results = run_model_against_testset_ignore_confidence(
-        hf_classifier, test_set, shared_root 
+        hf_classifier, test_set, shared_root
     )
     hf_test_accuracy = hf_test_results.passing_tests / len(hf_test_results.results)
     lr_classifier = ClassifierFactory().new_prediction(
