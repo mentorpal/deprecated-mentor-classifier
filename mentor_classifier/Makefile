@@ -9,8 +9,7 @@ $(VENV)-update:
 	[ -d $(VENV) ] || python3.8 -m venv $(VENV)
 	$(VENV)/bin/pip install --upgrade pip
 	$(VENV)/bin/pip install -r ./requirements.test.txt
-	$(VENV)/bin/python3 -m nltk.downloader averaged_perceptron_tagger
-
+	
 .PHONY clean:
 clean:
 	rm -rf .venv htmlcov .coverage
