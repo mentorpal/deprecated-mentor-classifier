@@ -22,9 +22,9 @@ class NamedEntities:
     def load(self, answers: List[Answer], shared_root: str):
         nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
         for answer in answers:
-            answer = nlp(answer.transcript)
-            if answer.ents:
-                for ent in answer.ents:
+            answer_doc = nlp(answer.transcript)
+            if answer_doc.ents:
+                for ent in answer_doc.ents:
                     if ent.label_ == "PERSON":
                         self.people.append(ent.text)
                     if ent.label == "ORG":

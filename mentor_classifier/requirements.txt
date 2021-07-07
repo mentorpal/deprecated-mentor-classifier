@@ -14,3 +14,4 @@ sentence-transformers
 spacy==3.0.6 
 
 
+

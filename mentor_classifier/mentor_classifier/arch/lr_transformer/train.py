@@ -45,7 +45,7 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
         self.model_path = mentor_model_path(output_dir, mentor.id, ARCH_LR_TRANSFORMER)
         self.transformer = TransformerEmbeddings(shared_root)
 
-    def train(self) -> QuestionClassifierTrainingResult:
+    def train(self, shared_root) -> QuestionClassifierTrainingResult:
         x_train, y_train = self.__load_training_data()
         x_train, y_train = self.__load_transformer_embeddings(x_train, y_train)
         classifier = self.train_ridge_classifier(x_train, y_train)
