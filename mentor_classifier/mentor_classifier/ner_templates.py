@@ -6,7 +6,7 @@
 #
 from string import Template
 
-#templates for follow-up questions
+# templates for follow-up questions
 QUESTION_TEMPLATES = {
     "person": Template("Can you tell me more about $entity?"),
     "place": Template("What was $entity like?"),
