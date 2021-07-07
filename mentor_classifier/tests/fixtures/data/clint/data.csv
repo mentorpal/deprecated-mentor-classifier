@@ -1,5 +1,4 @@
 id,question,paraphrases,answer,topic
-Q1,What is your name?,Who are you?,Clint Anderson,About Me
-Q2,How old are you?,What's your age?,37 years old,About Me
-Q3,What do penguins do?,Tell me about the penguins.,Penguins do important things,Penguins
-
+Q1,"What is your name?","Who are you?","Clint Anderson","About Me"
+Q2,"How old are you?","What's your age?","37 years old","About Me"
+Q3,"What do penguins do?","Tell me about the penguins.","Penguins do important things","Penguins"
