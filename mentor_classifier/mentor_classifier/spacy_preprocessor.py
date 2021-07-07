@@ -4,11 +4,9 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+from mentor_classifier.spacy_model import find_or_load_spacy
 import string
-from nltk.tokenize import RegexpTokenizer
-from nltk import pos_tag
-from nltk.stem import PorterStemmer
-
+from os import path
 """
 This class contains the methods that operate on the questions to normalize them. The questions are tokenized, punctuations are
 removed and words are stemmed to bring them to a common platform
@@ -16,9 +14,9 @@ removed and words are stemmed to bring them to a common platform
 
 
 class SpacyPreprocessor(object):
-    def __init__(self):
+    def __init__(self, shared_root):
         self.punct = set(string.punctuation)
-        self.stemmer = PorterStemmer()
+        self.model = find_or_load_spacy(path.join(shared_root, "spacy-model"))
 
     def inverse_transform(self, x):
         return [" ".join(doc) for doc in x]
@@ -31,19 +29,12 @@ class SpacyPreprocessor(object):
     """
 
     def tokenize(self, sentence):
-        tokenizer = RegexpTokenizer(r"\w+")
-        # Break the sentence into part of speech tagged tokens
-        for token, tag in pos_tag(tokenizer.tokenize(sentence)):
-            token = token.lower()
-            token = token.strip()
-
-            # If punctuation, ignore token and continue
-            if all(char in self.punct for char in token):
+        doc = self.model(sentence)
+        for token in doc:
+            if all(char in self.punct for char in token.lemma_):
                 continue
-
-            # Stem the token and yield
             try:
-                stemmed_token = self.stemmer.stem(token)
+                stemmed_token = token.lemma_
             except BaseException:
                 print(
                     "Unicode error. File encoding was changed when you opened it in Excel. ",

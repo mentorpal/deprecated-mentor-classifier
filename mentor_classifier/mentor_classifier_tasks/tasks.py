@@ -34,7 +34,7 @@ def train_task(mentor: str, arch: str = "") -> float:
             .new_training(
                 mentor=mentor, shared_root=SHARED_ROOT, data_path=OUTPUT_ROOT, arch=arch
             )
-            .train()
+            .train(SHARED_ROOT)
         )
         return result.accuracy
     except Exception as err:
