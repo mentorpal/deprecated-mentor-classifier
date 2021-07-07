@@ -114,7 +114,7 @@ def mutation_create_user_question(
                 "question": question,
                 "classifierAnswer": answer_id,
                 "classifierAnswerType": answer_type,
-                "confidence": str(confidence),
+                "confidence": float(confidence),
             }
         },
     }
