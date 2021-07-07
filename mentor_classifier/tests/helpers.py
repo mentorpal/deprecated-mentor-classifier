@@ -106,9 +106,6 @@ def run_model_against_testset(
         if test_set_entry.comparison_type == ComparisonType.GTE:
             if test_result.highest_confidence < test_set_entry.expected_confidence:
                 current_result_entry.passing = False
-                import logging
-
-                logging.warning(f"expected conf {test_result.highest_confidence}")
                 result.errors.append(
                     f"expected a confidence of at least {test_set_entry.expected_confidence}, but recieved a confidence of {test_result.highest_confidence}, for question/answer: {test_set_entry.question}/{test_result.answer_text}"
                 )
