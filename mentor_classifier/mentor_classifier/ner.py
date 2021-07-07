@@ -16,7 +16,6 @@ class NamedEntities:
         self.people: List[str] = []
         self.places: List[str] = []
         self.acronyms: List[str] = []
-        # "jobs":[]
         self.load(answers, shared_root)
 
     def load(self, answers: List[Answer], shared_root: str):
