@@ -13,7 +13,6 @@ followups_blueprint = Blueprint("followups", __name__)
 def followup(mentor: str, category: str):
     return jsonify(
         {
-            "errors": {},
             "data": {
                 "followups": [
                     {

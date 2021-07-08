@@ -26,7 +26,6 @@ def test_fetch_data(client, input_mentor, category):
     res = client.get(f"/classifier/followups/{input_mentor}/{category}")
     expected_data = jsonify(
         {
-            "errors": {},
             "data": {
                 "followups": [
                     {
