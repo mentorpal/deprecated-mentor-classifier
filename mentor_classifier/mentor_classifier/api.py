@@ -8,13 +8,17 @@ import json
 import os
 import requests
 import pandas as pd
-from typing import TypedDict
+from typing import TypedDict, List
+from mentor_classifier.ner import FollowupQuestion, NamedEntities
+from .types import Answer
 
 
 class GQLQueryBody(TypedDict):
     query: str
     variables: dict
 
+
+SHARED_ROOT = os.environ.get("SHARED_ROOT") or "shared"
 
 OFF_TOPIC_THRESHOLD_DEFAULT = (
     -0.55
@@ -84,6 +88,15 @@ mutation UserQuestionCreate($userQuestion: UserQuestionCreateInput!) {
     }
 }
 """
+GQL_CATEGORY_ANSWERS = """
+query CategoryAnswers($category: ID!) {
+  me {
+    categoryAnswers(category: $category) {
+      answerText
+      questionText
+    }
+}
+"""
 
 
 def __auth_gql(query: GQLQueryBody) -> dict:
@@ -97,6 +110,10 @@ def __auth_gql(query: GQLQueryBody) -> dict:
 
 def query_mentor(mentor: str) -> GQLQueryBody:
     return {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor}}
+
+
+def query_category_answers(category: str) -> GQLQueryBody:
+    return {"query": GQL_CATEGORY_ANSWERS, "variables": {"id": category}}
 
 
 def mutation_update_training(mentor: str) -> GQLQueryBody:
@@ -165,6 +182,31 @@ def fetch_mentor_data(mentor: str) -> dict:
         raise Exception(json.dumps(tdjson.get("errors")))
     data = tdjson["data"]["mentor"]
     return data
+
+
+def fetch_category(category: str):
+    tdjson = __auth_gql(query_mentor(category))
+    data = tdjson["data"]["categoryAnswers"]
+    return data
+
+
+def generate_followups(category: str, shared_root=SHARED_ROOT) -> List[FollowupQuestion]:
+    data = fetch_category(category)
+    recorded = []
+    id = 0
+    for answer_data in data:
+        answer_text = answer_data.get("answerText")
+        question_text = answer_data.get("questionText")
+        answer = Answer(
+            _id=f"A{id}",
+            status="COMPLETE",
+            transcript=answer_text,
+            question=question_text,
+        )
+        recorded.append(answer)
+        id = id + 1
+    followups = NamedEntities(recorded, shared_root).generate_questions()
+    return followups
 
 
 def update_training(mentor: str):

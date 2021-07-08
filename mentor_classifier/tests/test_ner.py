@@ -38,3 +38,22 @@ def test_ner(
     answers = get_answers(mentor)
     ents = NamedEntities(answers, shared_root)
     assert NamedEntities.to_dict(ents) == expected_answer
+
+
+@pytest.mark.only
+@responses.activate
+@pytest.mark.parametrize(
+    "mentor_id, expected_question",
+    [("clint", "Can you tell me more about Clint Anderson?")],
+)
+def test_question_gen(
+    mentor_id: str,
+    expected_question: str,
+    shared_root: str,
+):
+    mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
+    answers = get_answers(mentor)
+    ents = NamedEntities(answers, shared_root)
+    questions = ents.generate_questions()
+    actual_question = questions[0].question
+    assert actual_question == expected_question

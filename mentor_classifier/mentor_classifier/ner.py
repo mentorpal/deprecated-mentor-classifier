@@ -8,8 +8,9 @@ import logging
 from os import path
 from typing import List, Dict
 from mentor_classifier.spacy_model import find_or_load_spacy
-from tests.types import Answer
+from .types import Answer
 from string import Template
+from dataclasses import dataclass
 
 QUESTION_TEMPLATES = {
     "person": Template("Can you tell me more about $entity?"),
@@ -17,6 +18,13 @@ QUESTION_TEMPLATES = {
     "acronym": Template("What is $entity?"),
     "job": Template("What does a(n) $entity do?"),
 }
+
+
+@dataclass
+class FollowupQuestion:
+    question: str
+    entity_type: str
+    template: str
 
 
 class NamedEntities:
@@ -49,15 +57,18 @@ class NamedEntities:
         }
         return entities
 
-    def generate_questions(self) -> List[str]:
+    def generate_questions(self) -> List[FollowupQuestion]:
         questions = []
         for person in self.people:
-            question = QUESTION_TEMPLATES[person].substitute(entity=person)
+            question_str = QUESTION_TEMPLATES["person"].substitute(entity=person)
+            question = FollowupQuestion(question_str, person, "person")
             questions.append(question)
         for place in self.places:
-            question = QUESTION_TEMPLATES[place].substitute(entity=place)
+            question_str = QUESTION_TEMPLATES["place"].substitute(entity=place)
+            question = FollowupQuestion(question_str, place, "place")
             questions.append(question)
         for acronym in self.acronyms:
-            question = QUESTION_TEMPLATES[acronym].substitute(entity=acronym)
+            question_str = QUESTION_TEMPLATES["acronym"].substitute(entity=acronym)
+            question = FollowupQuestion(question_str, acronym, "acronym")
             questions.append(question)
         return questions

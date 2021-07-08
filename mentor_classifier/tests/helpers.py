@@ -6,7 +6,7 @@
 #
 from os import path
 import csv
-from .types import (
+from mentor_classifier.types import (
     Mentor,
     MentorQuestion,
     _MentorTestSet,

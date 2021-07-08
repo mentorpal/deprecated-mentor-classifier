@@ -5,27 +5,24 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from flask import Blueprint, jsonify
+from mentor_classifier.api import generate_followups
 
 followups_blueprint = Blueprint("followups", __name__)
 
 
 @followups_blueprint.route("/<mentor>/<category>", methods=["GET"])
 def followup(mentor: str, category: str):
+    data = generate_followups(category)
+    questions = []
+    for question in data:
+        question_dict = {
+            "question": question.question,
+            "entityType": question.entity_type,
+            "template": question.template,
+        }
+        questions.append(question_dict)
     return jsonify(
         {
-            "errors": {},
-            "data": {
-                "followups": [
-                    {
-                        "question": "what is it like being a nurse?",
-                        # this shape allows us to extend the metadata for each question in the future, e.g.
-                        "entityType": "profession",
-                        "template": "what is it like being a <entity:profession>?",
-                    },
-                    {
-                        "question": "when did you decide to become a nurse?",
-                    },
-                ]
-            },
+            "data": {"followups": questions},
         }
     )

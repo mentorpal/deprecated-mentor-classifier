@@ -17,7 +17,7 @@ from .helpers import (
     run_model_against_testset,
     run_model_against_testset_ignore_confidence,
 )
-from .types import _MentorTrainAndTestConfiguration
+from mentor_classifier.types import _MentorTrainAndTestConfiguration
 
 
 @pytest.fixture(scope="module")
