@@ -9,6 +9,14 @@ from os import path
 from typing import List, Dict
 from mentor_classifier.spacy_model import find_or_load_spacy
 from tests.types import Answer
+from string import Template
+
+QUESTION_TEMPLATES = {
+    "person": Template('Can you tell me more about $entity?'),
+    "place": Template('What was $entity like?'),
+    "acronym": Template('What is $entity?'),
+    "job": Template('What does a(n) $entity do?'),
+}
 
 
 class NamedEntities:
@@ -16,7 +24,6 @@ class NamedEntities:
         self.people: List[str] = []
         self.places: List[str] = []
         self.acronyms: List[str] = []
-        # "jobs":[]
         self.load(answers, shared_root)
 
     def load(self, answers: List[Answer], shared_root: str):
@@ -41,3 +48,16 @@ class NamedEntities:
             "places": self.places,
         }
         return entities
+
+    def generate_questions(self) -> List(str):
+        questions = []
+        for person in self.people:
+            question = QUESTION_TEMPLATES[person].substitute(entity = person)
+            questions.append(question)
+        for place in self.places:
+            question = QUESTION_TEMPLATES[place].substitute(entity = place)
+            questions.append(question)
+        for acronym in self.acronyms:
+            question = QUESTION_TEMPLATES[acronym].substitute(entity = acronym)
+            questions.append(question)
+        return questions
