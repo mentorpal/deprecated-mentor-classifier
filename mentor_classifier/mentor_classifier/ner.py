@@ -12,10 +12,10 @@ from tests.types import Answer
 from string import Template
 
 QUESTION_TEMPLATES = {
-    "person": Template('Can you tell me more about $entity?'),
-    "place": Template('What was $entity like?'),
-    "acronym": Template('What is $entity?'),
-    "job": Template('What does a(n) $entity do?'),
+    "person": Template("Can you tell me more about $entity?"),
+    "place": Template("What was $entity like?"),
+    "acronym": Template("What is $entity?"),
+    "job": Template("What does a(n) $entity do?"),
 }
 
 
@@ -49,15 +49,15 @@ class NamedEntities:
         }
         return entities
 
-    def generate_questions(self) -> List(str):
+    def generate_questions(self) -> List[str]:
         questions = []
         for person in self.people:
-            question = QUESTION_TEMPLATES[person].substitute(entity = person)
+            question = QUESTION_TEMPLATES[person].substitute(entity=person)
             questions.append(question)
         for place in self.places:
-            question = QUESTION_TEMPLATES[place].substitute(entity = place)
+            question = QUESTION_TEMPLATES[place].substitute(entity=place)
             questions.append(question)
         for acronym in self.acronyms:
-            question = QUESTION_TEMPLATES[acronym].substitute(entity = acronym)
+            question = QUESTION_TEMPLATES[acronym].substitute(entity=acronym)
             questions.append(question)
         return questions
