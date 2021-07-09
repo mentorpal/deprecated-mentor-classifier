@@ -45,8 +45,8 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
 
     def evaluate(
         self,
-        question,
-        shared_root,
+        question: str,
+        shared_root: str,
         canned_question_match_disabled=False,
     ) -> QuestionClassiferPredictionResult:
         if not canned_question_match_disabled:
