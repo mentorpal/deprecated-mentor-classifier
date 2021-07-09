@@ -4,9 +4,11 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from flask import jsonify
+
 import pytest
 import responses
+import json
+
 
 from . import fixture_path
 
@@ -19,28 +21,26 @@ def python_path_env(monkeypatch, shared_root):
 
 @responses.activate
 @pytest.mark.parametrize(
-    "input_mentor, category",
-    [("clint", "About me")],
-)
-def test_fetch_data(client, input_mentor, category):
-    res = client.get(f"/classifier/followups/{input_mentor}/{category}")
-    expected_data = jsonify(
-        {
-            "errors": {},
-            "data": {
-                "followups": [
-                    {
-                        "question": "what is it like being a nurse?",
-                        # this shape allows us to extend the metadata for each question in the future, e.g.
-                        "entityType": "profession",
-                        "template": "what is it like being a <entity:profession>?",
-                    },
-                    {
-                        "question": "when did you decide to become a nurse?",
-                    },
-                ]
+    "input_mentor, category, expected_results",
+    [
+        (
+            "clint",
+            "About me",
+            {
+                "entityType": "Clint Anderson",
+                "question": "Can you tell me more about Clint Anderson?",
+                "template": "person",
             },
-        }
-    )
-    actual_data = res.data.decode("utf-8")
-    assert actual_data == expected_data.data.decode("utf-8")
+        )
+    ],
+)
+def test_fetch_data(client, input_mentor, category, expected_results):
+    with open(fixture_path("graphql/{}.json".format("category_answers"))) as f:
+        data = json.load(f)
+        responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    res = client.get(f"/classifier/followups/{input_mentor}/{category}")
+    data = res.json["data"]
+    import logging
+
+    logging.warning(res.json)
+    assert data["followups"][0] == expected_results

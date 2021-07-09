@@ -6,6 +6,7 @@
 #
 import json
 import os
+from os import path
 import requests
 import pandas as pd
 from typing import TypedDict, List
@@ -18,7 +19,9 @@ class GQLQueryBody(TypedDict):
     variables: dict
 
 
-SHARED_ROOT = os.environ.get("SHARED_ROOT") or "shared"
+SHARED_ROOT = os.environ.get("SHARED_ROOT") or path.join(
+    path.abspath(path.join("..", "shared")), "installed"
+)
 
 OFF_TOPIC_THRESHOLD_DEFAULT = (
     -0.55
@@ -185,18 +188,26 @@ def fetch_mentor_data(mentor: str) -> dict:
 
 
 def fetch_category(category: str):
-    tdjson = __auth_gql(query_mentor(category))
-    data = tdjson["data"]["categoryAnswers"]
+    tdjson = __auth_gql(query_category_answers(category))
+    data = tdjson["data"]
+    data = tdjson["data"]
     return data
 
 
-def generate_followups(category: str, shared_root=SHARED_ROOT) -> List[FollowupQuestion]:
+def generate_followups(
+    category: str, shared_root=SHARED_ROOT
+) -> List[FollowupQuestion]:
     data = fetch_category(category)
+    import logging
+
     recorded = []
     id = 0
-    for answer_data in data:
-        answer_text = answer_data.get("answerText")
-        question_text = answer_data.get("questionText")
+    me = data.get("me")
+    category_answer = me.get("categoryAnswers", [])
+    for answer_data in category_answer:
+        logging.warning(f"grumpkin: {answer_data}")
+        answer_text = answer_data["answerText"]
+        question_text = answer_data["questionText"]
         answer = Answer(
             _id=f"A{id}",
             status="COMPLETE",
@@ -206,6 +217,7 @@ def generate_followups(category: str, shared_root=SHARED_ROOT) -> List[FollowupQ
         recorded.append(answer)
         id = id + 1
     followups = NamedEntities(recorded, shared_root).generate_questions()
+    logging.warning(f"LOOK: {followups}")
     return followups
 
 
