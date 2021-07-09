@@ -40,7 +40,7 @@ class QuestionClassiferPredictionResult:
 
 class QuestionClassifierTraining(ABC):
     @abstractmethod
-    def train(self, shared_root) -> QuestionClassifierTrainingResult:
+    def train(self, shared_root: str) -> QuestionClassifierTrainingResult:
         raise NotImplementedError()
 
 

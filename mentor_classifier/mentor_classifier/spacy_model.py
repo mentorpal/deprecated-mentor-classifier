@@ -5,12 +5,12 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from os import path
-from spacy import load
+from spacy import load, Language
 
 SPACY_MODELS = {}
 
 
-def find_or_load_spacy(file_path: str):
+def find_or_load_spacy(file_path: str) -> Language:
     abs_path = path.abspath(file_path)
     if abs_path not in SPACY_MODELS:
         SPACY_MODELS[abs_path] = load(

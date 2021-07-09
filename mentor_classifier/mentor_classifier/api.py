@@ -198,14 +198,11 @@ def generate_followups(
     category: str, shared_root=SHARED_ROOT
 ) -> List[FollowupQuestion]:
     data = fetch_category(category)
-    import logging
-
     recorded = []
     id = 0
     me = data.get("me")
     category_answer = me.get("categoryAnswers", [])
     for answer_data in category_answer:
-        logging.warning(f"grumpkin: {answer_data}")
         answer_text = answer_data["answerText"]
         question_text = answer_data["questionText"]
         answer = Answer(
@@ -217,7 +214,6 @@ def generate_followups(
         recorded.append(answer)
         id = id + 1
     followups = NamedEntities(recorded, shared_root).generate_questions()
-    logging.warning(f"LOOK: {followups}")
     return followups
 
 

@@ -40,7 +40,4 @@ def test_fetch_data(client, input_mentor, category, expected_results):
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     res = client.get(f"/classifier/followups/{input_mentor}/{category}")
     data = res.json["data"]
-    import logging
-
-    logging.warning(res.json)
     assert data["followups"][0] == expected_results
