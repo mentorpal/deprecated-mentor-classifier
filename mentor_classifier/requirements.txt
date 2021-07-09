@@ -9,15 +9,7 @@ PyYAML==5.4.1
 redis==3.5.3
 requests==2.25.1
 scikit-learn==0.24.2
-<<<<<<< HEAD
-<<<<<<< HEAD
-sentence-transformers
-=======
 sentence-transformers==2.0.0
->>>>>>> main
-=======
-sentence-transformers==2.0.0
->>>>>>> dcc5c18897d302c936365716a69365ec15280d77
 spacy==3.0.6 
 
 
