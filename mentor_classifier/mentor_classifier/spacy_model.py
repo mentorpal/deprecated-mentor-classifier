@@ -5,32 +5,20 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 from os import path
+from spacy import load, Language
 
-import json
-import pytest
-import responses
-
-from mentor_classifier import ClassifierFactory, ARCH_DEFAULT
-from .helpers import fixture_path
+SPACY_MODELS = {}
 
 
-@pytest.fixture(scope="module")
-def data_root() -> str:
-    return fixture_path("data_out")
-
-
-@responses.activate
-@pytest.mark.parametrize("mentor_id", [("clint")])
-def test_trains_and_outputs_models(data_root: str, shared_root: str, mentor_id: str):
-    with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    result = (
-        ClassifierFactory()
-        .new_training(mentor_id, shared_root, data_root)
-        .train(shared_root)
-    )
-    print(result)
-    assert result.model_path == path.join(data_root, mentor_id, ARCH_DEFAULT)
-    assert path.exists(path.join(result.model_path, "model.pkl"))
-    assert path.exists(path.join(result.model_path, "w2v.txt"))
+def find_or_load_spacy(file_path: str) -> Language:
+    abs_path = path.abspath(file_path)
+    if abs_path not in SPACY_MODELS:
+        SPACY_MODELS[abs_path] = load(
+            path.join(
+                file_path,
+                "en_core_web_sm-3.0.0",
+                "en_core_web_sm",
+                "en_core_web_sm-3.0.0",
+            )
+        )
+    return SPACY_MODELS[abs_path]

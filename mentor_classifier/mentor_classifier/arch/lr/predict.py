@@ -22,7 +22,7 @@ from mentor_classifier import (
 )
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import file_last_updated_at, sanitize_string
-from .nltk_preprocessor import NLTKPreprocessor
+from mentor_classifier.spacy_preprocessor import SpacyPreprocessor
 from .word2vec import W2V
 
 AnswerIdTextAndMedia = Tuple[str, str, str]
@@ -44,7 +44,10 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
         self.model = self.__load_model()
 
     def evaluate(
-        self, question, canned_question_match_disabled=False
+        self,
+        question: str,
+        shared_root: str,
+        canned_question_match_disabled=False,
     ) -> QuestionClassiferPredictionResult:
         if not canned_question_match_disabled:
             sanitized_question = sanitize_string(question)
@@ -66,7 +69,7 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
                     answer_id, answer, answer_media, 1.0, feedback_id
                 )
 
-        preprocessor = NLTKPreprocessor()
+        preprocessor = SpacyPreprocessor(shared_root)
         processed_question = preprocessor.transform(question)
         w2v_vector, lstm_vector = self.w2v_model.w2v_for_question(processed_question)
         off_topic_threshold = get_off_topic_threshold()

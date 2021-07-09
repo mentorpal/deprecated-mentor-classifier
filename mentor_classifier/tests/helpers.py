@@ -14,8 +14,10 @@ from .types import (
     _MentorTestSetResult,
     _MentorTestResultEntry,
     ComparisonType,
+    Answer,
 )
 from mentor_classifier import QuestionClassifierPrediction
+from typing import List
 
 
 def load_mentor_csv(path: str) -> Mentor:
@@ -28,6 +30,10 @@ def load_mentor_csv(path: str) -> Mentor:
             result.add_mentor_question(mentor_question)
 
     return result
+
+
+def get_answers(mentor: Mentor) -> List[Answer]:
+    return mentor.answers
 
 
 def load_test_csv(path: str) -> _MentorTestSet:
@@ -70,12 +76,12 @@ def fixture_mentor_data(mentor_id: str, p: str) -> str:
 
 
 def run_model_against_testset_ignore_confidence(
-    evaluator: QuestionClassifierPrediction, test_set: _MentorTestSet
+    evaluator: QuestionClassifierPrediction, test_set: _MentorTestSet, shared_root: str
 ) -> _MentorTestSetResult:
     result = _MentorTestSetResult()
     for test_set_entry in test_set.tests:
         current_result_entry = _MentorTestResultEntry(test_set_entry)
-        test_result = evaluator.evaluate(test_set_entry.question)
+        test_result = evaluator.evaluate(test_set_entry.question, shared_root)
 
         if test_result.answer_text != test_set_entry.expected_answer:
             current_result_entry.passing = False
@@ -89,13 +95,13 @@ def run_model_against_testset_ignore_confidence(
 
 
 def run_model_against_testset(
-    evaluator: QuestionClassifierPrediction, test_set: _MentorTestSet
+    evaluator: QuestionClassifierPrediction, test_set: _MentorTestSet, shared_root: str
 ) -> _MentorTestSetResult:
     result = _MentorTestSetResult()
 
     for test_set_entry in test_set.tests:
         current_result_entry = _MentorTestResultEntry(test_set_entry)
-        test_result = evaluator.evaluate(test_set_entry.question)
+        test_result = evaluator.evaluate(test_set_entry.question, shared_root)
 
         if test_result.answer_text != test_set_entry.expected_answer:
             current_result_entry.passing = False

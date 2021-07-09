@@ -47,6 +47,6 @@ def test_find_classifier_returns_updated_classifier_if_model_has_changed(
     c1 = dao.find_classifier(mentor_id)
     ClassifierFactory().new_training(
         mentor=mentor_id, shared_root=shared_root, data_path=test_data_root
-    ).train()
+    ).train(shared_root)
     c2 = dao.find_classifier(mentor_id)
     assert c1 != c2

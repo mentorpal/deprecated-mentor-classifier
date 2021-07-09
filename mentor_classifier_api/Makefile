@@ -14,8 +14,6 @@ $(VENV)-update:
 	$(VENV_PIP) install --upgrade pip
 	$(VENV_PIP) install -r requirements.test.txt
 	$(VENV_PIP) install ../mentor_classifier
-	$(VENV)/bin/python3.8 -m nltk.downloader averaged_perceptron_tagger
-
 .PHONY clean:
 clean:
 	rm -rf .venv .pytest_cache .mypy_cache build

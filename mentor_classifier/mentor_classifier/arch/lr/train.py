@@ -22,7 +22,7 @@ from mentor_classifier import (
 )
 from mentor_classifier.api import update_training
 from mentor_classifier.mentor import Mentor
-from .nltk_preprocessor import NLTKPreprocessor
+from mentor_classifier.spacy_preprocessor import SpacyPreprocessor
 from .word2vec import W2V
 
 
@@ -47,10 +47,12 @@ class LRQuestionClassifierTraining(QuestionClassifierTraining):
         accuracy: (float) accuracy score for training data
     """
 
-    def train(self) -> QuestionClassifierTrainingResult:
+    def train(self, shared_root) -> QuestionClassifierTrainingResult:
         if not os.path.exists(self.model_path):
             os.makedirs(self.model_path)
-        training_data, num_rows_having_paraphrases = self.__load_training_data()
+        training_data, num_rows_having_paraphrases = self.__load_training_data(
+            shared_root
+        )
         train_vectors = self.__load_training_vectors(training_data)
         train_vectors = self.__load_topic_vectors(train_vectors)
         (
@@ -69,8 +71,8 @@ class LRQuestionClassifierTraining(QuestionClassifierTraining):
             f.write(self.w2v.get_w2v_file_path())
         return QuestionClassifierTrainingResult(scores, accuracy, self.model_path)
 
-    def __load_training_data(self):
-        preprocessor = NLTKPreprocessor()
+    def __load_training_data(self, shared_root):
+        preprocessor = SpacyPreprocessor(shared_root)
         train_data = []
         num_rows_having_paraphrases = 0
         for key in self.mentor.questions_by_id:
@@ -153,5 +155,5 @@ def train(
 ):
     m = Mentor(mentor)
     classifier = LRQuestionClassifierTraining(m, shared_root, output_dir)
-    result = classifier.train()
+    result = classifier.train(shared_root)
     return result

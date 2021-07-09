@@ -30,7 +30,7 @@ def data_root() -> str:
     "training_configuration",
     [
         _MentorTrainAndTestConfiguration(
-            mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
+            mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.66
         )
     ],
 )
@@ -55,9 +55,9 @@ def test_train_and_predict(
             data_path=tmpdir,
             arch=training_configuration.arch,
         )
-        .train()
+        .train(shared_root)
     )
-    assert result.accuracy == training_configuration.expected_training_accuracy
+    assert result.accuracy >= training_configuration.expected_training_accuracy
 
     classifier = ClassifierFactory().new_prediction(
         mentor=training_configuration.mentor_id,
@@ -66,7 +66,7 @@ def test_train_and_predict(
         arch=training_configuration.arch,
     )
 
-    test_results = run_model_against_testset(classifier, test_set)
+    test_results = run_model_against_testset(classifier, test_set, shared_root)
 
     logging.warning(test_results.errors)
     logging.warning(
@@ -105,7 +105,7 @@ def test_train_and_predict_transformers(
             data_path=tmpdir,
             arch=training_configuration.arch,
         )
-        .train()
+        .train(shared_root)
     )
     assert result.accuracy >= training_configuration.expected_training_accuracy
 
@@ -116,7 +116,7 @@ def test_train_and_predict_transformers(
         arch=training_configuration.arch,
     )
 
-    test_results = run_model_against_testset(classifier, test_set)
+    test_results = run_model_against_testset(classifier, test_set, shared_root)
 
     logging.warning(test_results.errors)
     logging.warning(
@@ -193,7 +193,7 @@ def test_compare_test_accuracy(
             data_path=tmpdir,
             arch=training_configuration.arch,
         )
-        .train()
+        .train(shared_root)
     )
     hf_train = (
         ClassifierFactory()
@@ -203,7 +203,7 @@ def test_compare_test_accuracy(
             data_path=tmpdir,
             arch=compare_configuration.arch,
         )
-        .train()
+        .train(shared_root)
     )
     assert hf_train.accuracy >= lr_train.accuracy
 
@@ -214,7 +214,7 @@ def test_compare_test_accuracy(
         arch=compare_configuration.arch,
     )
     hf_test_results = run_model_against_testset_ignore_confidence(
-        hf_classifier, test_set
+        hf_classifier, test_set, shared_root
     )
     hf_test_accuracy = hf_test_results.passing_tests / len(hf_test_results.results)
     lr_classifier = ClassifierFactory().new_prediction(
@@ -224,12 +224,12 @@ def test_compare_test_accuracy(
         arch=training_configuration.arch,
     )
     lr_test_results = run_model_against_testset_ignore_confidence(
-        lr_classifier, test_set
+        lr_classifier, test_set, shared_root
     )
     lr_test_accuracy = lr_test_results.passing_tests / len(lr_test_results.results)
     assert lr_test_accuracy <= hf_test_accuracy
-    hf_result = hf_classifier.evaluate(example)
-    lr_result = lr_classifier.evaluate(example)
+    hf_result = hf_classifier.evaluate(example, shared_root)
+    lr_result = lr_classifier.evaluate(example, shared_root)
     assert hf_result.highest_confidence >= lr_result.highest_confidence
 
 
@@ -268,7 +268,7 @@ def test_compare_cross_validation(
             data_path=tmpdir,
             arch=training_configuration.arch,
         )
-        .train()
+        .train(shared_root)
     )
     assert lr_train.accuracy >= training_configuration.expected_training_accuracy
 
@@ -280,6 +280,6 @@ def test_compare_cross_validation(
             data_path=tmpdir,
             arch=compare_configuration.arch,
         )
-        .train()
+        .train(shared_root)
     )
     assert hf_train.accuracy >= compare_configuration.expected_training_accuracy

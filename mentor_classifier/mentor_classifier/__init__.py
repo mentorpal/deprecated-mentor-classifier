@@ -40,14 +40,14 @@ class QuestionClassiferPredictionResult:
 
 class QuestionClassifierTraining(ABC):
     @abstractmethod
-    def train(self) -> QuestionClassifierTrainingResult:
+    def train(self, shared_root: str) -> QuestionClassifierTrainingResult:
         raise NotImplementedError()
 
 
 class QuestionClassifierPrediction(ABC):
     @abstractmethod
     def evaluate(
-        self, question, canned_question_match_disabled=False
+        self, question: str, shared_root: str, canned_question_match_disabled=False
     ) -> QuestionClassiferPredictionResult:
         raise NotImplementedError()
 

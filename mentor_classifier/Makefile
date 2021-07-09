@@ -9,7 +9,6 @@ $(VENV)-update:
 	[ -d $(VENV) ] || python3.8 -m venv $(VENV)
 	$(VENV)/bin/pip install --upgrade pip
 	$(VENV)/bin/pip install -r ./requirements.test.txt
-	$(VENV)/bin/python3 -m nltk.downloader averaged_perceptron_tagger
 
 .PHONY clean:
 clean:
@@ -57,6 +56,7 @@ test: $(VENV)
 	rm -rf tests/fixtures/data_out/*/*
 	cd $(ROOT)/shared && $(MAKE) installed/word2vec.bin
 	cd $(ROOT)/shared && $(MAKE) installed/sentence-transformer
+	cd $(ROOT)/shared && $(MAKE) installed/spacy-model
 	. $(VENV)/bin/activate \
 		&& coverage run \
 			--omit="$(PWD)/tests $(VENV)" \
