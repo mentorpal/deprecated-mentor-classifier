@@ -47,7 +47,11 @@ class QuestionClassifierTraining(ABC):
 class QuestionClassifierPrediction(ABC):
     @abstractmethod
     def evaluate(
+<<<<<<< HEAD
         self, question, shared_root, canned_question_match_disabled=False
+=======
+        self, question: str, shared_root: str, canned_question_match_disabled=False
+>>>>>>> main
     ) -> QuestionClassiferPredictionResult:
         raise NotImplementedError()
 
