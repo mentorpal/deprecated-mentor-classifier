@@ -40,6 +40,7 @@ def answer():
     model_root = os.environ.get("MODEL_ROOT") or "models"
     shared_root = os.environ.get("SHARED_ROOT") or "shared"
     mentor_models = os.path.join(model_root, mentor)
+    shared_root = os.environ.get("SHARED_ROOT") or "shared"
     if not os.path.isdir(mentor_models):
         return (jsonify({"message": f"No models found for mentor {mentor}."}), 404)
     classifier = _get_dao().find_classifier(mentor)
