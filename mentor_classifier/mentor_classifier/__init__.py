@@ -48,10 +48,14 @@ class QuestionClassifierPrediction(ABC):
     @abstractmethod
     def evaluate(
 <<<<<<< HEAD
+<<<<<<< HEAD
         self, question, shared_root, canned_question_match_disabled=False
 =======
         self, question: str, shared_root: str, canned_question_match_disabled=False
 >>>>>>> main
+=======
+        self, question, shared_root, canned_question_match_disabled=False
+>>>>>>> dcc5c18897d302c936365716a69365ec15280d77
     ) -> QuestionClassiferPredictionResult:
         raise NotImplementedError()
 
