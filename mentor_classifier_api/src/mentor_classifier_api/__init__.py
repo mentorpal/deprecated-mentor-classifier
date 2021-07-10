@@ -57,6 +57,6 @@ def create_app():
 
     from mentor_classifier_api.blueprints.followups import followups_blueprint
 
-    app.register_blueprint(followups_blueprint, url_prefix="/classifier/followups/")
+    app.register_blueprint(followups_blueprint, url_prefix="/classifier/me/")
 
     return app

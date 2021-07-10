@@ -92,20 +92,30 @@ mutation UserQuestionCreate($userQuestion: UserQuestionCreateInput!) {
 }
 """
 GQL_CATEGORY_ANSWERS = """
-query CategoryAnswers($category: ID!) {
+query CategoryAnswers($category: String!) {
   me {
-    categoryAnswers(category: $category) {
-      answerText
-      questionText
+        categoryAnswers(category: $category) {
+            answerText
+            questionText
+        }
     }
 }
 """
 
 
-def __auth_gql(query: GQLQueryBody) -> dict:
-    res = requests.post(
-        GRAPHQL_ENDPOINT,
-        json=query,
+def __auth_gql(query: GQLQueryBody, authtoken: str = None) -> dict:
+    requests.options
+    res = (
+        requests.get(
+            GRAPHQL_ENDPOINT,
+            json=query,
+            headers={"Authorization": authtoken},
+        )
+        if authtoken
+        else requests.get(
+            GRAPHQL_ENDPOINT,
+            json=query,
+        )
     )
     res.raise_for_status()
     return res.json()
@@ -116,7 +126,7 @@ def query_mentor(mentor: str) -> GQLQueryBody:
 
 
 def query_category_answers(category: str) -> GQLQueryBody:
-    return {"query": GQL_CATEGORY_ANSWERS, "variables": {"id": category}}
+    return {"query": GQL_CATEGORY_ANSWERS, "variables": {"category": category}}
 
 
 def mutation_update_training(mentor: str) -> GQLQueryBody:
@@ -187,17 +197,19 @@ def fetch_mentor_data(mentor: str) -> dict:
     return data
 
 
-def fetch_category(category: str):
-    tdjson = __auth_gql(query_category_answers(category))
+def fetch_category(category: str, authtoken: str):
+    tdjson = __auth_gql(query_category_answers(category), authtoken)
     data = tdjson["data"]
     data = tdjson["data"]
     return data
 
 
 def generate_followups(
-    category: str, shared_root=SHARED_ROOT
+    category: str, authtoken: str, shared_root=SHARED_ROOT
 ) -> List[FollowupQuestion]:
-    data = fetch_category(category)
+    data = fetch_category(category, authtoken)
+    import logging
+
     recorded = []
     id = 0
     me = data.get("me")
