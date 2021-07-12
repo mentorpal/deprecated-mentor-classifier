@@ -33,10 +33,11 @@ def test_fetch_data(
 ):
     with open(fixture_path("graphql/{}.json".format(input_mentor))) as f:
         data = json.load(f)
-        responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    res = client.post(f"/classifier/trainingdata/{input_mentor}")
+        responses.add(responses.GET, "http://graphql/graphql", json=data, status=200)
+    res = client.get(f"/classifier/trainingdata/{input_mentor}")
     expected_data = pd.read_csv(
         fixture_path(os.path.join("fetched_training_data", f"{input_mentor}.csv"))
     )
     actual_data = pd.read_csv(StringIO(res.data.decode("utf-8")))
+    print(actual_data)
     pandas.testing.assert_frame_equal(actual_data, expected_data)
