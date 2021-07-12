@@ -11,6 +11,7 @@ from mentor_classifier.spacy_model import find_or_load_spacy
 from .types import Answer
 from string import Template
 from dataclasses import dataclass
+from jobs_train import CustomSpacy
 
 QUESTION_TEMPLATES = {
     "person": Template("Can you tell me more about $entity?"),
@@ -32,12 +33,15 @@ class NamedEntities:
         self.people: List[str] = []
         self.places: List[str] = []
         self.acronyms: List[str] = []
+        self.jobs: List[str] = []
         self.load(answers, shared_root)
 
     def load(self, answers: List[Answer], shared_root: str):
         nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
+        data_root = path.join(path.abspath("../tests"), "fixtures","data", "jobs", "data.csv")
+        job_aware = CustomSpacy(nlp,data_root).new_model()
         for answer in answers:
-            answer_doc = nlp(answer.transcript)
+            answer_doc = job_aware(answer.transcript)
             if answer_doc.ents:
                 for ent in answer_doc.ents:
                     if ent.label_ == "PERSON":
@@ -46,6 +50,8 @@ class NamedEntities:
                         self.acronyms.append(ent.text)
                     if ent.label == "GPE":
                         self.places.append(ent.text)
+                    if ent.label == "JOB":
+                        self.jobs.append(ent.text)
             else:
                 logging.warning("No named entities found.")
 
@@ -70,5 +76,9 @@ class NamedEntities:
         for acronym in self.acronyms:
             question_str = QUESTION_TEMPLATES["acronym"].substitute(entity=acronym)
             question = FollowupQuestion(question_str, acronym, "acronym")
+            questions.append(question)
+        for job in self.jobs:
+            question_str = QUESTION_TEMPLATES["job"].substitute(entity=job)
+            question = FollowupQuestion(question_str, job, "job")
             questions.append(question)
         return questions
