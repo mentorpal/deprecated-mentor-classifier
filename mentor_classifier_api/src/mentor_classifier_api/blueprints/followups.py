@@ -4,7 +4,7 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 from mentor_classifier.api import generate_followups
 
 followups_blueprint = Blueprint("followups", __name__)
@@ -12,8 +12,7 @@ followups_blueprint = Blueprint("followups", __name__)
 
 @followups_blueprint.route("/followups/category/<category>", methods=["GET"])
 def followup(category: str):
-    authtoken = request.headers.get("Authorization")
-    data = generate_followups(category, authtoken)
+    data = generate_followups(category)
     questions = []
     for question in data:
         question_dict = {

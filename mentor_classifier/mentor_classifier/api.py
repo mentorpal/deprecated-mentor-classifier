@@ -11,6 +11,7 @@ import requests
 import pandas as pd
 from typing import TypedDict, List
 from mentor_classifier.ner import FollowupQuestion, NamedEntities
+from flask import request
 from .types import Answer
 
 
@@ -103,17 +104,21 @@ query CategoryAnswers($category: String!) {
 """
 
 
-def __auth_gql(query: GQLQueryBody, authtoken: str = None) -> dict:
+def __auth_gql(query: GQLQueryBody) -> dict:
+    authtoken = request.headers.get("Authorization")
+    cookies = request.cookies
     requests.options
     res = (
         requests.get(
             GRAPHQL_ENDPOINT,
             json=query,
+            cookies=cookies,
             headers={"Authorization": authtoken},
         )
         if authtoken
         else requests.get(
             GRAPHQL_ENDPOINT,
+            cookies=cookies,
             json=query,
         )
     )
@@ -197,17 +202,17 @@ def fetch_mentor_data(mentor: str) -> dict:
     return data
 
 
-def fetch_category(category: str, authtoken: str):
-    tdjson = __auth_gql(query_category_answers(category), authtoken)
+def fetch_category(category: str):
+    tdjson = __auth_gql(query_category_answers(category))
     data = tdjson["data"]
     data = tdjson["data"]
     return data
 
 
 def generate_followups(
-    category: str, authtoken: str, shared_root=SHARED_ROOT
+    category: str, shared_root=SHARED_ROOT
 ) -> List[FollowupQuestion]:
-    data = fetch_category(category, authtoken)
+    data = fetch_category(category)
     recorded = []
     id = 0
     me = data.get("me")
