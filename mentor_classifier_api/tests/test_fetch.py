@@ -34,7 +34,7 @@ def test_fetch_data(
     with open(fixture_path("graphql/{}.json".format(input_mentor))) as f:
         data = json.load(f)
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    res = client.get(f"/classifier/trainingdata/{input_mentor}")
+    res = client.post(f"/classifier/trainingdata/{input_mentor}")
     expected_data = pd.read_csv(
         fixture_path(os.path.join("fetched_training_data", f"{input_mentor}.csv"))
     )
