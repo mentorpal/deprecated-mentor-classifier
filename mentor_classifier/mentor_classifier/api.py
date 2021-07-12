@@ -208,8 +208,6 @@ def generate_followups(
     category: str, authtoken: str, shared_root=SHARED_ROOT
 ) -> List[FollowupQuestion]:
     data = fetch_category(category, authtoken)
-    import logging
-
     recorded = []
     id = 0
     me = data.get("me")
