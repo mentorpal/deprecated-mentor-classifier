@@ -19,12 +19,6 @@ from .helpers import get_answers
 from typing import List, Dict
 
 
-@pytest.fixture(scope="module")
-def shared_root() -> str:
-    root = path.abspath(path.join("..", "shared", "installed"))
-    return root
-
-
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id, expected_answer",
