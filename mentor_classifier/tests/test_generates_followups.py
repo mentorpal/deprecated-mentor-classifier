@@ -24,7 +24,7 @@ from typing import List, Dict
     "mentor_id, expected_answer",
     [("clint", {"people": ["Clint Anderson"], "places": [], "acronyms": []})],
 )
-def test_ner(
+def test_recognizes_named_entities(
     mentor_id: str,
     expected_answer: Dict[str, List[str]],
     shared_root: str,
@@ -46,7 +46,7 @@ def test_ner(
     "mentor_id, expected_question",
     [("clint", "Can you tell me more about Clint Anderson?")],
 )
-def test_question_gen(
+def test_generates_followups(
     mentor_id: str,
     expected_question: str,
     shared_root: str,
