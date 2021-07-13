@@ -12,7 +12,7 @@ import pandas as pd
 from typing import TypedDict, List
 from mentor_classifier.ner import FollowupQuestion, NamedEntities
 from flask import request
-from .types import Answer
+from .types import AnswerInfo
 
 
 class GQLQueryBody(TypedDict):
@@ -109,14 +109,14 @@ def __auth_gql(query: GQLQueryBody) -> dict:
     cookies = request.cookies
     requests.options
     res = (
-        requests.get(
+        requests.post(
             GRAPHQL_ENDPOINT,
             json=query,
             cookies=cookies,
             headers={"Authorization": authtoken},
         )
         if authtoken
-        else requests.get(
+        else requests.post(
             GRAPHQL_ENDPOINT,
             cookies=cookies,
             json=query,
@@ -202,32 +202,26 @@ def fetch_mentor_data(mentor: str) -> dict:
     return data
 
 
-def fetch_category(category: str):
+def fetch_category(category: str) -> dict:
     tdjson = __auth_gql(query_category_answers(category))
-    data = tdjson["data"]
-    data = tdjson["data"]
-    return data
+    return tdjson.get("data") or {}
 
 
 def generate_followups(
     category: str, shared_root=SHARED_ROOT
 ) -> List[FollowupQuestion]:
     data = fetch_category(category)
-    recorded = []
-    id = 0
     me = data.get("me")
+    if me is None:
+        raise NameError("me not found")
     category_answer = me.get("categoryAnswers", [])
-    for answer_data in category_answer:
-        answer_text = answer_data["answerText"]
-        question_text = answer_data["questionText"]
-        answer = Answer(
-            _id=f"A{id}",
-            status="COMPLETE",
-            transcript=answer_text,
-            question=question_text,
+    recorded = [
+        AnswerInfo(
+            answer_text=answer_data.get("answerText") or "",
+            question_text=answer_data.get("questionText") or "",
         )
-        recorded.append(answer)
-        id = id + 1
+        for answer_data in category_answer
+    ]
     followups = NamedEntities(recorded, shared_root).generate_questions()
     return followups
 

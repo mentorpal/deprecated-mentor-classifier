@@ -10,17 +10,17 @@ from mentor_classifier.api import generate_followups
 followups_blueprint = Blueprint("followups", __name__)
 
 
-@followups_blueprint.route("/followups/category/<category>", methods=["GET"])
+@followups_blueprint.route("followups/category/<category>", methods=["POST"])
 def followup(category: str):
     data = generate_followups(category)
-    questions = []
-    for question in data:
-        question_dict = {
+    questions = [
+        {
             "question": question.question,
             "entityType": question.entity_type,
             "template": question.template,
         }
-        questions.append(question_dict)
+        for question in data
+    ]
     return jsonify(
         {
             "data": {"followups": questions},
