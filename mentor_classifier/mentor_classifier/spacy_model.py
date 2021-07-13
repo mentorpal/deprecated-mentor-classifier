@@ -13,12 +13,18 @@ SPACY_MODELS = {}
 def find_or_load_spacy(file_path: str) -> Language:
     abs_path = path.abspath(file_path)
     if abs_path not in SPACY_MODELS:
-        SPACY_MODELS[abs_path] = load(
+         SPACY_MODELS[abs_path] = load(
             path.join(
                 file_path,
-                "en_core_web_sm-3.0.0",
-                "en_core_web_sm",
-                "en_core_web_sm-3.0.0",
+                "output",
+                "model-best",
             )
+        # SPACY_MODELS[abs_path] = load(
+        #     path.join(
+        #         file_path,
+        #         "en_core_web_sm-3.0.0",
+        #         "en_core_web_sm",
+        #         "en_core_web_sm-3.0.0",
+        #     )
         )
     return SPACY_MODELS[abs_path]

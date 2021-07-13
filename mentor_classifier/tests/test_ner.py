@@ -44,7 +44,7 @@ def test_ner(
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id, expected_question",
-    [("clint", "Can you tell me more about Clint Anderson?")],
+    [("clint", "Clint Anderson is an electrician and he workes for GE on Christmans")],
 )
 def test_question_gen(
     mentor_id: str,

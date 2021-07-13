@@ -3,7 +3,9 @@ from spacy.util import minibatch, compounding
 from typing import List, Tuple, Dict, Union
 from spacy import Language
 from spacy.training import Example
+from spacy.tokens import DocBin
 import csv
+from os import path
 
 class CustomSpacy():
     train: List[Tuple[str,Dict[str,List[Tuple[Union[int, str]]]]]]
@@ -14,7 +16,7 @@ class CustomSpacy():
         self.train = self.load_training(data_path)
     
     def load_training(self, data_path: str) -> List[Tuple[str,Dict[str,List[Tuple[Union[int, str]]]]]]:
-        training = []
+        training = DocBin()
         with open(data_path) as f:
             csv_reader = csv.reader(f, delimiter=",")
             next(csv_reader)
@@ -22,12 +24,18 @@ class CustomSpacy():
                 context = row[1]
                 start_index = int(row[2])
                 end_index = int(row[3])
-                annotation = {"entities": [(start_index, end_index, "JOB")]}
                 doc = self.model.make_doc(context)
-                example = Example.from_dict(doc, annotation)
-                training.append(example)
+                span = doc.char_span(start_index, end_index, label = "JOB", alignment_mode = "contract")
+                ents = []
+                if span is None:
+                    break
+                ents.append(span)
+                doc.ents = ents
+                training.add(doc)
+        training.to_disk(path.join(path.abspath("../../"), "train.spacy"))
         return training
-    
+
+   
     def new_model(self)-> Language:
         nlp = self.model
         nlp.initialize(lambda: self.train)

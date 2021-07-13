@@ -38,19 +38,21 @@ class NamedEntities:
 
     def load(self, answers: List[Answer], shared_root: str):
         nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
-        data_root = path.join(path.abspath("tests"), "fixtures","data", "jobs", "data.csv")
-        job_aware = CustomSpacy(nlp,data_root).new_model()
         for answer in answers:
-            answer_doc = job_aware(answer.transcript)
+            answer_doc = nlp(answer.transcript)
             if answer_doc.ents:
                 for ent in answer_doc.ents:
                     if ent.label_ == "PERSON":
                         self.people.append(ent.text)
+                        logging.warning(ent.text)
                     if ent.label == "ORG":
                         self.acronyms.append(ent.text)
+                        logging.warning(ent.text)
                     if ent.label == "GPE":
                         self.places.append(ent.text)
+                        logging.warning(ent.text)
                     if ent.label == "JOB":
+                        logging.warning(ent.text)
                         self.jobs.append(ent.text)
             else:
                 logging.warning("No named entities found.")
