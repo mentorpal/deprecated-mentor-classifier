@@ -4,6 +4,7 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+from dataclasses import dataclass
 import json
 import os
 import requests
@@ -104,6 +105,12 @@ query CategoryAnswers($category: String!) {
 """
 
 
+@dataclass
+class PassThroughAuth:
+    cookies: Dict[str, str]
+    headers: Dict[str, str]
+
+
 def __auth_gql(
     query: GQLQueryBody, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
 ) -> dict:
@@ -188,13 +195,19 @@ def fetch_mentor_data(mentor: str) -> dict:
     return data
 
 
-def fetch_category(category: str) -> dict:
-    tdjson = __auth_gql(query_category_answers(category))
+def fetch_category(
+    category: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> dict:
+    tdjson = __auth_gql(
+        query_category_answers(category), cookies=cookies, headers=headers
+    )
     return tdjson.get("data") or {}
 
 
-def generate_followups(category: str) -> List[FollowupQuestion]:
-    data = fetch_category(category)
+def generate_followups(
+    category: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> List[FollowupQuestion]:
+    data = fetch_category(category, cookies=cookies, headers=headers)
     me = data.get("me")
     if me is None:
         raise NameError("me not found")

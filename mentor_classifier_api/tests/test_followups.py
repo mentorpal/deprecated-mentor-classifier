@@ -33,7 +33,7 @@ def python_path_env(monkeypatch, shared_root):
         )
     ],
 )
-def test_fetch_data(client, category, expected_results):
+def test_followup(client, category, expected_results):
     with open(fixture_path("graphql/{}.json".format("category_answers"))) as f:
         data = json.load(f)
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
