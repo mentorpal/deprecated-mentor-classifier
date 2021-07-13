@@ -6,12 +6,12 @@
 #
 import json
 import os
-from os import path
 import requests
+from typing import Dict, List, TypedDict
+
 import pandas as pd
-from typing import TypedDict, List
+
 from mentor_classifier.ner import FollowupQuestion, NamedEntities
-from flask import request
 from .types import AnswerInfo
 
 
@@ -20,9 +20,9 @@ class GQLQueryBody(TypedDict):
     variables: dict
 
 
-SHARED_ROOT = os.environ.get("SHARED_ROOT") or path.join(
-    path.abspath(path.join("..", "shared")), "installed"
-)
+def get_shared_root() -> str:
+    return os.environ.get("SHARED_ROOT") or "shared"
+
 
 OFF_TOPIC_THRESHOLD_DEFAULT = (
     -0.55
@@ -104,24 +104,10 @@ query CategoryAnswers($category: String!) {
 """
 
 
-def __auth_gql(query: GQLQueryBody) -> dict:
-    authtoken = request.headers.get("Authorization")
-    cookies = request.cookies
-    requests.options
-    res = (
-        requests.post(
-            GRAPHQL_ENDPOINT,
-            json=query,
-            cookies=cookies,
-            headers={"Authorization": authtoken},
-        )
-        if authtoken
-        else requests.post(
-            GRAPHQL_ENDPOINT,
-            cookies=cookies,
-            json=query,
-        )
-    )
+def __auth_gql(
+    query: GQLQueryBody, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> dict:
+    res = requests.post(GRAPHQL_ENDPOINT, json=query, cookies=cookies, headers=headers)
     res.raise_for_status()
     return res.json()
 
@@ -207,9 +193,7 @@ def fetch_category(category: str) -> dict:
     return tdjson.get("data") or {}
 
 
-def generate_followups(
-    category: str, shared_root=SHARED_ROOT
-) -> List[FollowupQuestion]:
+def generate_followups(category: str) -> List[FollowupQuestion]:
     data = fetch_category(category)
     me = data.get("me")
     if me is None:
@@ -222,7 +206,9 @@ def generate_followups(
         )
         for answer_data in category_answer
     ]
-    followups = NamedEntities(recorded, shared_root).generate_questions()
+    followups = NamedEntities(
+        recorded, shared_root=get_shared_root()
+    ).generate_questions()
     return followups
 
 

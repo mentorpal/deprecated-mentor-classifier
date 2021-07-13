@@ -12,6 +12,7 @@ from .types import AnswerInfo
 from string import Template
 from dataclasses import dataclass
 
+
 QUESTION_TEMPLATES = {
     "person": Template("Can you tell me more about $entity?"),
     "place": Template("What was $entity like?"),

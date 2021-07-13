@@ -38,7 +38,9 @@ def test_ner(
     mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
     answers: List[Answer] = get_answers(mentor)
     answer_info: List[AnswerInfo] = [
-        AnswerInfo(question_text=answer.question.question, answer_text=answer.transcript)
+        AnswerInfo(
+            question_text=answer.question.question, answer_text=answer.transcript
+        )
         for answer in answers
     ]
     ents = NamedEntities(answer_info, shared_root)
@@ -58,7 +60,9 @@ def test_question_gen(
     mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
     answers: List[Answer] = get_answers(mentor)
     answer_info: List[AnswerInfo] = [
-        AnswerInfo(question_text=answer.question.question, answer_text=answer.transcript)
+        AnswerInfo(
+            question_text=answer.question.question, answer_text=answer.transcript
+        )
         for answer in answers
     ]
     ents = NamedEntities(answer_info, shared_root)
