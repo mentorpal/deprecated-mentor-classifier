@@ -20,10 +20,6 @@ class GQLQueryBody(TypedDict):
     variables: dict
 
 
-def get_shared_root() -> str:
-    return os.environ.get("SHARED_ROOT") or "shared"
-
-
 OFF_TOPIC_THRESHOLD_DEFAULT = (
     -0.55
 )  # todo: this should probably be specific to the classifier arch?
@@ -212,9 +208,7 @@ def generate_followups(
         )
         for answer_data in category_answer
     ]
-    followups = NamedEntities(
-        recorded, shared_root=get_shared_root()
-    ).generate_questions()
+    followups = NamedEntities(recorded).generate_questions()
     return followups
 
 

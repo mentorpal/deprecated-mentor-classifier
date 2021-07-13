@@ -4,13 +4,16 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+from dataclasses import dataclass
 import logging
 from os import path
-from typing import List, Dict
-from mentor_classifier.spacy_model import find_or_load_spacy
-from .types import AnswerInfo
 from string import Template
-from dataclasses import dataclass
+from typing import List, Dict
+
+
+from mentor_classifier.spacy_model import find_or_load_spacy
+from mentor_classifier.types import AnswerInfo
+from mentor_classifier.utils import get_shared_root
 
 
 QUESTION_TEMPLATES = {
@@ -29,11 +32,11 @@ class FollowupQuestion:
 
 
 class NamedEntities:
-    def __init__(self, answers: List[AnswerInfo], shared_root: str):
+    def __init__(self, answers: List[AnswerInfo], shared_root: str = ""):
         self.people: List[str] = []
         self.places: List[str] = []
         self.acronyms: List[str] = []
-        self.load(answers, shared_root)
+        self.load(answers, shared_root or get_shared_root())
 
     def load(self, answers: List[AnswerInfo], shared_root: str):
         nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
