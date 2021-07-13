@@ -30,7 +30,6 @@ def test_trains_and_outputs_models(data_root: str, shared_root: str, mentor_id: 
         .new_training(mentor_id, shared_root, data_root)
         .train(shared_root)
     )
-    print(result)
     assert result.model_path == path.join(data_root, mentor_id, ARCH_DEFAULT)
     assert path.exists(path.join(result.model_path, "model.pkl"))
     assert path.exists(path.join(result.model_path, "w2v.txt"))

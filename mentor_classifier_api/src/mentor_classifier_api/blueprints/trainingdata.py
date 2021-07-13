@@ -11,7 +11,7 @@ from flask import Blueprint, make_response
 trainingdata_blueprint = Blueprint("trainingdata", __name__)
 
 
-@trainingdata_blueprint.route("/<mentor>", methods=["POST"])
+@trainingdata_blueprint.route("/<mentor>", methods=["GET"])
 def get_data(mentor: str):
     data = fetch_training_data(mentor)
     data_csv = data.to_csv(index=False)

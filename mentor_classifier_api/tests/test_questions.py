@@ -81,7 +81,7 @@ def test_evaluate_classifies_user_questions(
     with open(fixture_path("graphql/{}.json".format(input_mentor))) as f:
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    res = client.post(
+    res = client.get(
         f"/classifier/questions/?mentor={input_mentor}&query={input_question}"
     )
     assert res.json["query"] == expected_results["query"]
