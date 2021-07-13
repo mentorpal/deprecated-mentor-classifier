@@ -4,7 +4,7 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from mentor_classifier.mentor_classifier.types import Answer, AnswerInfo
+from mentor_classifier.types import Answer, AnswerInfo
 from os import path
 
 import pytest
@@ -38,14 +38,13 @@ def test_ner(
     mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
     answers: List[Answer] = get_answers(mentor)
     answer_info: List[AnswerInfo] = [
-        AnswerInfo(question_text="", answer_text=answer["question"]["question"])
+        AnswerInfo(question_text=answer.question.question, answer_text=answer.transcript)
         for answer in answers
     ]
     ents = NamedEntities(answer_info, shared_root)
     assert NamedEntities.to_dict(ents) == expected_answer
 
 
-@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id, expected_question",
@@ -59,7 +58,7 @@ def test_question_gen(
     mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
     answers: List[Answer] = get_answers(mentor)
     answer_info: List[AnswerInfo] = [
-        AnswerInfo(question_text="", answer_text=answer["question"]["question"])
+        AnswerInfo(question_text=answer.question.question, answer_text=answer.transcript)
         for answer in answers
     ]
     ents = NamedEntities(answer_info, shared_root)

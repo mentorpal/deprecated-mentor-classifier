@@ -20,6 +20,11 @@ from .helpers import fixture_path
 def data_root() -> str:
     return fixture_path("data")
 
+@pytest.fixture(scope="module")
+def shared_root() -> str:
+    root = path.abspath(path.join("..", "shared", "installed"))
+    return root
+
 
 @responses.activate
 @pytest.mark.parametrize("mentor_id", [("clint")])
