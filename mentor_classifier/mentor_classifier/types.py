@@ -85,6 +85,12 @@ class Answer:
 
 
 @dataclass
+class AnswerInfo:
+    question_text: str
+    answer_text: str
+
+
+@dataclass
 class QuestionAndTopics:
     question: Question
     topics: List[Topic]

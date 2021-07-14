@@ -11,7 +11,8 @@ import requests
 import pandas as pd
 from typing import TypedDict, List
 from mentor_classifier.ner import FollowupQuestion, NamedEntities
-from .types import Answer
+from flask import request
+from .types import AnswerInfo
 
 
 class GQLQueryBody(TypedDict):
@@ -103,17 +104,21 @@ query CategoryAnswers($category: String!) {
 """
 
 
-def __auth_gql(query: GQLQueryBody, authtoken: str = None) -> dict:
+def __auth_gql(query: GQLQueryBody) -> dict:
+    authtoken = request.headers.get("Authorization")
+    cookies = request.cookies
     requests.options
     res = (
-        requests.get(
+        requests.post(
             GRAPHQL_ENDPOINT,
             json=query,
+            cookies=cookies,
             headers={"Authorization": authtoken},
         )
         if authtoken
-        else requests.get(
+        else requests.post(
             GRAPHQL_ENDPOINT,
+            cookies=cookies,
             json=query,
         )
     )
@@ -197,34 +202,26 @@ def fetch_mentor_data(mentor: str) -> dict:
     return data
 
 
-def fetch_category(category: str, authtoken: str):
-    tdjson = __auth_gql(query_category_answers(category), authtoken)
-    data = tdjson["data"]
-    data = tdjson["data"]
-    return data
+def fetch_category(category: str) -> dict:
+    tdjson = __auth_gql(query_category_answers(category))
+    return tdjson.get("data") or {}
 
 
 def generate_followups(
-    category: str, authtoken: str, shared_root=SHARED_ROOT
+    category: str, shared_root=SHARED_ROOT
 ) -> List[FollowupQuestion]:
-    data = fetch_category(category, authtoken)
-    import logging
-
-    recorded = []
-    id = 0
+    data = fetch_category(category)
     me = data.get("me")
+    if me is None:
+        raise NameError("me not found")
     category_answer = me.get("categoryAnswers", [])
-    for answer_data in category_answer:
-        answer_text = answer_data["answerText"]
-        question_text = answer_data["questionText"]
-        answer = Answer(
-            _id=f"A{id}",
-            status="COMPLETE",
-            transcript=answer_text,
-            question=question_text,
+    recorded = [
+        AnswerInfo(
+            answer_text=answer_data.get("answerText") or "",
+            question_text=answer_data.get("questionText") or "",
         )
-        recorded.append(answer)
-        id = id + 1
+        for answer_data in category_answer
+    ]
     followups = NamedEntities(recorded, shared_root).generate_questions()
     return followups
 

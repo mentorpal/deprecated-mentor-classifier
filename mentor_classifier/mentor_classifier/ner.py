@@ -8,7 +8,7 @@ import logging
 from os import path
 from typing import List, Dict
 from mentor_classifier.spacy_model import find_or_load_spacy
-from .types import Answer
+from .types import AnswerInfo
 from string import Template
 from dataclasses import dataclass
 from jobs_train import CustomSpacy
@@ -29,17 +29,17 @@ class FollowupQuestion:
 
 
 class NamedEntities:
-    def __init__(self, answers: List[Answer], shared_root: str):
+    def __init__(self, answers: List[AnswerInfo], shared_root: str):
         self.people: List[str] = []
         self.places: List[str] = []
         self.acronyms: List[str] = []
         self.jobs: List[str] = []
         self.load(answers, shared_root)
 
-    def load(self, answers: List[Answer], shared_root: str):
-        nlp = find_or_load_spacy("/Users/erice/Desktop/mentor-classifier/shared/installed/spacy-model/updated/model-best")
+    def load(self, answers: List[AnswerInfo], shared_root: str):
+        nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
         for answer in answers:
-            answer_doc = nlp(answer.transcript)
+            answer_doc = nlp(answer.answer_text)
             if answer_doc.ents:
                 for ent in answer_doc.ents:
                     if ent.label_ == "PERSON":
@@ -65,22 +65,28 @@ class NamedEntities:
         }
         return entities
 
+    def add_followups(
+        self,
+        entity_name: str,
+        entity_vals: List[str],
+        followups: List[FollowupQuestion],
+    ) -> None:
+        if entity_name not in QUESTION_TEMPLATES:
+            logging.warning("invalid entity name")
+            return  # no template for this entity
+        template = QUESTION_TEMPLATES[entity_name]
+        for e in entity_vals:
+            followups.append(
+                FollowupQuestion(
+                    question=template.substitute(entity=e),
+                    entity_type=e,
+                    template=entity_name,
+                )
+            )
+
     def generate_questions(self) -> List[FollowupQuestion]:
-        questions = []
-        for person in self.people:
-            question_str = QUESTION_TEMPLATES["person"].substitute(entity=person)
-            question = FollowupQuestion(question_str, person, "person")
-            questions.append(question)
-        for place in self.places:
-            question_str = QUESTION_TEMPLATES["place"].substitute(entity=place)
-            question = FollowupQuestion(question_str, place, "place")
-            questions.append(question)
-        for acronym in self.acronyms:
-            question_str = QUESTION_TEMPLATES["acronym"].substitute(entity=acronym)
-            question = FollowupQuestion(question_str, acronym, "acronym")
-            questions.append(question)
-        for job in self.jobs:
-            question_str = QUESTION_TEMPLATES["job"].substitute(entity=job)
-            question = FollowupQuestion(question_str, job, "job")
-            questions.append(question)
+        questions: List[FollowupQuestion] = []
+        self.add_followups("person", self.people, questions)
+        self.add_followups("place", self.places, questions)
+        self.add_followups("acronym", self.acronyms, questions)
         return questions
