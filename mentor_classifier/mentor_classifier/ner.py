@@ -46,9 +46,9 @@ class NamedEntities:
                 for ent in answer_doc.ents:
                     if ent.label_ == "PERSON":
                         self.people.append(ent.text)
-                    if ent.label == "ORG":
+                    if ent.label_ == "ORG":
                         self.acronyms.append(ent.text)
-                    if ent.label == "GPE":
+                    if ent.label_ == "GPE":
                         self.places.append(ent.text)
             else:
                 logging.warning("No named entities found.")
