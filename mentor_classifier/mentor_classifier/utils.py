@@ -4,6 +4,7 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+from os import environ
 from pathlib import Path
 from typing import List
 
@@ -14,6 +15,10 @@ def extract_alphanumeric(input_string: str) -> str:
     return "".join(
         [ch for ch in input_string if ch in (ascii_letters + digits + whitespace)]
     )
+
+
+def get_shared_root() -> str:
+    return environ.get("SHARED_ROOT") or "shared"
 
 
 def file_last_updated_at(file_path: str) -> int:

@@ -16,11 +16,6 @@ from mentor_classifier import ClassifierFactory
 from .helpers import fixture_path
 
 
-@pytest.fixture(scope="module")
-def data_root() -> str:
-    return fixture_path("data")
-
-
 @responses.activate
 @pytest.mark.parametrize("mentor_id", [("clint")])
 def test_find_classifier_caches(data_root: str, shared_root: str, mentor_id: str):

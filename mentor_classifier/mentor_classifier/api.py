@@ -7,8 +7,12 @@
 import json
 import os
 import requests
+from typing import Dict, List, TypedDict
+
 import pandas as pd
-from typing import TypedDict
+
+from mentor_classifier.ner import FollowupQuestion, NamedEntities
+from .types import AnswerInfo
 
 
 class GQLQueryBody(TypedDict):
@@ -84,19 +88,32 @@ mutation UserQuestionCreate($userQuestion: UserQuestionCreateInput!) {
     }
 }
 """
+GQL_CATEGORY_ANSWERS = """
+query CategoryAnswers($category: String!) {
+  me {
+        categoryAnswers(category: $category) {
+            answerText
+            questionText
+        }
+    }
+}
+"""
 
 
-def __auth_gql(query: GQLQueryBody) -> dict:
-    res = requests.post(
-        GRAPHQL_ENDPOINT,
-        json=query,
-    )
+def __auth_gql(
+    query: GQLQueryBody, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> dict:
+    res = requests.post(GRAPHQL_ENDPOINT, json=query, cookies=cookies, headers=headers)
     res.raise_for_status()
     return res.json()
 
 
 def query_mentor(mentor: str) -> GQLQueryBody:
     return {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor}}
+
+
+def query_category_answers(category: str) -> GQLQueryBody:
+    return {"query": GQL_CATEGORY_ANSWERS, "variables": {"category": category}}
 
 
 def mutation_update_training(mentor: str) -> GQLQueryBody:
@@ -165,6 +182,34 @@ def fetch_mentor_data(mentor: str) -> dict:
         raise Exception(json.dumps(tdjson.get("errors")))
     data = tdjson["data"]["mentor"]
     return data
+
+
+def fetch_category(
+    category: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> dict:
+    tdjson = __auth_gql(
+        query_category_answers(category), cookies=cookies, headers=headers
+    )
+    return tdjson.get("data") or {}
+
+
+def generate_followups(
+    category: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> List[FollowupQuestion]:
+    data = fetch_category(category, cookies=cookies, headers=headers)
+    me = data.get("me")
+    if me is None:
+        raise NameError("me not found")
+    category_answer = me.get("categoryAnswers", [])
+    recorded = [
+        AnswerInfo(
+            answer_text=answer_data.get("answerText") or "",
+            question_text=answer_data.get("questionText") or "",
+        )
+        for answer_data in category_answer
+    ]
+    followups = NamedEntities(recorded).generate_questions()
+    return followups
 
 
 def update_training(mentor: str):

@@ -7,6 +7,13 @@
 from os import path
 import pytest
 
+from .helpers import fixture_path
+
+
+@pytest.fixture(scope="module")
+def data_root() -> str:
+    return fixture_path("data")
+
 
 @pytest.fixture(scope="module", autouse=True)
 def shared_root() -> str:

@@ -4,32 +4,39 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from os import path
 
-import json
 import pytest
 import responses
-
-from mentor_classifier import ClassifierFactory, ARCH_DEFAULT
-from .helpers import fixture_path
+import json
 
 
-@pytest.fixture(scope="module")
-def data_root() -> str:
-    return fixture_path("data_out")
+from . import fixture_path
+
+
+@pytest.fixture(autouse=True)
+def python_path_env(monkeypatch, shared_root):
+    monkeypatch.setenv("MODEL_ROOT", fixture_path("models"))
+    monkeypatch.setenv("SHARED_ROOT", shared_root)
 
 
 @responses.activate
-@pytest.mark.parametrize("mentor_id", [("clint")])
-def test_trains_and_outputs_models(data_root: str, shared_root: str, mentor_id: str):
-    with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
+@pytest.mark.parametrize(
+    "category, expected_results",
+    [
+        (
+            "About me",
+            {
+                "entityType": "Clint Anderson",
+                "question": "Can you tell me more about Clint Anderson?",
+                "template": "person",
+            },
+        )
+    ],
+)
+def test_followup(client, category, expected_results):
+    with open(fixture_path("graphql/{}.json".format("category_answers"))) as f:
         data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    result = (
-        ClassifierFactory()
-        .new_training(mentor_id, shared_root, data_root)
-        .train(shared_root)
-    )
-    assert result.model_path == path.join(data_root, mentor_id, ARCH_DEFAULT)
-    assert path.exists(path.join(result.model_path, "model.pkl"))
-    assert path.exists(path.join(result.model_path, "w2v.txt"))
+        responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    res = client.post(f"/classifier/me/followups/category/{category}")
+    data = res.json["data"]
+    assert data["followups"][0] == expected_results
