@@ -37,7 +37,7 @@ class NamedEntities:
         self.load(answers, shared_root)
 
     def load(self, answers: List[Answer], shared_root: str):
-        nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
+        nlp = find_or_load_spacy("/Users/erice/Desktop/mentor-classifier/shared/installed/spacy-model/updated/model-best")
         for answer in answers:
             answer_doc = nlp(answer.transcript)
             if answer_doc.ents:
