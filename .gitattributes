@@ -1,1 +1,2 @@
 shared/installed/spacy-model/jobs/** filter=lfs diff=lfs merge=lfs -text
+shared/installed/spacy-model/jobs/* filter=lfs diff=lfs merge=lfs -text
