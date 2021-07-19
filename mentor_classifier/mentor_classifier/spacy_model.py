@@ -16,9 +16,9 @@ def find_or_load_spacy(file_path: str) -> Language:
         SPACY_MODELS[abs_path] = load(
             path.join(
                 file_path,
-                "en_core_web_sm-3.0.0",
+                "en_core_web_sm-3.1.0",
                 "en_core_web_sm",
-                "en_core_web_sm-3.0.0",
+                "en_core_web_sm-3.1.0",
             )
         )
     return SPACY_MODELS[abs_path]

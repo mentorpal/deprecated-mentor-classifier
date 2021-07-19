@@ -17,7 +17,7 @@ def spacy_download(to_path="installed", replace_existing=True) -> str:
         return spacy_path
     spacy_tar = os.path.join(to_path, "spacy.tar.gz")
     download(
-        "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz",
+        "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.0.0.tar.gz",
         spacy_tar,
     )
     tar = tarfile.open(spacy_tar)
