@@ -9,6 +9,7 @@ import responses
 from mentor_classifier.types import AnswerInfo
 from mentor_classifier.ner import NamedEntities
 
+
 @pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
@@ -21,7 +22,11 @@ from mentor_classifier.ner import NamedEntities
             "Can you tell me more about Clint Anderson?",
         ),
         ("Where do you work?", "I work at USC", "What is USC?"),
-        ("What is your job", "The Network Security Engineer provides support of the information systems security controls.", "What does a(n) Network Security Engineer do?"),
+        (
+            "What is your job",
+            "The Network Security Engineer provides support of the information systems security controls.",
+            "What does a(n) Network Security Engineer do?",
+        ),
     ],
 )
 def test_questions(

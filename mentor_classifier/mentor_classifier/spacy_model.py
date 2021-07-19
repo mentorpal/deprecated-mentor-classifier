@@ -23,14 +23,9 @@ def find_or_load_spacy(file_path: str) -> Language:
         )
     return SPACY_MODELS[abs_path]
 
+
 def find_or_load_custom(file_path: str) -> Language:
     abs_path = path.abspath(file_path)
     if abs_path not in SPACY_MODELS:
-        SPACY_MODELS[abs_path] = load(
-            path.join(
-                file_path,
-                "output",
-                "model-best"
-            )
-        )
+        SPACY_MODELS[abs_path] = load(path.join(file_path, "output", "model-best"))
     return SPACY_MODELS[abs_path]

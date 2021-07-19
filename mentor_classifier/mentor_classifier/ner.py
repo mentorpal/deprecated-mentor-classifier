@@ -9,7 +9,6 @@ import logging
 from os import path
 from string import Template
 from typing import List, Dict
-import spacy
 
 
 from mentor_classifier.spacy_model import find_or_load_spacy, find_or_load_custom
@@ -57,13 +56,13 @@ class NamedEntities:
             if jobs_doc.ents:
                 for ent in jobs_doc.ents:
                     self.jobs.append(ent)
-            
+
     def to_dict(self) -> Dict[str, List[str]]:
         entities = {
             "acronyms": self.acronyms,
             "people": self.people,
             "places": self.places,
-            "jobs": self.jobs
+            "jobs": self.jobs,
         }
         return entities
 
