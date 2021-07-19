@@ -10,6 +10,7 @@ from os import path
 from string import Template
 from typing import List, Dict
 from spacy.matcher import Matcher
+from spacy import Language
 
 from mentor_classifier.spacy_model import find_or_load_spacy
 from mentor_classifier.types import AnswerInfo
@@ -35,12 +36,13 @@ class NamedEntities:
         self.people: List[str] = []
         self.places: List[str] = []
         self.acronyms: List[str] = []
+        self.model: Language 
         self.load(answers, shared_root or get_shared_root())
 
     def load(self, answers: List[AnswerInfo], shared_root: str):
-        nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
+        self.model = find_or_load_spacy(path.join(shared_root, "spacy-model"))
         for answer in answers:
-            answer_doc = nlp(answer.answer_text)
+            answer_doc = self.model(answer.answer_text)
             if answer_doc.ents:
                 for ent in answer_doc.ents:
                     if ent.label_ == "PERSON":
@@ -79,13 +81,14 @@ class NamedEntities:
                 )
             )
 
-    def remove_duplicates(followups: List[FollowupQuestion], answered: List[AnswerInfo]):
-        shared_root = get_shared_root()
-        nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
-        matcher = Matcher(nlp.vocab)
-        patterns = [{"LOWER": followup.question} for followup in followups]
-        matcher.add(patterns)
-        deduplicated = [question for question in answered if matcher(nlp(question.question_text)) == []]
+    def remove_duplicates(self, followups: List[FollowupQuestion], answered: List[AnswerInfo]):
+        matcher = Matcher(self.model.vocab)
+        patterns = [{"LOWER": answer.question_text} for answer in answered]
+        if len(answered) == 1:
+            matcher.add("questions", [patterns])
+        else:
+            matcher.add("questions", patterns)
+        deduplicated = [followup for followup in followups if matcher(self.model(followup.question)) == []]
         return deduplicated
 
 
@@ -94,4 +97,4 @@ class NamedEntities:
         self.add_followups("person", self.people, questions)
         self.add_followups("place", self.places, questions)
         self.add_followups("acronym", self.acronyms, questions)
-        return remove_duplicates(questions, answers)
+        return self.remove_duplicates(questions, answers)

@@ -9,7 +9,7 @@ import responses
 from mentor_classifier.types import AnswerInfo
 from mentor_classifier.ner import NamedEntities
 
-
+@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "question, answer, expected_followup",
