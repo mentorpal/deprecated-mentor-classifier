@@ -32,6 +32,6 @@ def test_questions(
     answer_info = AnswerInfo(question_text=question, answer_text=answer)
     answer_info_list = [answer_info]
     ents = NamedEntities(answer_info_list, shared_root)
-    questions = ents.generate_questions()
+    questions = ents.generate_questions(answer_info_list)
     actual_question = questions[0].question
     assert actual_question == expected_followup

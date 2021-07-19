@@ -9,12 +9,11 @@ import logging
 from os import path
 from string import Template
 from typing import List, Dict
-
+from spacy.matcher import Matcher
 
 from mentor_classifier.spacy_model import find_or_load_spacy
 from mentor_classifier.types import AnswerInfo
 from mentor_classifier.utils import get_shared_root
-
 
 QUESTION_TEMPLATES = {
     "person": Template("Can you tell me more about $entity?"),
@@ -80,9 +79,19 @@ class NamedEntities:
                 )
             )
 
-    def generate_questions(self) -> List[FollowupQuestion]:
+    def remove_duplicates(followups: List[FollowupQuestion], answered: List[AnswerInfo]):
+        shared_root = get_shared_root()
+        nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
+        matcher = Matcher(nlp.vocab)
+        patterns = [{"LOWER": followup.question} for followup in followups]
+        matcher.add(patterns)
+        deduplicated = [question for question in answered if matcher(nlp(question.question_text)) == []]
+        return deduplicated
+
+
+    def generate_questions(self, answers: List[AnswerInfo]) -> List[FollowupQuestion]:
         questions: List[FollowupQuestion] = []
         self.add_followups("person", self.people, questions)
         self.add_followups("place", self.places, questions)
         self.add_followups("acronym", self.acronyms, questions)
-        return questions
+        return remove_duplicates(questions, answers)
