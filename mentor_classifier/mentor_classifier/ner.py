@@ -9,9 +9,10 @@ import logging
 from os import path
 from string import Template
 from typing import List, Dict
+import spacy
 
 
-from mentor_classifier.spacy_model import find_or_load_spacy
+from mentor_classifier.spacy_model import find_or_load_spacy, find_or_load_custom
 from mentor_classifier.types import AnswerInfo
 from mentor_classifier.utils import get_shared_root
 
@@ -36,10 +37,12 @@ class NamedEntities:
         self.people: List[str] = []
         self.places: List[str] = []
         self.acronyms: List[str] = []
+        self.jobs: List[str] = []
         self.load(answers, shared_root or get_shared_root())
 
     def load(self, answers: List[AnswerInfo], shared_root: str):
         nlp = find_or_load_spacy(path.join(shared_root, "spacy-model"))
+        jobs = find_or_load_custom(path.join(shared_root, "spacy-model", "jobs"))
         for answer in answers:
             answer_doc = nlp(answer.answer_text)
             if answer_doc.ents:
@@ -50,14 +53,17 @@ class NamedEntities:
                         self.acronyms.append(ent.text)
                     if ent.label_ == "GPE":
                         self.places.append(ent.text)
-            else:
-                logging.warning("No named entities found.")
-
+            jobs_doc = jobs(answer.answer_text)
+            if jobs_doc.ents:
+                for ent in jobs_doc.ents:
+                    self.jobs.append(ent)
+            
     def to_dict(self) -> Dict[str, List[str]]:
         entities = {
             "acronyms": self.acronyms,
             "people": self.people,
             "places": self.places,
+            "jobs": self.jobs
         }
         return entities
 
@@ -85,4 +91,5 @@ class NamedEntities:
         self.add_followups("person", self.people, questions)
         self.add_followups("place", self.places, questions)
         self.add_followups("acronym", self.acronyms, questions)
+        self.add_followups("job", self.jobs, questions)
         return questions
