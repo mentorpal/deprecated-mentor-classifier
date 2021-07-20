@@ -83,22 +83,30 @@ class NamedEntities:
             )
 
     def remove_duplicates(
-        self, followups: List[FollowupQuestion], answered: List[AnswerInfo]
-    ):
+        self, entity_vals: List[str], answered: List[AnswerInfo]
+    ) -> List[str]:
         matcher = PhraseMatcher(self.model.vocab)
-        terms = [answer.question_text for answer in answered]
+        terms = entity_vals
         patterns = [self.model.make_doc(text) for text in terms]
         matcher.add("TerminologyList", patterns)
-        deduplicated = [
-            followup
-            for followup in followups
-            if matcher(self.model(followup.question)) == []
-        ]
-        return deduplicated
+        ent_set = set(entity_vals)
+        for question in answered:
+            question_text = question.question_text
+            doc = self.model(question_text)
+            matches = matcher(doc)
+            if not matches == []:
+                for match_id, start, end in matches:
+                    span = doc[start:end]
+                    if span.text in ent_set:
+                        ent_set.remove(span.text)
+        return list(ent_set)
 
-    def generate_questions(self, answers: List[AnswerInfo]) -> List[FollowupQuestion]:
+    def generate_questions(self, answered: List[AnswerInfo]) -> List[FollowupQuestion]:
         questions: List[FollowupQuestion] = []
+        self.people = self.remove_duplicates(self.people, answered)
+        self.places = self.remove_duplicates(self.places, answered)
+        self.acronyms = self.remove_duplicates(self.acronyms, answered)
         self.add_followups("person", self.people, questions)
         self.add_followups("place", self.places, questions)
         self.add_followups("acronym", self.acronyms, questions)
-        return self.remove_duplicates(questions, answers)
+        return questions

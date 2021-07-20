@@ -91,6 +91,7 @@ def test_covers_all_entities(
     assert actual_question == expected_followup
 
 
+@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "questions, answers, expected_followups",
@@ -122,6 +123,6 @@ def test_deduplication(
         AnswerInfo(questions[x], answers[x]) for x in range(len(questions))
     ]
     ents = NamedEntities(answer_info_list, shared_root)
-    questions = ents.generate_questions(answer_info_list)
-    question_text = [followup.question for followup in questions]
+    followups = ents.generate_questions(answer_info_list)
+    question_text = [followup.question for followup in followups]
     assert question_text == expected_followups
