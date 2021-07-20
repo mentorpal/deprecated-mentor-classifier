@@ -9,7 +9,7 @@ import logging
 from os import path
 from string import Template
 from typing import List, Dict
-from spacy.matcher import Matcher
+from spacy.matcher import PhraseMatcher
 from spacy import Language
 
 from mentor_classifier.spacy_model import find_or_load_spacy
@@ -36,7 +36,7 @@ class NamedEntities:
         self.people: List[str] = []
         self.places: List[str] = []
         self.acronyms: List[str] = []
-        self.model: Language 
+        self.model: Language
         self.load(answers, shared_root or get_shared_root())
 
     def load(self, answers: List[AnswerInfo], shared_root: str):
@@ -49,8 +49,9 @@ class NamedEntities:
                         self.people.append(ent.text)
                     if ent.label_ == "ORG":
                         self.acronyms.append(ent.text)
-                    if ent.label_ == "GPE":
+                    if ent.label_ == "GPE" or ent.label_ == "LOC":
                         self.places.append(ent.text)
+
             else:
                 logging.warning("No named entities found.")
 
@@ -81,16 +82,19 @@ class NamedEntities:
                 )
             )
 
-    def remove_duplicates(self, followups: List[FollowupQuestion], answered: List[AnswerInfo]):
-        matcher = Matcher(self.model.vocab)
-        patterns = [{"LOWER": answer.question_text} for answer in answered]
-        if len(answered) == 1:
-            matcher.add("questions", [patterns])
-        else:
-            matcher.add("questions", patterns)
-        deduplicated = [followup for followup in followups if matcher(self.model(followup.question)) == []]
+    def remove_duplicates(
+        self, followups: List[FollowupQuestion], answered: List[AnswerInfo]
+    ):
+        matcher = PhraseMatcher(self.model.vocab)
+        terms = [answer.question_text for answer in answered]
+        patterns = [self.model.make_doc(text) for text in terms]
+        matcher.add("TerminologyList", patterns)
+        deduplicated = [
+            followup
+            for followup in followups
+            if matcher(self.model(followup.question)) == []
+        ]
         return deduplicated
-
 
     def generate_questions(self, answers: List[AnswerInfo]) -> List[FollowupQuestion]:
         questions: List[FollowupQuestion] = []

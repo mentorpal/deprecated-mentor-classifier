@@ -99,6 +99,34 @@ query CategoryAnswers($category: String!) {
 }
 """
 
+GQL_QUERY_MENTOR_ME = """
+query Mentor() {
+    me {
+        mentor {
+            answers() {
+                _id
+                question {
+                    _id
+                    question
+                    paraphrases
+                    type
+                    name
+                    mentor
+                    mentorType
+                    minVideoLength
+            }
+            transcript
+            status
+            media {
+                type
+                tag
+                url
+            }
+        }
+    }
+}
+"""
+
 
 def __auth_gql(
     query: GQLQueryBody, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
@@ -110,6 +138,10 @@ def __auth_gql(
 
 def query_mentor(mentor: str) -> GQLQueryBody:
     return {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor}}
+
+
+def query_me() -> GQLQueryBody:
+    return {"query": GQL_QUERY_MENTOR_ME, "variables": {}}
 
 
 def query_category_answers(category: str) -> GQLQueryBody:
@@ -184,6 +216,14 @@ def fetch_mentor_data(mentor: str) -> dict:
     return data
 
 
+def fetch_me_data() -> dict:
+    tdjson = __auth_gql(query_me())
+    if "errors" in tdjson:
+        raise Exception(json.dumps(tdjson.get("errors")))
+    data = tdjson["me"]["mentor"]
+    return data
+
+
 def fetch_category(
     category: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
 ) -> dict:
@@ -208,8 +248,18 @@ def generate_followups(
         )
         for answer_data in category_answer
     ]
-    followups = NamedEntities(recorded).generate_questions()
+    answered = fetch_mentor_questions()
+    followups = NamedEntities(recorded).generate_questions(answered)
     return followups
+
+
+def fetch_mentor_questions() -> List[AnswerInfo]:
+    data = fetch_me_data()
+    answered = [
+        AnswerInfo(answer["question"]["question"], answer["question"]["transcript"])
+        for answer in data.get("answers", [])
+    ]
+    return answered
 
 
 def update_training(mentor: str):

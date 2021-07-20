@@ -51,7 +51,7 @@ def test_generates_followups(
     shared_root: str,
 ):
     mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
-    answers: List[Answer] = get_answers(mentor)
+    answers = get_answers(mentor)
     answer_info: List[AnswerInfo] = [
         AnswerInfo(
             question_text=answer.question.question, answer_text=answer.transcript
@@ -59,6 +59,69 @@ def test_generates_followups(
         for answer in answers
     ]
     ents = NamedEntities(answer_info, shared_root)
-    questions = ents.generate_questions()
+    questions = ents.generate_questions(answer_info)
     actual_question = questions[0].question
     assert actual_question == expected_question
+
+
+@responses.activate
+@pytest.mark.parametrize(
+    "question, answer, expected_followup",
+    [
+        ("Where did you live?", "I lived in the U.K.", "What was U.K. like?"),
+        (
+            "Who is your brother?",
+            "He is Clint Anderson",
+            "Can you tell me more about Clint Anderson?",
+        ),
+        ("Where do you work?", "I work at USC", "What is USC?"),
+    ],
+)
+def test_covers_all_entities(
+    question: str,
+    answer: str,
+    expected_followup: str,
+    shared_root: str,
+):
+    answer_info = AnswerInfo(question_text=question, answer_text=answer)
+    answer_info_list = [answer_info]
+    ents = NamedEntities(answer_info_list, shared_root)
+    questions = ents.generate_questions(answer_info_list)
+    actual_question = questions[0].question
+    assert actual_question == expected_followup
+
+
+@responses.activate
+@pytest.mark.parametrize(
+    "questions, answers, expected_followups",
+    [
+        (
+            [
+                "Where did you live?",
+                "Who is your brother?",
+                "Where do you work?",
+                "What was U.K. like?",
+            ],
+            [
+                "I lived in the U.K.",
+                "He is Clint Anderson.",
+                "I work at USC.",
+                "The U.K. was cool.",
+            ],
+            ["Can you tell me more about Clint Anderson?", "What is USC?"],
+        )
+    ],
+)
+def test_deduplication(
+    questions: List[str],
+    answers: List[str],
+    expected_followups: List[str],
+    shared_root: str,
+):
+    answer_info_list = [
+        AnswerInfo(questions[x], answers[x]) for x in range(len(questions))
+    ]
+    ents = NamedEntities(answer_info_list, shared_root)
+    questions = ents.generate_questions(answer_info_list)
+    question_text = [followup.question for followup in questions]
+    assert question_text == expected_followups
