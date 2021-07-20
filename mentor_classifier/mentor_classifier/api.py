@@ -102,7 +102,7 @@ query CategoryAnswers($category: String!) {
 GQL_QUERY_MENTOR_ME = """
 query Mentor() {
     me {
-        mentor {
+        mentor(){
             answers() {
                 _id
                 question {
@@ -216,11 +216,11 @@ def fetch_mentor_data(mentor: str) -> dict:
     return data
 
 
-def fetch_me_data() -> dict:
-    tdjson = __auth_gql(query_me())
+def fetch_me_data(cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}) -> dict:
+    tdjson = __auth_gql(query_me(), cookies=cookies, headers=headers)
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
-    data = tdjson["me"]["mentor"]
+    data = tdjson["data"]["me"]["mentor"]
     return data
 
 
@@ -234,7 +234,9 @@ def fetch_category(
 
 
 def generate_followups(
-    category: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+    category: str,
+    cookies: Dict[str, str] = {},
+    headers: Dict[str, str] = {},
 ) -> List[FollowupQuestion]:
     data = fetch_category(category, cookies=cookies, headers=headers)
     me = data.get("me")
@@ -248,15 +250,17 @@ def generate_followups(
         )
         for answer_data in category_answer
     ]
-    answered = fetch_mentor_questions()
+    answered = fetch_mentor_questions(cookies=cookies, headers=headers)
     followups = NamedEntities(recorded).generate_questions(answered)
     return followups
 
 
-def fetch_mentor_questions() -> List[AnswerInfo]:
-    data = fetch_me_data()
+def fetch_mentor_questions(
+    cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> List[AnswerInfo]:
+    data = fetch_me_data(cookies=cookies, headers=headers)
     answered = [
-        AnswerInfo(answer["question"]["question"], answer["question"]["transcript"])
+        AnswerInfo(answer["question"]["question"], answer["transcript"])
         for answer in data.get("answers", [])
     ]
     return answered

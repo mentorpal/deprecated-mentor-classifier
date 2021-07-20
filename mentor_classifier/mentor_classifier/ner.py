@@ -4,6 +4,7 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+
 from dataclasses import dataclass
 import logging
 from os import path
@@ -83,7 +84,7 @@ class NamedEntities:
             )
 
     def remove_duplicates(
-        self, entity_vals: List[str], answered: List[AnswerInfo]
+        self, entity_vals: List[str], answered: List[str]
     ) -> List[str]:
         matcher = PhraseMatcher(self.model.vocab)
         terms = entity_vals
@@ -91,8 +92,7 @@ class NamedEntities:
         matcher.add("TerminologyList", patterns)
         ent_set = set(entity_vals)
         for question in answered:
-            question_text = question.question_text
-            doc = self.model(question_text)
+            doc = self.model(question)
             matches = matcher(doc)
             if not matches == []:
                 for match_id, start, end in matches:
@@ -102,11 +102,12 @@ class NamedEntities:
         return list(ent_set)
 
     def generate_questions(self, answered: List[AnswerInfo]) -> List[FollowupQuestion]:
-        questions: List[FollowupQuestion] = []
-        self.people = self.remove_duplicates(self.people, answered)
-        self.places = self.remove_duplicates(self.places, answered)
-        self.acronyms = self.remove_duplicates(self.acronyms, answered)
-        self.add_followups("person", self.people, questions)
-        self.add_followups("place", self.places, questions)
-        self.add_followups("acronym", self.acronyms, questions)
-        return questions
+        followups: List[FollowupQuestion] = []
+        answered_list = [question.question_text for question in answered]
+        self.people = self.remove_duplicates(self.people, answered_list)
+        self.places = self.remove_duplicates(self.places, answered_list)
+        self.acronyms = self.remove_duplicates(self.acronyms, answered_list)
+        self.add_followups("person", self.people, followups)
+        self.add_followups("place", self.places, followups)
+        self.add_followups("acronym", self.acronyms, followups)
+        return followups
