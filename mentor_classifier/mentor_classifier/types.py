@@ -88,6 +88,7 @@ class Answer:
 class AnswerInfo:
     question_text: str
     answer_text: str
+    paraphrases: List[str]
 
 
 @dataclass

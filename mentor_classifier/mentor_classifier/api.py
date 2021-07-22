@@ -260,7 +260,11 @@ def fetch_mentor_questions(
 ) -> List[AnswerInfo]:
     data = fetch_me_data(cookies=cookies, headers=headers)
     answered = [
-        AnswerInfo(answer["question"]["question"], answer["transcript"])
+        AnswerInfo(
+            answer["question"]["question"],
+            answer["transcript"],
+            answer["question"]["paraphrases"],
+        )
         for answer in data.get("answers", [])
     ]
     return answered

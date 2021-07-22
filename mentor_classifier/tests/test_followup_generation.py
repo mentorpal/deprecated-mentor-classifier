@@ -4,8 +4,9 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+import csv
 from mentor_classifier.types import Answer, AnswerInfo
-
+from sentence_transformers import SentenceTransformer, util
 import pytest
 import responses
 
@@ -32,7 +33,9 @@ def test_recognizes_named_entities(
     answers: List[Answer] = get_answers(mentor)
     answer_info: List[AnswerInfo] = [
         AnswerInfo(
-            question_text=answer.question.question, answer_text=answer.transcript
+            question_text=answer.question.question,
+            answer_text=answer.transcript,
+            paraphrases=answer.question.paraphrases,
         )
         for answer in answers
     ]
@@ -54,7 +57,9 @@ def test_generates_followups(
     answers = get_answers(mentor)
     answer_info: List[AnswerInfo] = [
         AnswerInfo(
-            question_text=answer.question.question, answer_text=answer.transcript
+            question_text=answer.question.question,
+            answer_text=answer.transcript,
+            paraphrases=answer.question.paraphrases,
         )
         for answer in answers
     ]
@@ -83,10 +88,9 @@ def test_covers_all_entities(
     expected_followup: str,
     shared_root: str,
 ):
-    answer_info = AnswerInfo(question_text=question, answer_text=answer)
-    answer_info_list = [answer_info]
+    answer_info = AnswerInfo(question_text=question, answer_text=answer, paraphrases=[])
     ents = NamedEntities(answer_info_list, shared_root)
-    questions = ents.generate_questions(answer_info_list)
+    questions = ents.generate_questions(answer_info)
     actual_question = questions[0].question
     assert actual_question == expected_followup
 
@@ -119,9 +123,10 @@ def test_deduplication(
     shared_root: str,
 ):
     answer_info_list = [
-        AnswerInfo(questions[x], answers[x]) for x in range(len(questions))
+        AnswerInfo(questions[x], answers[x], []) for x in range(len(questions))
     ]
     ents = NamedEntities(answer_info_list, shared_root)
     followups = ents.generate_questions(answer_info_list)
     question_text = [followup.question for followup in followups]
     assert question_text == expected_followups
+    assert 0 == 1
