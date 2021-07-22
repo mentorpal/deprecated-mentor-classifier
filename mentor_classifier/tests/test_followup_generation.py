@@ -42,7 +42,6 @@ def test_recognizes_named_entities(
     ents = NamedEntities(answer_info, shared_root)
     assert NamedEntities.to_dict(ents) == expected_answer
 
-
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id, expected_question",

@@ -80,9 +80,9 @@ class NamedEntities:
         verb_list = list(verbs)
         categories = []
         for verb in verb_list:
-            embed = self.transformer.encode(verb , convert_to_tensor=True)
+            embed = self.transformer.encode(verb, convert_to_tensor=True)
             family_score = float(util.pytorch_cos_sim(embed, family))
-            work_score = float(util.pytorch_cos_sim(embed, work))
+            work_score = float(util.pytorch_cos_sim(embed, work)
             if family_score >= work_score:
                 scores.append(family_score)
                 categories.append("family")
