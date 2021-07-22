@@ -78,13 +78,21 @@ class NamedEntities:
         family = self.transformer.encode("family", convert_to_tensor=True)
         work = self.transformer.encode("work", convert_to_tensor=True)
         verb_list = list(verbs)
+        categories = []
         for verb in verb_list:
-            embed = self.transformer.encode("verb", convert_to_tensor=True)
-            family_score = util.pytorch_cos_sim(embed, work)
-            work_score = util.pytorch_cos_sim(embed, family)
-            scores.append(max(family_score, work_score))
+            embed = self.transformer.encode(verb , convert_to_tensor=True)
+            family_score = float(util.pytorch_cos_sim(embed, family))
+            work_score = float(util.pytorch_cos_sim(embed, work))
+            if family_score >= work_score:
+                scores.append(family_score)
+                categories.append("family")
+            else:
+                scores.append(work_score)
+                categories.append("work")
         sorted_verbs = [x for _, x in sorted(zip(scores, verb_list), reverse = True, key=lambda pair: pair[0])]
-        return sorted_verbs
+        sorted_categories = [x for _, x in sorted(zip(scores, categories), reverse = True, key=lambda pair: pair[0])]
+        sorted_scores = sorted(scores, reverse = True)
+        return sorted_verbs, sorted_scores, sorted_categories
     
     def add_followups(
         self,
