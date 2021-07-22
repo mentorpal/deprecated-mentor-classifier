@@ -16,6 +16,8 @@ from spacy import Language
 from mentor_classifier.spacy_model import find_or_load_spacy
 from mentor_classifier.types import AnswerInfo
 from mentor_classifier.utils import get_shared_root
+from spacy.tokens.span import Span as entity
+from spacy.tokens import Doc, VERB
 
 QUESTION_TEMPLATES = {
     "person": Template("Can you tell me more about $entity?"),
@@ -32,11 +34,20 @@ class FollowupQuestion:
     template: str
 
 
+#this should be a dictionary for easier removal
+@dataclass
+class EntityObject:
+    span: entity
+    doc: Doc
+    text: str
+    weight: float
+
+
 class NamedEntities:
     def __init__(self, answers: List[AnswerInfo], shared_root: str = ""):
-        self.people: List[str] = []
-        self.places: List[str] = []
-        self.acronyms: List[str] = []
+        self.people: List[EntityObject] = []
+        self.places: List[EntityObject] = []
+        self.acronyms: List[EntityObject] = []
         self.model: Language
         self.load(answers, shared_root or get_shared_root())
 
@@ -47,27 +58,27 @@ class NamedEntities:
             if answer_doc.ents:
                 for ent in answer_doc.ents:
                     if ent.label_ == "PERSON":
-                        self.people.append(ent.text)
+                        self.people.append(EntityObject(ent, answer_doc, ent.text))
                     if ent.label_ == "ORG":
-                        self.acronyms.append(ent.text)
+                        self.acronyms.append(EntityObject(ent, answer_doc, ent.text))
                     if ent.label_ == "GPE" or ent.label_ == "LOC":
-                        self.places.append(ent.text)
+                        self.places.append(EntityObject(ent, answer_doc, ent.text))
 
             else:
                 logging.warning("No named entities found.")
 
     def to_dict(self) -> Dict[str, List[str]]:
         entities = {
-            "acronyms": self.acronyms,
-            "people": self.people,
-            "places": self.places,
+            "acronyms": [acronym.text for acronym in self.acronyms],
+            "people": [person.text for person in self.people],
+            "places": [place.text for place in self.places],
         }
         return entities
 
     def add_followups(
         self,
         entity_name: str,
-        entity_vals: List[str],
+        entity_vals: List[EntityObject],
         followups: List[FollowupQuestion],
     ) -> None:
         if entity_name not in QUESTION_TEMPLATES:
@@ -77,36 +88,54 @@ class NamedEntities:
         for e in entity_vals:
             followups.append(
                 FollowupQuestion(
-                    question=template.substitute(entity=e),
+                    question=template.substitute(entity=e.text),
                     entity_type=e,
                     template=entity_name,
                 )
             )
 
+    def clean_ents(
+        self, entity_vals: List[EntityObject], answered: List[str], entity_type: str
+    ) -> List[EntityObject]:
+        deduped = self.remove_duplicates(entity_vals, answered)
+        relevant = self.check_relevance(deduped, entity_type)
+        return relevant
+
     def remove_duplicates(
-        self, entity_vals: List[str], answered: List[str]
-    ) -> List[str]:
+        self, entity_vals: List[EntityObject], answered: List[str]
+    ) -> List[EntityObject]:
         matcher = PhraseMatcher(self.model.vocab)
-        terms = entity_vals
+        terms = [ent.text for ent in entity_vals]
         patterns = [self.model.make_doc(text) for text in terms]
         matcher.add("TerminologyList", patterns)
-        ent_set = set(entity_vals)
         for question in answered:
             doc = self.model(question)
             matches = matcher(doc)
             if not matches == []:
                 for match_id, start, end in matches:
                     span = doc[start:end]
-                    if span.text in ent_set:
-                        ent_set.remove(span.text)
-        return list(ent_set)
+                    while span.text in terms:
+                        i = terms.index(span.text)
+                        del entity_vals[i]
+                        del terms[i]
+        return entity_vals
+
+    def check_relevance(self, entity_vals: List[EntityObject], entity_type: str) -> List[EntityObject]:
+        for entity in ent_vals:
+            token = entity.doc[entity.span]
+            verb = token.head
+            while not verb.pos == VERB:
+                verb = verb.head 
+            if not verb.text in KEY_VERBS[entity_type]:
+                del entity_vals[entity]
+        return entity_vals
 
     def generate_questions(self, answered: List[AnswerInfo]) -> List[FollowupQuestion]:
         followups: List[FollowupQuestion] = []
         answered_list = [question.question_text for question in answered]
-        self.people = self.remove_duplicates(self.people, answered_list)
-        self.places = self.remove_duplicates(self.places, answered_list)
-        self.acronyms = self.remove_duplicates(self.acronyms, answered_list)
+        self.people = self.clean_ents(self.people, answered_list)
+        self.places = self.clean_ents(self.places, answered_list)
+        self.acronyms = self.clean_ents(self.acronyms, answered_list)
         self.add_followups("person", self.people, followups)
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)

@@ -91,6 +91,7 @@ def test_covers_all_entities(
     assert actual_question == expected_followup
 
 
+@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "questions, answers, expected_followups",
