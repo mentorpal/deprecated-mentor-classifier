@@ -73,8 +73,18 @@ class NamedEntities:
             doc = self.model(answer.answer_text)
             for token in doc:
                 if token.pos == VERB:
-                    verbs.add(token)
-        return list(verbs)
+                    verbs.add(token.lemma_)
+        scores = []
+        family = self.transformer.encode("family", convert_to_tensor=True)
+        work = self.transformer.encode("work", convert_to_tensor=True)
+        verb_list = list(verbs)
+        for verb in verb_list:
+            embed = self.transformer.encode("verb", convert_to_tensor=True)
+            family_score = util.pytorch_cos_sim(embed, work)
+            work_score = util.pytorch_cos_sim(embed, family)
+            scores.append(max(family_score, work_score))
+        sorted_verbs = [x for _, x in sorted(zip(scores, verb_list), reverse = True, key=lambda pair: pair[0])]
+        return sorted_verbs
     
     def add_followups(
         self,

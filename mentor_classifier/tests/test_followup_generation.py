@@ -94,6 +94,37 @@ def test_covers_all_entities(
     actual_question = questions[0].question
     assert actual_question == expected_followup
 
+@pytest.mark.only
+@responses.activate
+@pytest.mark.parametrize(
+    "mentor_id",
+    [("clint_long")],
+)
+def test_long(
+    mentor_id: str,
+    shared_root: str,
+):
+    mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
+    answers = get_answers(mentor)
+    answer_info: List[AnswerInfo] = [
+        AnswerInfo(
+            question_text=answer.question.question,
+            answer_text=answer.transcript,
+            paraphrases=answer.question.paraphrases,
+        )
+        for answer in answers
+    ]
+    ents = NamedEntities(answer_info, shared_root)
+    verbs = ents.find_verbs(answer_info)
+    question_strs = [[token] for token in verbs]
+    with open(
+        "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/verbs.csv",
+        "w",
+    ) as f:
+        write = csv.writer(f)
+        write.writerows(question_strs)
+    assert 0 == 1
+
 
 @responses.activate
 @pytest.mark.parametrize(
