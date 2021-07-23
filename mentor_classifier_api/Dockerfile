@@ -1,3 +1,12 @@
+FROM python:3.8 as builder
+WORKDIR /build
+RUN pip install poetry
+COPY mentor_classifier ./mentor_classifier
+# build mentor-classifier as something api can install
+RUN cd mentor_classifier \
+	&& poetry config virtualenvs.create false \
+	&& poetry install --no-dev \
+	&& poetry build
 FROM python:3.8-slim
 ENV STATUS_URL_FORCE_HTTPS=false
 # for now we need to pre install 
@@ -11,14 +20,17 @@ RUN pip3 install \
 	torch==1.9.0+cpu \
 	torchvision==0.10.0+cpu \
 	-f https://download.pytorch.org/whl/torch_stable.html
-ADD requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
-RUN rm /tmp/requirements.txt
-COPY build /tmp/build
-RUN pip install /tmp/build/mentor_classifier
-RUN rm -rf /tmp/build
 ENV FLASK_APP=mentor_classifier_api
 WORKDIR /app
+RUN pip install poetry
+WORKDIR /app/mentor_classifier
+# the only thing we need from mentor_classifier is the built .gz (to install)
+COPY --from=builder /build/mentor_classifier/dist ./dist
+WORKDIR /app
+RUN cd mentor_classifier_api \
+	&& poetry config virtualenvs.create false \
+	&& poetry install --no-dev \
+	&& pip uninstall -y poetry
 COPY src .
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]

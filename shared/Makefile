@@ -1,7 +1,7 @@
 ROOT=$(shell dirname ${PWD})
 VENV=.venv
 $(VENV):
-	$(MAKE) $(VENV)-update
+	$(MAKE) install
 
 .PHONY: $(VENV)-update
 $(VENV)-update:
@@ -13,23 +13,39 @@ $(VENV)-update:
 clean:
 	rm -rf .venv installed
 
+.PHONY: deps-show
+deps-show:
+	poetry show
+
+.PHONY: deps-show
+deps-show-outdated:
+	poetry show --outdated
+
+.PHONY: deps-update
+deps-update:
+	poetry update
+
+.PHONY: install
+install: poetry-ensure-installed
+	poetry config --local virtualenvs.in-project true
+	poetry env use python3.8
+	poetry install
+
 installed:
 	mkdir -p installed
 
 installed/word2vec.bin: $(VENV)
 	$(MAKE) installed
-	. $(VENV)/bin/activate && python word2vec_download.py 
+	poetry run python word2vec_download.py 
 
 installed/sentence-transformer: $(VENV)
 	$(MAKE) installed
-	. $(VENV)/bin/activate && python sentence_transformer_download.py 
+	poetry run python sentence_transformer_download.py 
 
 installed/spacy-model: $(VENV)
 	$(MAKE) installed
-	. $(VENV)/bin/activate && python spacy_download.py 
+	poetry run python spacy_download.py 
 
-
-.PHONY: update-deps
-update-deps: $(VENV)
-	. $(VENV)/bin/activate && pip-upgrade requirements*
-
+.PHONY: poetry-ensure-installed
+poetry-ensure-installed:
+	sh $(ROOT)/tools/poetry_ensure_installed.sh

@@ -14,6 +14,10 @@ WORKDIR /opt/mentor_classifier
 COPY . .
 RUN pip install .
 WORKDIR /app
+COPY poetry.lock pyproject.toml ./
+RUN pip install poetry
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-dev
 RUN rm -rf /opt/mentor_classifier
 COPY mentor_classifier_tasks .
 COPY bin/training_worker.sh .
