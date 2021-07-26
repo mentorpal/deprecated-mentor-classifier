@@ -12,10 +12,9 @@ from string import Template
 from typing import List, Dict
 from spacy.matcher import PhraseMatcher
 from spacy import Language
-from spacy.tokens.span import Span 
+from spacy.tokens.span import Span
 from spacy.tokens import Doc
 from spacy.symbols import VERB
-import spacy 
 
 from mentor_classifier.spacy_model import find_or_load_spacy
 from mentor_classifier.types import AnswerInfo
@@ -76,14 +75,22 @@ class NamedEntities:
             for sent in answer_doc.sents:
                 if sent.ents:
                     for ent in sent.ents:
-                        if (ent.label_ == "PERSON") and (not ent.text in person_set):
-                            self.people.append(EntityObject(ent, sent, answer_doc, ent.text))
+                        if (ent.label_ == "PERSON") and (ent.text not in person_set):
+                            self.people.append(
+                                EntityObject(ent, sent, answer_doc, ent.text)
+                            )
                             person_set.add(ent.text)
-                        if (ent.label_ == "ORG") and (not ent.text in acronym_set):
-                            self.acronyms.append(EntityObject(ent, sent, answer_doc, ent.text))
+                        if (ent.label_ == "ORG") and (ent.text not in acronym_set):
+                            self.acronyms.append(
+                                EntityObject(ent, sent, answer_doc, ent.text)
+                            )
                             acronym_set.add(ent.text)
-                        if (ent.label_ == "GPE" or ent.label_ == "LOC") and (not ent.text in place_set):
-                            self.places.append(EntityObject(ent, sent, answer_doc, ent.text))
+                        if (ent.label_ == "GPE" or ent.label_ == "LOC") and (
+                            ent.text not in place_set
+                        ):
+                            self.places.append(
+                                EntityObject(ent, sent, answer_doc, ent.text)
+                            )
                             place_set.add(ent.text)
 
     def answer_blob(self, answers: List[AnswerInfo]):
@@ -101,34 +108,24 @@ class NamedEntities:
         entity_type: str,
     ) -> List[EntityObject]:
         blob = self.answer_blob(category_answers)
-        ents = [entity.text for entity in entity_vals]
-        logging.warning(ents)
         for entity in entity_vals:
             verbs = [token for token in entity.doc if token.pos == VERB]
             if verbs == []:
-                logging.warning(entity.text)
-                logging.warning("NO VERB")
                 entity.weight = -1
                 continue
             else:
                 token = entity.answer[entity.span.start].head
                 while not (token.pos == VERB or token.is_sent_start or token.is_punct):
                     if token == token.head:
-                        logging.warning(entity.text)
-                        logging.warning("infinite loop")
                         break
                     token = token.head
                 if token.pos == VERB:
                     verb = token.text
-                    logging.warning(entity.text)
-                    logging.warning(verb)
                 else:
                     verb = verbs[0].text
-                    logging.warning(entity.text)
-                    logging.warning(verb)
                 entity.verb = verb
                 verb_tensor = self.transformer.encode(verb, convert_to_tensor=True)
-                entity.weight = float(util.pytorch_cos_sim(blob, verb_tensor))     
+                entity.weight = float(util.pytorch_cos_sim(blob, verb_tensor))
         return entity_vals
 
     def to_dict(self) -> Dict[str, List[str]]:
@@ -155,8 +152,8 @@ class NamedEntities:
                     question=template.substitute(entity=e.text),
                     entity=e.text,
                     template=entity_name,
-                    weight= e.weight,
-                    verb = e.verb
+                    weight=e.weight,
+                    verb=e.verb,
                 )
             )
 
@@ -208,6 +205,7 @@ class NamedEntities:
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)
         import random
+
         random.shuffle(followups)
         followups.sort(key=lambda followup: followup.weight, reverse=True)
         return followups

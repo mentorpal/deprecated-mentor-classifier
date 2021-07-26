@@ -243,15 +243,17 @@ def generate_followups(
     if me is None:
         raise NameError("me not found")
     category_answer = me.get("categoryAnswers", [])
-    recorded = [
+    category_answers = [
         AnswerInfo(
             answer_text=answer_data.get("answerText") or "",
             question_text=answer_data.get("questionText") or "",
         )
         for answer_data in category_answer
     ]
-    answered = fetch_mentor_questions(cookies=cookies, headers=headers)
-    followups = NamedEntities(recorded).generate_questions(answered)
+    all_answered = fetch_mentor_questions(cookies=cookies, headers=headers)
+    followups = NamedEntities(category_answers).generate_questions(
+        category_answers, all_answered
+    )
     return followups
 
 
