@@ -91,7 +91,6 @@ def test_covers_all_entities(
     assert actual_question == expected_followup
 
 
-@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "questions, answers, expected_followups",
@@ -126,3 +125,45 @@ def test_deduplication(
     followups = ents.generate_questions(answer_info_list)
     question_text = [followup.question for followup in followups]
     assert question_text == expected_followups
+
+
+@pytest.mark.only
+@responses.activate
+@pytest.mark.parametrize(
+    "mentor_id, category_id",
+    [("clint_long", "background")],
+)
+def test_from_category(
+    mentor_id: str,
+    category_id: str,
+    shared_root: str,
+):
+    mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
+    category = load_mentor_csv(fixture_mentor_data(mentor_id, category_id + ".csv"))
+
+    answers = get_answers(category)
+    answer_info: List[AnswerInfo] = [
+        AnswerInfo(
+            question_text=answer.question.question, answer_text=answer.transcript
+        )
+        for answer in answers
+    ]
+    ents = NamedEntities(answer_info, shared_root)
+    context = get_answers(mentor)
+    context_info: List[AnswerInfo] = [
+        AnswerInfo(
+            question_text=answer.question.question, answer_text=answer.transcript
+        )
+        for answer in context
+    ]
+    questions = ents.generate_questions(answer_info, context_info)
+    question_strs = [[question.question, question.weight, question.verb] for question in questions]
+    import csv
+
+    with open(
+        "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/sorted_background.csv",
+        "w",
+    ) as f:
+        write = csv.writer(f)
+        write.writerows(question_strs)
+    assert 0 == 1

@@ -12,12 +12,19 @@ from string import Template
 from typing import List, Dict
 from spacy.matcher import PhraseMatcher
 from spacy import Language
+from spacy.tokens.span import Span 
+from spacy.tokens import Doc
+from spacy.symbols import VERB
+import spacy 
 
 from mentor_classifier.spacy_model import find_or_load_spacy
 from mentor_classifier.types import AnswerInfo
 from mentor_classifier.utils import get_shared_root
-from spacy.tokens.span import Span as entity
-from spacy.tokens import Doc, VERB
+
+from sentence_transformers import util, SentenceTransformer
+from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
+from mentor_classifier.stopwords import STOPWORDS
+
 
 QUESTION_TEMPLATES = {
     "person": Template("Can you tell me more about $entity?"),
@@ -30,17 +37,21 @@ QUESTION_TEMPLATES = {
 @dataclass
 class FollowupQuestion:
     question: str
-    entity_type: str
+    entity: str
     template: str
+    weight: float = 0
+    verb: str = ""
 
 
-#this should be a dictionary for easier removal
+# this should be a dictionary for easier removal
 @dataclass
 class EntityObject:
-    span: entity
+    span: Span
     doc: Doc
+    answer: Doc
     text: str
-    weight: float
+    weight: float = 0
+    verb: str = ""
 
 
 class NamedEntities:
@@ -49,23 +60,76 @@ class NamedEntities:
         self.places: List[EntityObject] = []
         self.acronyms: List[EntityObject] = []
         self.model: Language
+        self.transformer: SentenceTransformer
         self.load(answers, shared_root or get_shared_root())
 
     def load(self, answers: List[AnswerInfo], shared_root: str):
         self.model = find_or_load_spacy(path.join(shared_root, "spacy-model"))
+        self.transformer = find_or_load_sentence_transformer(
+            path.join(shared_root, "sentence-transformer")
+        )
+        person_set = set()
+        acronym_set = set()
+        place_set = set()
         for answer in answers:
             answer_doc = self.model(answer.answer_text)
-            if answer_doc.ents:
-                for ent in answer_doc.ents:
-                    if ent.label_ == "PERSON":
-                        self.people.append(EntityObject(ent, answer_doc, ent.text))
-                    if ent.label_ == "ORG":
-                        self.acronyms.append(EntityObject(ent, answer_doc, ent.text))
-                    if ent.label_ == "GPE" or ent.label_ == "LOC":
-                        self.places.append(EntityObject(ent, answer_doc, ent.text))
+            for sent in answer_doc.sents:
+                if sent.ents:
+                    for ent in sent.ents:
+                        if (ent.label_ == "PERSON") and (not ent.text in person_set):
+                            self.people.append(EntityObject(ent, sent, answer_doc, ent.text))
+                            person_set.add(ent.text)
+                        if (ent.label_ == "ORG") and (not ent.text in acronym_set):
+                            self.acronyms.append(EntityObject(ent, sent, answer_doc, ent.text))
+                            acronym_set.add(ent.text)
+                        if (ent.label_ == "GPE" or ent.label_ == "LOC") and (not ent.text in place_set):
+                            self.places.append(EntityObject(ent, sent, answer_doc, ent.text))
+                            place_set.add(ent.text)
 
+    def answer_blob(self, answers: List[AnswerInfo]):
+        text_list = [answer.answer_text for answer in answers]
+        answer_text = " ".join(text_list)
+        for word in answer_text:
+            if word in STOPWORDS:
+                answer_text.replace(word, " ")
+        return self.transformer.encode(answer_text, convert_to_tensor=True)
+
+    def check_relevance(
+        self,
+        entity_vals: List[EntityObject],
+        category_answers: List[AnswerInfo],
+        entity_type: str,
+    ) -> List[EntityObject]:
+        blob = self.answer_blob(category_answers)
+        ents = [entity.text for entity in entity_vals]
+        logging.warning(ents)
+        for entity in entity_vals:
+            verbs = [token for token in entity.doc if token.pos == VERB]
+            if verbs == []:
+                logging.warning(entity.text)
+                logging.warning("NO VERB")
+                entity.weight = -1
+                continue
             else:
-                logging.warning("No named entities found.")
+                token = entity.answer[entity.span.start].head
+                while not (token.pos == VERB or token.is_sent_start or token.is_punct):
+                    if token == token.head:
+                        logging.warning(entity.text)
+                        logging.warning("infinite loop")
+                        break
+                    token = token.head
+                if token.pos == VERB:
+                    verb = token.text
+                    logging.warning(entity.text)
+                    logging.warning(verb)
+                else:
+                    verb = verbs[0].text
+                    logging.warning(entity.text)
+                    logging.warning(verb)
+                entity.verb = verb
+                verb_tensor = self.transformer.encode(verb, convert_to_tensor=True)
+                entity.weight = float(util.pytorch_cos_sim(blob, verb_tensor))     
+        return entity_vals
 
     def to_dict(self) -> Dict[str, List[str]]:
         entities = {
@@ -89,21 +153,28 @@ class NamedEntities:
             followups.append(
                 FollowupQuestion(
                     question=template.substitute(entity=e.text),
-                    entity_type=e,
+                    entity=e.text,
                     template=entity_name,
+                    weight= e.weight,
+                    verb = e.verb
                 )
             )
 
     def clean_ents(
-        self, entity_vals: List[EntityObject], answered: List[str], entity_type: str
+        self,
+        entity_vals: List[EntityObject],
+        category_answers: List[AnswerInfo],
+        all_answered: List[AnswerInfo],
+        entity_type: str,
     ) -> List[EntityObject]:
-        deduped = self.remove_duplicates(entity_vals, answered)
-        relevant = self.check_relevance(deduped, entity_type)
+        deduped = self.remove_duplicates(entity_vals, all_answered)
+        relevant = self.check_relevance(deduped, category_answers, entity_type)
         return relevant
 
     def remove_duplicates(
-        self, entity_vals: List[EntityObject], answered: List[str]
+        self, entity_vals: List[EntityObject], all_answered: List[AnswerInfo]
     ) -> List[EntityObject]:
+        answered = [question.question_text for question in all_answered]
         matcher = PhraseMatcher(self.model.vocab)
         terms = [ent.text for ent in entity_vals]
         patterns = [self.model.make_doc(text) for text in terms]
@@ -120,23 +191,23 @@ class NamedEntities:
                         del terms[i]
         return entity_vals
 
-    def check_relevance(self, entity_vals: List[EntityObject], entity_type: str) -> List[EntityObject]:
-        for entity in ent_vals:
-            token = entity.doc[entity.span]
-            verb = token.head
-            while not verb.pos == VERB:
-                verb = verb.head 
-            if not verb.text in KEY_VERBS[entity_type]:
-                del entity_vals[entity]
-        return entity_vals
-
-    def generate_questions(self, answered: List[AnswerInfo]) -> List[FollowupQuestion]:
+    def generate_questions(
+        self, category_answers: List[AnswerInfo], all_answered: List[AnswerInfo]
+    ) -> List[FollowupQuestion]:
         followups: List[FollowupQuestion] = []
-        answered_list = [question.question_text for question in answered]
-        self.people = self.clean_ents(self.people, answered_list)
-        self.places = self.clean_ents(self.places, answered_list)
-        self.acronyms = self.clean_ents(self.acronyms, answered_list)
+        self.people = self.clean_ents(
+            self.people, category_answers, all_answered, "person"
+        )
+        self.places = self.clean_ents(
+            self.places, category_answers, all_answered, "place"
+        )
+        self.acronyms = self.clean_ents(
+            self.acronyms, category_answers, all_answered, "acronym"
+        )
         self.add_followups("person", self.people, followups)
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)
+        import random
+        random.shuffle(followups)
+        followups.sort(key=lambda followup: followup.weight, reverse=True)
         return followups
