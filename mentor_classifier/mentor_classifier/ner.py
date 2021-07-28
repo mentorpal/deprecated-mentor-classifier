@@ -14,7 +14,7 @@ from spacy.matcher import PhraseMatcher
 from spacy import Language
 from spacy.tokens.span import Span
 from spacy.tokens import Doc
-from spacy.symbols import VERB
+from spacy.symbols import VERB, nsubj
 
 from mentor_classifier.spacy_model import find_or_load_spacy
 from mentor_classifier.types import AnswerInfo
@@ -67,6 +67,7 @@ class NamedEntities:
         self.transformer = find_or_load_sentence_transformer(
             path.join(shared_root, "sentence-transformer")
         )
+        #for deduplicating found entities
         person_set = set()
         acronym_set = set()
         place_set = set()
@@ -114,18 +115,25 @@ class NamedEntities:
                 entity.weight = -1
                 continue
             else:
-                token = entity.answer[entity.span.start].head
+                verb = ""
+                token = entity.answer[entity.span.start]
                 while not (token.pos == VERB or token.is_sent_start or token.is_punct):
-                    if token == token.head:
-                        break
                     token = token.head
-                if token.pos == VERB:
-                    verb = token.text
-                else:
-                    verb = verbs[0].text
+                    if token.pos == VERB:
+                        verb = token.text
+                        for child in token.children:
+                            if child.dep == nsubj and child.text == "I":
+                                entity.weight = 1
+                    if token == token.head:
+                        break 
+                if verb == "":
+                    # verb = verbs[0].text
+                    continue
                 entity.verb = verb
                 verb_tensor = self.transformer.encode(verb, convert_to_tensor=True)
-                entity.weight = float(util.pytorch_cos_sim(blob, verb_tensor))
+                entity.weight = entity.weight + float(util.pytorch_cos_sim(blob, verb_tensor))
+                # ent_tensor = self.transformer.encode(entity.text, convert_to_tensor=True)
+                # entity.weight = entity.weight + float(util.pytorch_cos_sim(blob, ent_tensor))
         return entity_vals
 
     def to_dict(self) -> Dict[str, List[str]]:
@@ -204,8 +212,7 @@ class NamedEntities:
         self.add_followups("person", self.people, followups)
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)
-        import random
-
-        random.shuffle(followups)
+        # import random
+        # random.shuffle(followups)
         followups.sort(key=lambda followup: followup.weight, reverse=True)
         return followups

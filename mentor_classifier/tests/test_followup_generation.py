@@ -16,7 +16,8 @@ from .helpers import (
 from mentor_classifier.ner import NamedEntities
 from .helpers import get_answers
 from typing import List, Dict
-
+from os import path
+import csv
 
 @responses.activate
 @pytest.mark.parametrize(
@@ -125,3 +126,113 @@ def test_deduplication(
     followups = ents.generate_questions(answer_info_list, answer_info_list)
     question_text = [followup.question for followup in followups]
     assert question_text == expected_followups
+
+# @pytest.mark.only
+@responses.activate
+@pytest.mark.parametrize(
+    "mentor_id, category_id",
+    [("clint_long", "background")],
+)
+def test_from_category(
+    mentor_id: str,
+    category_id: str,
+    shared_root: str,
+):
+    mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
+    category = load_mentor_csv(fixture_mentor_data(mentor_id, category_id + ".csv"))
+
+    answers = get_answers(category)
+    answer_info: List[AnswerInfo] = [
+        AnswerInfo(
+            question_text=answer.question.question, answer_text=answer.transcript
+        )
+        for answer in answers
+    ]
+    ents = NamedEntities(answer_info, shared_root)
+    context = get_answers(mentor)
+    context_info: List[AnswerInfo] = [
+        AnswerInfo(
+            question_text=answer.question.question, answer_text=answer.transcript
+        )
+        for answer in context
+    ]
+    questions = ents.generate_questions(answer_info, context_info)
+    question_strs = [
+        [question.question, question.weight, question.verb] for question in questions
+    ]
+    import csv
+
+    with open(
+        "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/background_i.csv",
+        "w",
+    ) as f:
+        write = csv.writer(f)
+        write.writerows(question_strs)
+    assert 0 == 1
+
+def load_scored(mentor, category):
+    data_path = path.join(category, category + "_scored.csv")
+    data = fixture_mentor_data(mentor, data_path)
+    good = set()
+    bad = set()
+    with open(
+        data
+    ) as f:
+        csv_reader = csv.reader(f)
+        next(csv_reader)
+        for row in csv_reader:
+            if row[3] == "1":
+                good.add(row[0])
+            else:
+                bad.add(row[0])
+    return good, bad
+
+def k_precision(category, mentor, file_name, good, bad, k):
+    import logging
+    data_path = path.join(category, file_name)
+    data = fixture_mentor_data(mentor, data_path)
+    logging.warning(data)
+    pos = 0 
+    neg = 0
+    with open(
+        data
+    ) as f:
+        i = 0
+        csv_reader = csv.reader(f)
+        for row in csv_reader:
+            if i < (k):
+                if row[0] in good:
+                    pos = pos + 1
+                i = i+1
+            else:
+                if row[0] in good:
+                    neg = neg + 1
+        precision = pos/(k)
+    return precision
+
+@pytest.mark.only
+@responses.activate
+@pytest.mark.parametrize(
+    "mentor_id, category_id, standard_file, test_file",
+    [("clint_long", "background", "background_f_i.csv","background_f_i.csv")],
+)
+def test_sort(
+    mentor_id: str,
+    category_id: str,
+    standard_file: str,
+    test_file: str,
+    shared_root: str,
+):
+    import logging
+    k = 20
+    good, bad = load_scored(mentor_id, category_id)
+    precision = k_precision(category_id, mentor_id, test_file, good, bad, k)
+    s_precision = k_precision(category_id, mentor_id, standard_file, good, bad, k)
+    logging.warning(precision)
+    assert 0==1
+    assert precison <= s_precison
+   
+    
+        
+
+
