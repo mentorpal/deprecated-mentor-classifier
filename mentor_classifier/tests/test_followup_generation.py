@@ -103,14 +103,22 @@ def test_covers_all_entities(
                 "Who is your brother?",
                 "Where do you work?",
                 "What was U.K. like?",
+                "Where did you go to school?",
+                "What is that?",
             ],
             [
                 "I lived in the U.K.",
                 "He is Clint Anderson.",
                 "I work at USC.",
                 "The U.K. was cool.",
+                "I went to UC Berkeley",
+                "I went to University of California Berkeley",
             ],
-            ["What is USC?", "Can you tell me more about Clint Anderson?"],
+            [
+                "What is USC?",
+                "What is University of California Berkeley?",
+                "Can you tell me more about Clint Anderson?",
+            ],
         )
     ],
 )
@@ -201,21 +209,22 @@ def k_precision(category, mentor, file_name, good, bad, k):
         i = 0
         csv_reader = csv.reader(f)
         for row in csv_reader:
-            if i < (k):
+            if i < k:
                 if row[0] in good:
                     pos = pos + 1
                 i = i + 1
             else:
                 if row[0] in good:
                     neg = neg + 1
-        precision = pos / (k)
+        precision = pos / k
     return precision
 
 
+# test for comparing lists sorted with different algorithms
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id, category_id, standard_file, test_file, k",
-    [("clint_long", "background", "background_f_i.csv", "background_f_i.csv", "20")],
+    [("clint_long", "background", "background_f_i.csv", "background_f_i.csv", 20)],
 )
 def test_sort(
     mentor_id: str,
