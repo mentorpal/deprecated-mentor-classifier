@@ -21,9 +21,11 @@ from mentor_classifier.types import AnswerInfo
 from mentor_classifier.utils import get_shared_root
 
 from sentence_transformers import util, SentenceTransformer
+from torch import Tensor
 from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
 from mentor_classifier.stopwords import STOPWORDS
 
+SIMILARITY_THRESHOLD = 0.92
 
 QUESTION_TEMPLATES = {
     "person": Template("Can you tell me more about $entity?"),
@@ -42,7 +44,6 @@ class FollowupQuestion:
     verb: str = ""
 
 
-# this should be a dictionary for easier removal
 @dataclass
 class EntityObject:
     span: Span
@@ -67,7 +68,7 @@ class NamedEntities:
         self.transformer = find_or_load_sentence_transformer(
             path.join(shared_root, "sentence-transformer")
         )
-        #for deduplicating found entities
+        # for deduplicating found entities
         person_set = set()
         acronym_set = set()
         place_set = set()
@@ -94,12 +95,15 @@ class NamedEntities:
                             )
                             place_set.add(ent.text)
 
-    def answer_blob(self, answers: List[AnswerInfo]):
+    def answer_blob(self, answers: List[AnswerInfo]) -> Tensor:
         text_list = [answer.answer_text for answer in answers]
         answer_text = " ".join(text_list)
         for word in answer_text:
             if word in STOPWORDS:
                 answer_text.replace(word, " ")
+        logging.warning(
+            type(self.transformer.encode(answer_text, convert_to_tensor=True))
+        )
         return self.transformer.encode(answer_text, convert_to_tensor=True)
 
     def check_relevance(
@@ -115,25 +119,24 @@ class NamedEntities:
                 entity.weight = -1
                 continue
             else:
-                verb = ""
                 token = entity.answer[entity.span.start]
                 while not (token.pos == VERB or token.is_sent_start or token.is_punct):
                     token = token.head
                     if token.pos == VERB:
-                        verb = token.text
+                        entity.verb = token.text
                         for child in token.children:
                             if child.dep == nsubj and child.text == "I":
                                 entity.weight = 1
                     if token == token.head:
-                        break 
-                if verb == "":
-                    # verb = verbs[0].text
-                    continue
-                entity.verb = verb
-                verb_tensor = self.transformer.encode(verb, convert_to_tensor=True)
-                entity.weight = entity.weight + float(util.pytorch_cos_sim(blob, verb_tensor))
-                # ent_tensor = self.transformer.encode(entity.text, convert_to_tensor=True)
-                # entity.weight = entity.weight + float(util.pytorch_cos_sim(blob, ent_tensor))
+                        break
+                if entity.verb == "":
+                    entity.verb = verbs[0].text
+                verb_tensor = self.transformer.encode(
+                    entity.verb, convert_to_tensor=True
+                )
+                entity.weight = entity.weight + float(
+                    util.pytorch_cos_sim(blob, verb_tensor)
+                )
         return entity_vals
 
     def to_dict(self) -> Dict[str, List[str]]:
@@ -196,6 +199,30 @@ class NamedEntities:
                         del terms[i]
         return entity_vals
 
+    def remove_similar(
+        self,
+        followups: List[FollowupQuestion],
+        answered: List[AnswerInfo],
+        similarity_threshold: float = SIMILARITY_THRESHOLD,
+    ) -> List[FollowupQuestion]:
+        followups_text = [followup.question for followup in followups]
+        answered_text = [question.question_text for question in answered]
+        questions = answered_text + followups_text
+        paraphrases = util.paraphrase_mining(self.transformer, questions)
+        for paraphrase in paraphrases:
+            score, i, j = paraphrase
+            if score > similarity_threshold:
+                logging.warning(f"{score} {questions[i]} {questions[j]}")
+                if questions[i] in followups_text:
+                    duplicate = followups_text.index(questions[i])
+                    followups_text.pop(duplicate)
+                    followups.pop(duplicate)
+                elif questions[j] in followups_text:
+                    duplicate = followups_text.index(questions[j])
+                    followups_text.pop(duplicate)
+                    followups.pop(duplicate)
+        return followups
+
     def generate_questions(
         self, category_answers: List[AnswerInfo], all_answered: List[AnswerInfo]
     ) -> List[FollowupQuestion]:
@@ -212,6 +239,7 @@ class NamedEntities:
         self.add_followups("person", self.people, followups)
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)
+        followups = self.remove_similar(followups, all_answered)
         # import random
         # random.shuffle(followups)
         followups.sort(key=lambda followup: followup.weight, reverse=True)
