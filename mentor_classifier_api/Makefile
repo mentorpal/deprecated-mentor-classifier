@@ -43,8 +43,12 @@ build/mentor_classifier:
 		$(MENTOR_CLASSIFIER_SRC) build
 	
 .PHONY docker-build:
-docker-build: clean build/mentor_classifier
-	docker build -t $(DOCKER_IMAGE) .
+# docker-build: clean build/mentor_classifier
+docker-build: clean
+	# docker build -t $(DOCKER_IMAGE) .
+	cd .. \
+		&& docker build -t $(DOCKER_IMAGE) -f ./mentor_classifier_api/Dockerfile .
+
 
 .PHONY docker-build:
 docker-run:

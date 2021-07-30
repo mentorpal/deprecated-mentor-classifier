@@ -27,10 +27,12 @@ WORKDIR /app/mentor_classifier
 # the only thing we need from mentor_classifier is the built .gz (to install)
 COPY --from=builder /build/mentor_classifier/dist ./dist
 WORKDIR /app
+COPY mentor_classifier_api ./mentor_classifier_api
 RUN cd mentor_classifier_api \
 	&& poetry config virtualenvs.create false \
 	&& poetry install --no-dev \
 	&& pip uninstall -y poetry
-COPY src .
+# COPY src .
+COPY mentor_classifier_api/src .
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
