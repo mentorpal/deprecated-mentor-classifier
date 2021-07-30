@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mentor_classifier"
 version = "1.0.0"
-description = ""
+description = "train and run inference for mentor pal"
 authors = []
 
 [tool.poetry.dependencies]
