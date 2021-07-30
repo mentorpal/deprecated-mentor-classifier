@@ -12,7 +12,7 @@ RUN pip3 install \
 	-f https://download.pytorch.org/whl/torch_stable.html
 WORKDIR /opt/mentor_classifier
 COPY . .
-RUN pip install .
+# RUN pip install .
 WORKDIR /app
 COPY poetry.lock pyproject.toml ./
 RUN pip install poetry
