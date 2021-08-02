@@ -32,7 +32,6 @@ RUN cd mentor_classifier_api \
 	&& poetry config virtualenvs.create false \
 	&& poetry install --no-dev \
 	&& pip uninstall -y poetry
-# COPY src .
 COPY mentor_classifier_api/src .
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
