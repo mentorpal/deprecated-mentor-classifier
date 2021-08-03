@@ -10,18 +10,21 @@ FROM python:3.8-slim
 # 	torch==1.9.0+cpu \
 # 	torchvision==0.10.0+cpu \
 # 	-f https://download.pytorch.org/whl/torch_stable.html
-WORKDIR /opt/mentor_classifier
-COPY . .
+# WORKDIR /opt/mentor_classifier
+# COPY . .
 WORKDIR /app
 COPY poetry.lock pyproject.toml ./
-RUN pip install poetry
-RUN poetry config virtualenvs.create false
-RUN poetry install --no-dev
-# RUN pip install poethepoet
-# RUN python -m poethepoet force-cpu-only
-RUN poetry run poe force-cpu-only
-RUN pip uninstall -y poetry
-RUN rm -rf /opt/mentor_classifier
+COPY mentor_classifier mentor_classifier
+COPY mentor_classifier_tasks mentor_classifier_tasks
+RUN ls -la
+RUN pip install poetry \
+    && poetry config virtualenvs.create false \
+    && poetry install --no-dev \
+    && pip install poethepoet \
+    && poetry run poe force-cpu-only \
+    && poetry cache clear $(poetry cache list) --all -n \
+    && pip uninstall -y poetry poethepoet
+# RUN rm -rf /opt/mentor_classifier
 COPY mentor_classifier_tasks .
 COPY bin/training_worker.sh .
 RUN chmod a+x training_worker.sh
