@@ -23,9 +23,10 @@ RUN pip install poetry \
     && pip install poethepoet \
     && poetry run poe force-cpu-only \
     && poetry cache clear $(poetry cache list) --all -n \
+    # seems like poetry and pip caches 
+    # are not clearing no matter what so hacking with below...
+    && rm -rf /root/.cache/* \
     && pip uninstall -y poetry poethepoet
-# RUN rm -rf /opt/mentor_classifier
-COPY mentor_classifier_tasks .
 COPY bin/training_worker.sh .
 RUN chmod a+x training_worker.sh
 ENTRYPOINT ["mentor_classifier"]
