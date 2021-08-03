@@ -40,6 +40,7 @@ pytest-flask = "^1.2.0"
 pytest-only = "^1.2.2"
 responses = "^0.13.3"
 tqdm = "4.61.0"
+poethepoet = "^0.10.0"
 
 [tool.poe.tasks]
 # The problem stems from that fb doesn't publish 
