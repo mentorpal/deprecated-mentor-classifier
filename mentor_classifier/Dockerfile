@@ -17,7 +17,10 @@ COPY poetry.lock pyproject.toml ./
 RUN pip install poetry
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev
+# RUN pip install poethepoet
+# RUN python -m poethepoet force-cpu-only
 RUN poetry run poe force-cpu-only
+RUN pip uninstall -y poetry
 RUN rm -rf /opt/mentor_classifier
 COPY mentor_classifier_tasks .
 COPY bin/training_worker.sh .

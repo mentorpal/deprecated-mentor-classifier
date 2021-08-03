@@ -6,6 +6,7 @@ COPY mentor_classifier ./mentor_classifier
 RUN cd mentor_classifier \
 	&& poetry config virtualenvs.create false \
 	&& poetry install --no-dev \
+	&& poetry run poe force-cpu-only
 	&& poetry build
 FROM python:3.8-slim
 ENV STATUS_URL_FORCE_HTTPS=false
@@ -16,10 +17,10 @@ ENV STATUS_URL_FORCE_HTTPS=false
 # after 19.0 don't respect "dependency_links"
 # (e.g. for https://download.pytorch.org/whl/torch_stable.html)
 # in setup.py
-RUN pip3 install \
-	torch==1.9.0+cpu \
-	torchvision==0.10.0+cpu \
-	-f https://download.pytorch.org/whl/torch_stable.html
+# RUN pip3 install \
+# 	torch==1.9.0+cpu \
+# 	torchvision==0.10.0+cpu \
+# 	-f https://download.pytorch.org/whl/torch_stable.html
 ENV FLASK_APP=mentor_classifier_api
 WORKDIR /app
 RUN pip install poetry
@@ -30,8 +31,9 @@ WORKDIR /app
 COPY mentor_classifier_api ./mentor_classifier_api
 RUN cd mentor_classifier_api \
 	&& poetry config virtualenvs.create false \
-	&& poetry install --no-dev \
-	&& pip uninstall -y poetry
+	&& poetry install --no-dev
+RUN poetry run poe force-cpu-only
+RUN pip uninstall -y poetry
 COPY mentor_classifier_api/src .
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
