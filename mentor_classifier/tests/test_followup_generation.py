@@ -137,48 +137,47 @@ def test_deduplication(
     assert question_text == expected_followups
 
 
-# @pytest.mark.only
-# @responses.activate
-# @pytest.mark.parametrize(
-#     "mentor_id, category_id",
-#     [("clint_long", "background")],
-# )
-# def test_from_category(
-#     mentor_id: str,
-#     category_id: str,
-#     shared_root: str,
-# ):
-#     mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
-#     category = load_mentor_csv(fixture_mentor_data(mentor_id, category_id + ".csv"))
+@pytest.mark.only
+@responses.activate
+@pytest.mark.parametrize(
+    "mentor_id, category_id",
+    [("clint_long", "background")],
+)
+def test_from_category(
+    mentor_id: str,
+    category_id: str,
+    shared_root: str,
+):
+    mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
+    category = load_mentor_csv(fixture_mentor_data(mentor_id, category_id + ".csv"))
 
-#     answers = get_answers(category)
-#     answer_info: List[AnswerInfo] = [
-#         AnswerInfo(
-#             question_text=answer.question.question, answer_text=answer.transcript
-#         )
-#         for answer in answers
-#     ]
-#     ents = NamedEntities(answer_info, shared_root)
-#     context = get_answers(mentor)
-#     context_info: List[AnswerInfo] = [
-#         AnswerInfo(
-#             question_text=answer.question.question, answer_text=answer.transcript
-#         )
-#         for answer in context
-#     ]
-#     questions = ents.generate_questions(answer_info, context_info)
-#     question_strs = [
-#         [question.question, question.weight, question.verb] for question in questions
-#     ]
-#     import csv
+    answers = get_answers(category)
+    answer_info: List[AnswerInfo] = [
+        AnswerInfo(
+            question_text=answer.question.question, answer_text=answer.transcript
+        )
+        for answer in answers
+    ]
+    ents = NamedEntities(answer_info, shared_root)
+    context = get_answers(mentor)
+    context_info: List[AnswerInfo] = [
+        AnswerInfo(
+            question_text=answer.question.question, answer_text=answer.transcript
+        )
+        for answer in context
+    ]
+    questions = ents.generate_questions(answer_info, context_info)
+    question_strs = [
+        [question.question, question.weight, question.verb] for question in questions
+    ]
+    import csv
 
-#     with open(
-#         "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/noo_z.csv",
-#         "w",
-#     ) as f:
-#         write = csv.writer(f)
-#         write.writerows(question_strs)
-#     assert 0 == 1
+    with open(
+        "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/all_pop.csv",
+        "w",
+    ) as f:
+        write = csv.writer(f)
+        write.writerows(question_strs)
 
 
 def load_scored(mentor, category):
@@ -224,7 +223,7 @@ def k_precision(category, mentor, file_name, good, bad, k):
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id, category_id, standard_file, test_file, k",
-    [("clint_long", "background", "background_f_i.csv", "background_f_i.csv", 20)],
+    [("clint_long", "background", "background_f_i.csv", "background_f_i_p.csv", 20)],
 )
 def test_sort(
     mentor_id: str,
@@ -237,4 +236,8 @@ def test_sort(
     good, bad = load_scored(mentor_id, category_id)
     precision = k_precision(category_id, mentor_id, test_file, good, bad, k)
     s_precision = k_precision(category_id, mentor_id, standard_file, good, bad, k)
+    import logging
+
+    logging.warning(precision)
+    assert 0 == 1
     assert precision <= s_precision
