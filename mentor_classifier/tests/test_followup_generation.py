@@ -137,7 +137,6 @@ def test_deduplication(
     assert question_text == expected_followups
 
 
-@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id, category_id",
@@ -236,8 +235,4 @@ def test_sort(
     good, bad = load_scored(mentor_id, category_id)
     precision = k_precision(category_id, mentor_id, test_file, good, bad, k)
     s_precision = k_precision(category_id, mentor_id, standard_file, good, bad, k)
-    import logging
-
-    logging.warning(precision)
-    assert 0 == 1
-    assert precision <= s_precision
+    assert precision >= s_precision
