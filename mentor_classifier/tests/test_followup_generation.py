@@ -136,11 +136,11 @@ def test_deduplication(
     question_text = [followup.question for followup in followups]
     assert question_text == expected_followups
 
-
+@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id, category_id",
-    [("clint_long", "background")],
+    [("clint_long", "Motivation")],
 )
 def test_from_category(
     mentor_id: str,
@@ -172,11 +172,12 @@ def test_from_category(
     import csv
 
     with open(
-        "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/all_pop.csv",
+        "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/motivation_scored.csv",
         "w",
     ) as f:
         write = csv.writer(f)
         write.writerows(question_strs)
+    assert 0 ==1 
 
 
 def load_scored(mentor, category):

@@ -61,9 +61,9 @@ class EntityObject:
 
 class NamedEntities:
     def __init__(self, answers: List[AnswerInfo], shared_root: str = ""):
-        self.people: List[EntityObject] = []
-        self.places: List[EntityObject] = []
-        self.acronyms: List[EntityObject] = []
+        self.people: Dict[str, EntityObject] = {}
+        self.places: Dict[str, EntityObject] = {}
+        self.acronyms: Dict[str, EntityObject] = {}
         self.model: Language
         self.transformer: SentenceTransformer
         self.pop_culture: Set[str] = set()
@@ -75,36 +75,27 @@ class NamedEntities:
             path.join(shared_root, "sentence-transformer")
         )
         self.load_pop_culture()
-        # for deduplicating found entities
-        person_set = set()
-        acronym_set = set()
-        place_set = set()
         for answer in answers:
             answer_doc = self.model(answer.answer_text)
             for sent in answer_doc.sents:
                 if sent.ents:
                     for ent in sent.ents:
-                        if (ent.label_ == "PERSON") and (ent.text not in person_set):
-                            self.people.append(
-                                EntityObject(ent, sent, answer_doc, ent.text)
+                        if ent.label_ == "PERSON":
+                            self.people[ent.text] = EntityObject(
+                                ent, sent, answer_doc, ent.text
                             )
-                            person_set.add(ent.text)
-                        if (ent.label_ == "ORG") and (ent.text not in acronym_set):
-                            self.acronyms.append(
-                                EntityObject(ent, sent, answer_doc, ent.text)
+                        if ent.label_ == "ORG":
+                            self.acronyms[ent.text] = EntityObject(
+                                ent, sent, answer_doc, ent.text
                             )
-                            acronym_set.add(ent.text)
-                        if (ent.label_ == "GPE" or ent.label_ == "LOC") and (
-                            ent.text not in place_set
-                        ):
+                        if ent.label_ == "GPE" or ent.label_ == "LOC":
                             # us_tensor = self.transformer.encode("United States", convert_to_tensor=True)
                             # ent_tensor = self.transformer.encode(ent.text, convert_to_tensor=True)
                             # sim = float(util.pytorch_cos_sim(us_tensor, ent_tensor))
                             # if sim <= SIMILARITY_THRESHOLD:
-                            self.places.append(
-                                EntityObject(ent, sent, answer_doc, ent.text)
+                            self.places[ent.text] = EntityObject(
+                                ent, sent, answer_doc, ent.text
                             )
-                            place_set.add(ent.text)
 
     def load_pop_culture(self):
         path = "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/pop_culture.csv"
@@ -119,9 +110,6 @@ class NamedEntities:
         for word in answer_text:
             if word in STOPWORDS:
                 answer_text.replace(word, " ")
-        logging.warning(
-            type(self.transformer.encode(answer_text, convert_to_tensor=True))
-        )
         return self.transformer.encode(answer_text, convert_to_tensor=True)
 
     def org_weight(self, blob: Tensor, entity: EntityObject):
@@ -131,77 +119,66 @@ class NamedEntities:
 
     def check_relevance(
         self,
-        entity_vals: List[EntityObject],
+        entity_vals: Dict[str, EntityObject],
         category_answers: List[AnswerInfo],
         entity_type: str,
-    ) -> List[EntityObject]:
+    ) -> Dict[str, EntityObject]:
         blob = self.answer_blob(category_answers)
-        for entity in entity_vals:
-            self.check_pop_culture(entity, blob)
-            verbs = [token for token in entity.doc if token.pos == VERB]
+        for entity in entity_vals.keys():
+            ent = entity_vals[entity]
+            self.check_pop_culture(ent, blob)
+            verbs = [token for token in ent.doc if token.pos == VERB]
             if verbs == []:
-                entity.weight = -1
+                ent.weight = -1
                 continue
             else:
-                token = entity.answer[entity.span.start]
+                token = ent.answer[ent.span.start]
                 while not (token.pos == VERB or token.is_sent_start or token.is_punct):
                     token = token.head
                     if token.pos == VERB:
-                        entity.verb = token.text
+                        ent.verb = token.text
                         for child in token.children:
                             if child.dep == nsubj and child.text == "I":
-                                entity.weight = entity.weight + I_WEIGHT
+                                ent.weight = ent.weight + I_WEIGHT
                     if token == token.head:
                         break
-                if entity.verb == "":
-                    entity.verb = verbs[0].text
-                verb_tensor = self.transformer.encode(
-                    entity.verb, convert_to_tensor=True
-                )
-                entity.weight = entity.weight + float(
-                    util.pytorch_cos_sim(blob, verb_tensor)
-                )
+                if ent.verb == "":
+                    ent.verb = verbs[0].text
+                verb_tensor = self.transformer.encode(ent.verb, convert_to_tensor=True)
+                ent.weight = ent.weight + float(util.pytorch_cos_sim(blob, verb_tensor))
         return entity_vals
-
-    def to_dict(self) -> Dict[str, List[str]]:
-        entities = {
-            "acronyms": [acronym.text for acronym in self.acronyms],
-            "people": [person.text for person in self.people],
-            "places": [place.text for place in self.places],
-        }
-        return entities
 
     def add_followups(
         self,
         entity_name: str,
-        entity_vals: List[EntityObject],
-        followups: List[FollowupQuestion],
+        entity_vals: Dict[str, EntityObject],
+        followups: Dict[str, FollowupQuestion],
     ) -> None:
         if entity_name not in QUESTION_TEMPLATES:
             logging.warning("invalid entity name")
             return  # no template for this entity
         template = QUESTION_TEMPLATES[entity_name]
-        for e in entity_vals:
-            followups.append(
-                FollowupQuestion(
-                    question=template.substitute(entity=e.text),
-                    entity=e.text,
-                    template=entity_name,
-                    weight=e.weight,
-                    verb=e.verb,
-                )
+        for e in entity_vals.keys():
+            ent = entity_vals[e]
+            question = template.substitute(entity=ent.text)
+            followups[question] = FollowupQuestion(
+                question=question,
+                entity=ent.text,
+                template=entity_name,
+                weight=ent.weight,
+                verb=ent.verb,
             )
 
     def clean_ents(
         self,
-        entity_vals: List[EntityObject],
+        entity_vals: Dict[str, EntityObject],
         category_answers: List[AnswerInfo],
         all_answered: List[AnswerInfo],
         entity_type: str,
-    ) -> List[EntityObject]:
-        deduped = self.remove_duplicates(entity_vals, all_answered)
-        relevant = self.check_relevance(deduped, category_answers, entity_type)
-        return relevant
+    ) -> Dict[str, EntityObject]:
+        # deduped = self.remove_duplicates(entity_vals, all_answered)
+        # relevant = self.check_relevance(deduped, category_answers, entity_type)
+        return entity_vals
 
     def check_pop_culture(self, ent: EntityObject, blob: Tensor) -> None:
         doc = self.model(ent.text)
@@ -212,53 +189,39 @@ class NamedEntities:
             ent.weight = ent.weight + POP_WEIGHT
 
     def remove_duplicates(
-        self, entity_vals: List[EntityObject], all_answered: List[AnswerInfo]
-    ) -> List[EntityObject]:
-        answered = [question.question_text for question in all_answered]
-        matcher = PhraseMatcher(self.model.vocab)
-        terms = [ent.text for ent in entity_vals]
-        patterns = [self.model.make_doc(text) for text in terms]
-        matcher.add("TerminologyList", patterns)
-        for question in answered:
-            doc = self.model(question)
-            matches = matcher(doc)
-            if not matches == []:
-                for match_id, start, end in matches:
-                    span = doc[start:end]
-                    while span.text in terms:
-                        i = terms.index(span.text)
-                        entity_vals.pop(i)
-                        terms.pop(i)
+        self, entity_vals: Dict[str, EntityObject], all_answered: List[AnswerInfo]
+    ) -> Dict[str, EntityObject]:
+        answered = "".join([question.question_text for question in all_answered])
+        terms = [entity_vals[ent].text for ent in entity_vals.keys()]
+        for term in terms:
+            if term in answered:
+                entity_vals.pop(term)
         return entity_vals
 
     # Very slow
     def remove_similar(
         self,
-        followups: List[FollowupQuestion],
+        followups: Dict[str, FollowupQuestion],
         answered: List[AnswerInfo],
         similarity_threshold: float = SIMILARITY_THRESHOLD,
-    ) -> List[FollowupQuestion]:
-        followups_text = [followup.question for followup in followups]
+    ) -> Dict[str, FollowupQuestion]:
+        followups_text = [followups[followup].question for followup in followups.keys()]
         answered_text = [question.question_text for question in answered]
         questions = answered_text + followups_text
         paraphrases = util.paraphrase_mining(self.transformer, questions)
         for paraphrase in paraphrases:
             score, i, j = paraphrase
             if score > similarity_threshold:
-                if questions[i] in followups_text:
-                    duplicate = followups_text.index(questions[i])
-                    followups_text.pop(duplicate)
-                    followups.pop(duplicate)
-                elif questions[j] in followups_text:
-                    duplicate = followups_text.index(questions[j])
-                    followups_text.pop(duplicate)
-                    followups.pop(duplicate)
+                if questions[i] in followups:
+                    followups.pop(questions[i])
+                elif questions[j] in followups:
+                    followups.pop(questions[j])
         return followups
 
     def generate_questions(
         self, category_answers: List[AnswerInfo], all_answered: List[AnswerInfo]
     ) -> List[FollowupQuestion]:
-        followups: List[FollowupQuestion] = []
+        followups: Dict[str, FollowupQuestion] = {}
         self.people = self.clean_ents(
             self.people, category_answers, all_answered, "person"
         )
@@ -272,5 +235,9 @@ class NamedEntities:
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)
         # followups = self.remove_similar(followups, all_answered)
-        followups.sort(key=lambda followup: followup.weight, reverse=True)
-        return followups
+        followups_list = list(followups)
+        import random 
+        followups_list = random.shuffle(followups_list)
+        # followups_list.sort(key=lambda followup: followup.weight, reverse=True)
+        logging.warning(followups_list)
+        return followups_list
