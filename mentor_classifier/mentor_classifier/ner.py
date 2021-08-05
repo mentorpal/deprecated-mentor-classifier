@@ -21,9 +21,11 @@ from mentor_classifier.types import AnswerInfo
 from mentor_classifier.utils import get_shared_root
 
 from sentence_transformers import util, SentenceTransformer
+import torch
 from torch import Tensor
 from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
 from mentor_classifier.stopwords import STOPWORDS
+import functools
 import time
 import csv
 
@@ -111,11 +113,20 @@ class NamedEntities:
 
     def answer_blob(self, answers: List[AnswerInfo]) -> Tensor:
         text_list = [answer.answer_text for answer in answers]
-        answer_text = " ".join(text_list)
-        for word in answer_text:
-            if word in STOPWORDS:
-                answer_text.replace(word, " ")
-        return self.transformer.encode(answer_text, convert_to_tensor=True)
+        tensors = []
+        for answer in text_list:
+            for word in answer:
+                if word in STOPWORDS:
+                    answer.replace(word, " ")
+            t8 = time.time()
+            tensors.append(self.transformer.encode(answer, convert_to_tensor=True))
+            t9 = time.time()
+            logging.warning(t9-t8)
+        length = len(tensors)
+        tensor = tensors[0]
+        for i in range(1,length):
+            tensor.add(tensors[i])
+        return torch.div(tensor, length)
 
     def org_weight(self, blob: Tensor, entity: EntityObject):
         org_tensor = self.transformer.encode(entity.text, convert_to_tensor=True)
@@ -220,7 +231,7 @@ class NamedEntities:
     ) -> Dict[str, FollowupQuestion]:
         followups_text = [followups[followup].question for followup in followups.keys()]
         answered_text = [question.question_text for question in answered]
-        questions = answered_text + followups_text
+        question = answered_text + followups_text
         paraphrases = util.paraphrase_mining(self.transformer, questions)
         for paraphrase in paraphrases:
             score, i, j = paraphrase
