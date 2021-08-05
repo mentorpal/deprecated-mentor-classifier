@@ -24,7 +24,7 @@ from sentence_transformers import util, SentenceTransformer
 from torch import Tensor
 from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
 from mentor_classifier.stopwords import STOPWORDS
-
+import time
 import csv
 
 SIMILARITY_THRESHOLD = 0.92
@@ -67,6 +67,7 @@ class NamedEntities:
         self.model: Language
         self.transformer: SentenceTransformer
         self.pop_culture: Set[str] = set()
+        self.answers = Tensor
         self.load(answers, shared_root or get_shared_root())
 
     def load(self, answers: List[AnswerInfo], shared_root: str):
@@ -75,6 +76,10 @@ class NamedEntities:
             path.join(shared_root, "sentence-transformer")
         )
         self.load_pop_culture()
+        t1 = time.time()
+        self.answers = self.answer_blob(answers)
+        t2 = time.time()
+        logging.warning(t2-t1)
         for answer in answers:
             answer_doc = self.model(answer.answer_text)
             for sent in answer_doc.sents:
@@ -120,12 +125,13 @@ class NamedEntities:
     def check_relevance(
         self,
         entity_vals: Dict[str, EntityObject],
-        category_answers: List[AnswerInfo],
         entity_type: str,
     ) -> Dict[str, EntityObject]:
-        blob = self.answer_blob(category_answers)
+        blob = self.answers
+        logging.warning(f"LENGth {len(entity_vals.keys())}")
         for entity in entity_vals.keys():
             ent = entity_vals[entity]
+            t6 = time.time()
             self.check_pop_culture(ent, blob)
             verbs = [token for token in ent.doc if token.pos == VERB]
             if verbs == []:
@@ -137,15 +143,24 @@ class NamedEntities:
                     token = token.head
                     if token.pos == VERB:
                         ent.verb = token.text
-                        for child in token.children:
-                            if child.dep == nsubj and child.text == "I":
-                                ent.weight = ent.weight + I_WEIGHT
+                        # for child in token.children:
+                        #     if child.dep == nsubj and child.text == "I":
+                        #         ent.weight = ent.weight + I_WEIGHT
                     if token == token.head:
                         break
                 if ent.verb == "":
                     ent.verb = verbs[0].text
+                t7 = time.time()
+                logging.warning(f"dependency: {t7-t6}")
+                t2 = time.time()
                 verb_tensor = self.transformer.encode(ent.verb, convert_to_tensor=True)
+                t3 = time.time()
+                total2 = total = t3-t2
+                logging.warning(f"word time: {total2}")
+                t4 = time.time()
                 ent.weight = ent.weight + float(util.pytorch_cos_sim(blob, verb_tensor))
+                t5 = time.time()
+                logging.warning(f"cosine sim: {t5-t4}")
         return entity_vals
 
     def add_followups(
@@ -172,20 +187,18 @@ class NamedEntities:
     def clean_ents(
         self,
         entity_vals: Dict[str, EntityObject],
-        category_answers: List[AnswerInfo],
         all_answered: List[AnswerInfo],
         entity_type: str,
     ) -> Dict[str, EntityObject]:
-        # deduped = self.remove_duplicates(entity_vals, all_answered)
-        # relevant = self.check_relevance(deduped, category_answers, entity_type)
-        return entity_vals
+        deduped = self.remove_duplicates(entity_vals, all_answered)
+        relevant = self.check_relevance(deduped, entity_type)
+        return relevant
 
     def check_pop_culture(self, ent: EntityObject, blob: Tensor) -> None:
-        doc = self.model(ent.text)
-        lemmatized = [token.lemma_ for token in doc]
-        ent_lemma = " ".join(lemmatized)
+        lemma = ent.span.lemma_
+        logging.warning(lemma)
         sim = self.org_weight(blob, ent)
-        if ent_lemma in self.pop_culture and sim <= POP_THRESHOLD:
+        if lemma in self.pop_culture and sim <= POP_THRESHOLD:
             ent.weight = ent.weight + POP_WEIGHT
 
     def remove_duplicates(
@@ -223,21 +236,20 @@ class NamedEntities:
     ) -> List[FollowupQuestion]:
         followups: Dict[str, FollowupQuestion] = {}
         self.people = self.clean_ents(
-            self.people, category_answers, all_answered, "person"
+            self.people, all_answered, "person"
         )
         self.places = self.clean_ents(
-            self.places, category_answers, all_answered, "place"
+            self.places,all_answered, "place"
         )
         self.acronyms = self.clean_ents(
-            self.acronyms, category_answers, all_answered, "acronym"
+            self.acronyms, all_answered, "acronym"
         )
         self.add_followups("person", self.people, followups)
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)
         # followups = self.remove_similar(followups, all_answered)
-        followups_list = list(followups)
-        import random 
-        followups_list = random.shuffle(followups_list)
+        followups_list = list(followups.values())
+        # import random 
+        # random.shuffle(followups_list)
         # followups_list.sort(key=lambda followup: followup.weight, reverse=True)
-        logging.warning(followups_list)
         return followups_list

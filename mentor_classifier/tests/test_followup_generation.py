@@ -22,28 +22,6 @@ import csv
 
 @responses.activate
 @pytest.mark.parametrize(
-    "mentor_id, expected_answer",
-    [("clint", {"people": ["Clint Anderson"], "places": [], "acronyms": []})],
-)
-def test_recognizes_named_entities(
-    mentor_id: str,
-    expected_answer: Dict[str, List[str]],
-    shared_root: str,
-):
-    mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
-    answers: List[Answer] = get_answers(mentor)
-    answer_info: List[AnswerInfo] = [
-        AnswerInfo(
-            question_text=answer.question.question, answer_text=answer.transcript
-        )
-        for answer in answers
-    ]
-    ents = NamedEntities(answer_info, shared_root)
-    assert NamedEntities.to_dict(ents) == expected_answer
-
-
-@responses.activate
-@pytest.mark.parametrize(
     "mentor_id, expected_question",
     [("clint", "Can you tell me more about Clint Anderson?")],
 )
@@ -136,11 +114,12 @@ def test_deduplication(
     question_text = [followup.question for followup in followups]
     assert question_text == expected_followups
 
+
 @pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "mentor_id, category_id",
-    [("clint_long", "Motivation")],
+    [("clint_long", "background")],
 )
 def test_from_category(
     mentor_id: str,
@@ -169,15 +148,15 @@ def test_from_category(
     question_strs = [
         [question.question, question.weight, question.verb] for question in questions
     ]
-    import csv
+    # import csv
 
-    with open(
-        "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/motivation_scored.csv",
-        "w",
-    ) as f:
-        write = csv.writer(f)
-        write.writerows(question_strs)
-    assert 0 ==1 
+    # with open(
+    #     "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/m.csv",
+    #     "w",
+    # ) as f:
+    #     write = csv.writer(f)
+    #     write.writerows(question_strs)
+    assert 0 == 1
 
 
 def load_scored(mentor, category):
