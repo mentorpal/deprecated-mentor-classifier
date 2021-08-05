@@ -16,8 +16,10 @@ def find_or_load_sentence_transformer(file_path: str) -> SentenceTransformer:
     abs_path = path.abspath(file_path)
     if abs_path not in SENTENCE_TRANSFORMER_MODELS:
         SENTENCE_TRANSFORMER_MODELS[abs_path] = SentenceTransformer(
-            path.join(file_path, "distilbert-base-nli-mean-tokens"), device = "cpu"
+            path.join(file_path, "distilbert-base-nli-mean-tokens"), device="cpu"
         )
     model = SENTENCE_TRANSFORMER_MODELS[abs_path]
-    # quantized = torch.quantization.quantize_dynamic(model, {torch.nn.Embedding}, dtype=torch.qint8)    
-    return model
+    quantized = torch.quantization.quantize_dynamic(
+        model, {torch.nn.Embedding}, dtype=torch.qint8
+    )
+    return quantized
