@@ -31,7 +31,7 @@ import csv
 
 SIMILARITY_THRESHOLD = 0.92
 POP_WEIGHT = -0.5
-POP_THRESHOLD = 0.2
+POP_THRESHOLD = 0.4
 I_WEIGHT = 1
 
 QUESTION_TEMPLATES = {
@@ -78,10 +78,7 @@ class NamedEntities:
             path.join(shared_root, "sentence-transformer")
         )
         self.load_pop_culture()
-        t1 = time.time()
         self.answers = self.answer_blob(answers)
-        t2 = time.time()
-        logging.warning(t2-t1)
         for answer in answers:
             answer_doc = self.model(answer.answer_text)
             for sent in answer_doc.sents:
@@ -118,10 +115,7 @@ class NamedEntities:
             for word in answer:
                 if word in STOPWORDS:
                     answer.replace(word, " ")
-            t8 = time.time()
             tensors.append(self.transformer.encode(answer, convert_to_tensor=True))
-            t9 = time.time()
-            logging.warning(t9-t8)
         length = len(tensors)
         tensor = tensors[0]
         for i in range(1,length):
@@ -139,10 +133,8 @@ class NamedEntities:
         entity_type: str,
     ) -> Dict[str, EntityObject]:
         blob = self.answers
-        logging.warning(f"LENGth {len(entity_vals.keys())}")
         for entity in entity_vals.keys():
             ent = entity_vals[entity]
-            t6 = time.time()
             self.check_pop_culture(ent, blob)
             verbs = [token for token in ent.doc if token.pos == VERB]
             if verbs == []:
@@ -154,24 +146,15 @@ class NamedEntities:
                     token = token.head
                     if token.pos == VERB:
                         ent.verb = token.text
-                        # for child in token.children:
-                        #     if child.dep == nsubj and child.text == "I":
-                        #         ent.weight = ent.weight + I_WEIGHT
+                        for child in token.children:
+                            if child.dep == nsubj and child.text == "I":
+                                ent.weight = ent.weight + I_WEIGHT
                     if token == token.head:
                         break
                 if ent.verb == "":
                     ent.verb = verbs[0].text
-                t7 = time.time()
-                logging.warning(f"dependency: {t7-t6}")
-                t2 = time.time()
                 verb_tensor = self.transformer.encode(ent.verb, convert_to_tensor=True)
-                t3 = time.time()
-                total2 = total = t3-t2
-                logging.warning(f"word time: {total2}")
-                t4 = time.time()
                 ent.weight = ent.weight + float(util.pytorch_cos_sim(blob, verb_tensor))
-                t5 = time.time()
-                logging.warning(f"cosine sim: {t5-t4}")
         return entity_vals
 
     def add_followups(
@@ -207,7 +190,6 @@ class NamedEntities:
 
     def check_pop_culture(self, ent: EntityObject, blob: Tensor) -> None:
         lemma = ent.span.lemma_
-        logging.warning(lemma)
         sim = self.org_weight(blob, ent)
         if lemma in self.pop_culture and sim <= POP_THRESHOLD:
             ent.weight = ent.weight + POP_WEIGHT
@@ -231,7 +213,7 @@ class NamedEntities:
     ) -> Dict[str, FollowupQuestion]:
         followups_text = [followups[followup].question for followup in followups.keys()]
         answered_text = [question.question_text for question in answered]
-        question = answered_text + followups_text
+        questions = answered_text + followups_text
         paraphrases = util.paraphrase_mining(self.transformer, questions)
         for paraphrase in paraphrases:
             score, i, j = paraphrase
@@ -258,9 +240,9 @@ class NamedEntities:
         self.add_followups("person", self.people, followups)
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)
-        # followups = self.remove_similar(followups, all_answered)
+        followups = self.remove_similar(followups, all_answered)
         followups_list = list(followups.values())
         # import random 
         # random.shuffle(followups_list)
-        # followups_list.sort(key=lambda followup: followup.weight, reverse=True)
+        followups_list.sort(key=lambda followup: followup.weight, reverse=True)
         return followups_list
