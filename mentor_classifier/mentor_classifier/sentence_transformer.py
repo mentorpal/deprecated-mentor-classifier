@@ -15,6 +15,6 @@ def find_or_load_sentence_transformer(file_path: str) -> SentenceTransformer:
     abs_path = path.abspath(file_path)
     if abs_path not in SENTENCE_TRANSFORMER_MODELS:
         SENTENCE_TRANSFORMER_MODELS[abs_path] = SentenceTransformer(
-            path.join(file_path, "distilbert-base-nli-mean-tokens")
+            path.join(file_path, "paraphrase-TinyBERT-L6-v2")
         )
     return SENTENCE_TRANSFORMER_MODELS[abs_path]
