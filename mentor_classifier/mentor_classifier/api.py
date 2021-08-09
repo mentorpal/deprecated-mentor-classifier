@@ -11,6 +11,8 @@ from typing import Dict, List, TypedDict
 
 import pandas as pd
 
+from sentence_transformers import SentenceTransformer
+from mentor_classifier.sentence_transformers import find_or_load_sentence_transformer
 from mentor_classifier.ner import FollowupQuestion, NamedEntities
 from .types import AnswerInfo
 
@@ -98,6 +100,26 @@ query CategoryAnswers($category: String!) {
     }
 }
 """
+GQL_CATEGORY_ANSWERS = """
+query CategoryAnswers($category: String!) {
+  me {
+        categoryAnswers(category: $category) {
+            answerText
+            questionText
+        }
+    }
+}
+"""
+GQL_SINGLE_ANSWER = """
+query SingleAnswer() {
+  me {
+        singleAnswer() {
+            answerText
+            questionText
+        }
+    }
+}
+"""
 
 
 def __auth_gql(
@@ -111,6 +133,8 @@ def __auth_gql(
 def query_mentor(mentor: str) -> GQLQueryBody:
     return {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor}}
 
+def query_mentor(mentor: str) -> GQLQueryBody:
+    return {"query": GQL_SINGLE_ANSWER, "variables": {}}
 
 def query_category_answers(category: str) -> GQLQueryBody:
     return {"query": GQL_CATEGORY_ANSWERS, "variables": {"category": category}}
@@ -191,6 +215,8 @@ def fetch_category(
         query_category_answers(category), cookies=cookies, headers=headers
     )
     return tdjson.get("data") or {}
+
+def get_embeddings: 
 
 
 def generate_followups(
