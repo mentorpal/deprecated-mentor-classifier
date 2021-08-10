@@ -15,7 +15,7 @@ from sentence_transformers import SentenceTransformer
 from mentor_classifier.sentence_transformers import find_or_load_sentence_transformer
 from mentor_classifier.ner import FollowupQuestion, NamedEntities
 from .types import AnswerInfo
-
+from torch import Tensor
 
 class GQLQueryBody(TypedDict):
     query: str
@@ -112,6 +112,19 @@ query SingleAnswer() {
 }
 """
 
+GQL_EMBEDDINGS = """
+query_Embeddings() {
+  me {
+        embedding() {
+            answer,
+            question,
+            answer_embedding, 
+            question_embedding,
+        }
+    }
+}
+"""
+
 
 def __auth_gql(
     query: GQLQueryBody, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
@@ -124,20 +137,28 @@ def __auth_gql(
 def query_mentor(mentor: str) -> GQLQueryBody:
     return {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor}}
 
+
 def query_mentor(mentor: str) -> GQLQueryBody:
     return {"query": GQL_SINGLE_ANSWER, "variables": {}}
+
 
 def query_category_answers(category: str) -> GQLQueryBody:
     return {"query": GQL_CATEGORY_ANSWERS, "variables": {"category": category}}
 
-def query_single_answer() -> GQLQueryBody:
-    return {"query": GQL_SINGLE_ANSWER, "variables": {}
 
-def mutation_create_answer_embedding() -> GQLQueryBody:
-    question: str, answer: str, question_embedding: str, answer_embedding: float
+def query_single_answer() -> GQLQueryBody:
+    return {"query": GQL_SINGLE_ANSWER, "variables": {}}
+
+
+def query_embeddings() -> GQLQueryBody:
+    return {"query": GQL_EMBEDDINGS, "variables": {}}
+
+
+def mutation_create_answer_embedding(
+    question: str, answer: str, question_embedding: str, answer_embedding: str
 ) -> GQLQueryBody:
     return {
-        "query": GQL_CREATE_SINGLE_ANSWER,
+        "query": GQL_CREATE_EMBEDDING,
         "variables": {
             "embedding": {
                 "question": question,
@@ -147,6 +168,7 @@ def mutation_create_answer_embedding() -> GQLQueryBody:
             }
         },
     }
+
 
 def mutation_update_training(mentor: str) -> GQLQueryBody:
     return {"query": GQL_UPDATE_MENTOR_TRAINING, "variables": {"id": mentor}}
@@ -168,24 +190,36 @@ def mutation_create_user_question(
         },
     }
 
-def fetch_answer()-> Tuple[str, str]:
-    data = query_single_answer()
+
+def fetch_answer(
+    cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> Tuple[str, str]:
+    tdjson = __auth_gql(query_single_answer(), cookies=cookies, headers=headers)
+    data = tdjson.get("me") or {}
     me = data.get("me")
     answer_data = me.get("singleAnswer")
     question = answer_data.get("questionText")
     answer = answer_data.get("answerText")
     return question, answer
 
+
 def create_embeddings():
     question, answer = fetch_answer()
-    transformer = find_or_load_sentence_transformer(path.join(shared_root, "sentence-transformer"))
+    transformer = find_or_load_sentence_transformer(
+        path.join(shared_root, "sentence-transformer")
+    )
     question_embedding = transformer.encode(question).cpu().detach().numpy()
-    answer_embedding = transformer.encode(answer.cpu().detach().numpy()
+    answer_embedding = transformer.encode(answer).cpu().detach().numpy()
     json_question = json.dumps(question_embedding)
     json_answer = json.dumps(answer_embedding)
-    tdjson = __auth_gql(mutation_create_answer_embedding(question, answer, json_question, json_answer))
+    tdjson = __auth_gql(
+        mutation_create_answer_embedding(question, answer, json_question, json_answer),
+        cookies=cookies,
+        headers=headers,
+    )
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
+
 
 def fetch_training_data(mentor: str) -> pd.DataFrame:
     data = fetch_mentor_data(mentor)
@@ -225,6 +259,8 @@ def fetch_training_data(mentor: str) -> pd.DataFrame:
     )
     return data_df
 
+def fetch_embeddings(cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}) -> List[Tensor]:
+
 
 def fetch_mentor_data(mentor: str) -> dict:
     tdjson = __auth_gql(query_mentor(mentor))
@@ -241,8 +277,6 @@ def fetch_category(
         query_category_answers(category), cookies=cookies, headers=headers
     )
     return tdjson.get("data") or {}
-
-def get_embeddings: 
 
 
 def generate_followups(
