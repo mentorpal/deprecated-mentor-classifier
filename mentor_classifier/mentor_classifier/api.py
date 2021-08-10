@@ -7,15 +7,18 @@
 import json
 import os
 import requests
-from typing import Dict, List, TypedDict
+from typing import Dict, List, TypedDict, Tuple
 
 import pandas as pd
+from numpy.ndarray import tolist
 
 from sentence_transformers import SentenceTransformer
 from mentor_classifier.sentence_transformers import find_or_load_sentence_transformer
 from mentor_classifier.ner import FollowupQuestion, NamedEntities
 from .types import AnswerInfo
 from torch import Tensor
+from torch.Tensor import numpy, cpu, detach
+
 
 class GQLQueryBody(TypedDict):
     query: str
@@ -118,7 +121,7 @@ query_Embeddings() {
         embedding() {
             answer,
             question,
-            answer_embedding, 
+            answer_embedding,
             question_embedding,
         }
     }
@@ -136,10 +139,6 @@ def __auth_gql(
 
 def query_mentor(mentor: str) -> GQLQueryBody:
     return {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor}}
-
-
-def query_mentor(mentor: str) -> GQLQueryBody:
-    return {"query": GQL_SINGLE_ANSWER, "variables": {}}
 
 
 def query_category_answers(category: str) -> GQLQueryBody:
@@ -195,21 +194,20 @@ def fetch_answer(
     cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
 ) -> Tuple[str, str]:
     tdjson = __auth_gql(query_single_answer(), cookies=cookies, headers=headers)
-    data = tdjson.get("me") or {}
-    me = data.get("me")
-    answer_data = me.get("singleAnswer")
+    data = tdjson.get("data") or {}
+    answer_data = data.get("me").get("singleAnswer")
     question = answer_data.get("questionText")
     answer = answer_data.get("answerText")
     return question, answer
 
 
-def create_embeddings():
+def create_embeddings(cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}):
     question, answer = fetch_answer()
     transformer = find_or_load_sentence_transformer(
         path.join(shared_root, "sentence-transformer")
     )
-    question_embedding = transformer.encode(question).cpu().detach().numpy()
-    answer_embedding = transformer.encode(answer).cpu().detach().numpy()
+    question_embedding = transformer.encode(question).cpu().detach().numpy().tolist()
+    answer_embedding = transformer.encode(answer).cpu().detach().numpy().tolist()
     json_question = json.dumps(question_embedding)
     json_answer = json.dumps(answer_embedding)
     tdjson = __auth_gql(
@@ -259,8 +257,6 @@ def fetch_training_data(mentor: str) -> pd.DataFrame:
     )
     return data_df
 
-def fetch_embeddings(cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}) -> List[Tensor]:
-
 
 def fetch_mentor_data(mentor: str) -> dict:
     tdjson = __auth_gql(query_mentor(mentor))
@@ -293,7 +289,7 @@ def generate_followups(
             question_text=answer_data.get("questionText") or "",
         )
         for answer_data in category_answer
-    ]
+        ]
     followups = NamedEntities(recorded).generate_questions()
     return followups
 
