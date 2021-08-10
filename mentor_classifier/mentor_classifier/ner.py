@@ -15,6 +15,7 @@ from spacy import Language
 from spacy.tokens.span import Span
 from spacy.tokens import Doc
 from spacy.symbols import VERB, nsubj
+from sklearn.cluster import DBSCAN
 
 from mentor_classifier.spacy_model import find_or_load_spacy
 from mentor_classifier.types import AnswerInfo
@@ -211,11 +212,14 @@ class NamedEntities:
         answered: List[AnswerInfo],
         similarity_threshold: float = SIMILARITY_THRESHOLD,
     ) -> Dict[str, FollowupQuestion]:
-        followups_text = [followups[followup].question for followup in followups.keys()]
-        answered_text = [question.question_text for question in answered]
-        questions = answered_text + followups_text
-        paraphrases = util.paraphrase_mining(self.transformer, questions)
-        for paraphrase in paraphrases:
+        followups_embeddings = [followups[followup].question_embedding for followup in followups.keys()]
+        answered_embeddings = [question.question_embedding for question in answered]
+        questions = answered_embeddings + followups_embeddings
+        clustering DBSCAN.fit(questions)
+        cluster_dict = {i: X[db.lables==i] for i in xrange(n_clusters_)}        
+        for cluster in cluster_dict.keys:
+            for i in cluster_dict[cluster]:
+                
             score, i, j = paraphrase
             if score > similarity_threshold:
                 if questions[i] in followups:
