@@ -10,7 +10,7 @@ RUN pip install poetry \
     && pip install poethepoet \
     # for now we need force install
     # cpu-only versions of all the torch pip modules.
-    # The problem stmes from that fb doesn't publish 
+    # The problem stmes from that fb doesn't publish
     # the cpu versions to pypi and then versions of pip
     # after 19.0 don't respect "dependency_links"
     # (e.g. for https://download.pytorch.org/whl/torch_stable.html)
@@ -21,7 +21,7 @@ RUN pip install poetry \
     # 	-f https://download.pytorch.org/whl/torch_stable.html
     && poetry run poe force-cpu-only \
     && poetry cache clear $(poetry cache list) --all -n \
-    # seems like poetry and pip caches 
+    # seems like poetry and pip caches
     # are not clearing no matter what so hacking with below...
     && rm -rf /root/.cache/* \
     && pip uninstall -y poetry poethepoet

@@ -9,7 +9,6 @@ install: poetry-ensure-installed
 	poetry config --local virtualenvs.in-project true
 	poetry env use python3.8
 	poetry install
-	poetry run poe force-cpu-only
 
 .PHONY: poetry-build-classifier
 poetry-build-classifier: $(VENV)
