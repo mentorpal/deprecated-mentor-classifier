@@ -201,17 +201,13 @@ def fetch_answer(
     return question, answer
 
 
-def create_embeddings(cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}):
+def set_answer(embedding: Tuple[Tensor, Tensor], question_id: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}):
     question, answer = fetch_answer()
-    transformer = find_or_load_sentence_transformer(
-        path.join(shared_root, "sentence-transformer")
-    )
-    question_embedding = transformer.encode(question).cpu().detach().numpy().tolist()
-    answer_embedding = transformer.encode(answer).cpu().detach().numpy().tolist()
+    #convert tensor to json 
     json_question = json.dumps(question_embedding)
     json_answer = json.dumps(answer_embedding)
     tdjson = __auth_gql(
-        mutation_create_answer_embedding(question, answer, json_question, json_answer),
+        mutation_create_answer_embedding(question_id, question, answer, json_question, json_answer),
         cookies=cookies,
         headers=headers,
     )

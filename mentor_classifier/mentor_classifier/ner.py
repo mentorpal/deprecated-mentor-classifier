@@ -79,6 +79,12 @@ class NamedEntities:
                     template=entity_name,
                 )
             )
+            
+    def generate_embedding(question: str, answer: str): -> Tuple[Tensor, Tensor]:
+        question_embedding = transformer.encode(question).cpu().detach().numpy().tolist()
+        answer_embedding = transformer.encode(answer).cpu().detach().numpy().tolist()
+        return question_embedding, answer_embedding
+    
 
     def generate_questions(self) -> List[FollowupQuestion]:
         questions: List[FollowupQuestion] = []
