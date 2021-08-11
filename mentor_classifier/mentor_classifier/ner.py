@@ -15,7 +15,6 @@ from spacy import Language
 from spacy.tokens.span import Span
 from spacy.tokens import Doc
 from spacy.symbols import VERB, nsubj
-from sklearn.cluster import DBSCAN
 
 from mentor_classifier.spacy_model import find_or_load_spacy
 from mentor_classifier.types import AnswerInfo
@@ -94,10 +93,6 @@ class NamedEntities:
                                 ent, sent, answer_doc, ent.text
                             )
                         if ent.label_ == "GPE" or ent.label_ == "LOC":
-                            # us_tensor = self.transformer.encode("United States", convert_to_tensor=True)
-                            # ent_tensor = self.transformer.encode(ent.text, convert_to_tensor=True)
-                            # sim = float(util.pytorch_cos_sim(us_tensor, ent_tensor))
-                            # if sim <= SIMILARITY_THRESHOLD:
                             self.places[ent.text] = EntityObject(
                                 ent, sent, answer_doc, ent.text
                             )
@@ -206,27 +201,24 @@ class NamedEntities:
         return entity_vals
 
     # Very slow
-    def remove_similar(
-        self,
-        followups: Dict[str, FollowupQuestion],
-        answered: List[AnswerInfo],
-        similarity_threshold: float = SIMILARITY_THRESHOLD,
-    ) -> Dict[str, FollowupQuestion]:
-        followups_embeddings = [followups[followup].question_embedding for followup in followups.keys()]
-        answered_embeddings = [question.question_embedding for question in answered]
-        questions = answered_embeddings + followups_embeddings
-        clustering DBSCAN.fit(questions)
-        cluster_dict = {i: X[db.lables==i] for i in xrange(n_clusters_)}        
-        for cluster in cluster_dict.keys:
-            for i in cluster_dict[cluster]:
-                
-            score, i, j = paraphrase
-            if score > similarity_threshold:
-                if questions[i] in followups:
-                    followups.pop(questions[i])
-                elif questions[j] in followups:
-                    followups.pop(questions[j])
-        return followups
+    # def remove_similar(
+    #     self,
+    #     followups: Dict[str, FollowupQuestion],
+    #     answered: List[AnswerInfo],
+    #     similarity_threshold: float = SIMILARITY_THRESHOLD,
+    # ) -> Dict[str, FollowupQuestion]:
+    #     followups_text = [followups[followup].question for followup in followups.keys()]
+    #     answered_text = [question.question_text for question in answered]
+    #     questions = answered_text + followups_text
+    #     paraphrases = util.paraphrase_mining(self.transformer, questions)
+    #     for paraphrase in paraphrases:
+    #         score, i, j = paraphrase
+    #         if score > similarity_threshold:
+    #             if questions[i] in followups:
+    #                 followups.pop(questions[i])
+    #             elif questions[j] in followups:
+    #                 followups.pop(questions[j])
+    #     return followups
 
     def generate_questions(
         self, category_answers: List[AnswerInfo], all_answered: List[AnswerInfo]
@@ -244,7 +236,7 @@ class NamedEntities:
         self.add_followups("person", self.people, followups)
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)
-        followups = self.remove_similar(followups, all_answered)
+        # followups = self.remove_similar(followups, all_answered)
         followups_list = list(followups.values())
         # import random 
         # random.shuffle(followups_list)
