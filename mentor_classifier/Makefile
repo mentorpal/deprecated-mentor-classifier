@@ -2,17 +2,33 @@ DOCKER_IMAGE?=mentor-classifier
 ROOT=$(shell dirname ${PWD})
 VENV=.venv
 $(VENV):
-	$(MAKE) $(VENV)-update
+	$(MAKE) install
 
-.PHONY: $(VENV)-update
-$(VENV)-update:
-	[ -d $(VENV) ] || python3.8 -m venv $(VENV)
-	$(VENV)/bin/pip install --upgrade pip
-	$(VENV)/bin/pip install -r ./requirements.test.txt
+.PHONY: install
+install: poetry-ensure-installed
+	poetry config --local virtualenvs.in-project true
+	poetry env use python3.8
+	poetry install
+
+.PHONY: poetry-build-classifier
+poetry-build-classifier: $(VENV)
+	poetry build
+
+.PHONY: poetry-ensure-installed
+poetry-ensure-installed:
+	sh $(ROOT)/tools/poetry_ensure_installed.sh
 
 .PHONY clean:
 clean:
 	rm -rf .venv htmlcov .coverage
+
+.PHONY: deps-show
+deps-show-outdated:
+	poetry show --outdated
+
+.PHONY: deps-update
+deps-update:
+	poetry update
 
 .PHONY docker-build:
 docker-build:
@@ -57,10 +73,9 @@ test: $(VENV)
 	cd $(ROOT)/shared && $(MAKE) installed/word2vec.bin
 	cd $(ROOT)/shared && $(MAKE) installed/sentence-transformer
 	cd $(ROOT)/shared && $(MAKE) installed/spacy-model
-	. $(VENV)/bin/activate \
-		&& coverage run \
-			--omit="$(PWD)/tests $(VENV)" \
-			-m py.test -vv $(args)
+	poetry run coverage run \
+		--omit="$(PWD)/tests $(VENV)" \
+		-m py.test -vv $(args)
 
 .PHONY: test-all
 test-all: test-format test-lint test-types test-license test
@@ -81,6 +96,3 @@ test-lint: $(VENV)
 test-types: $(VENV)
 	cd $(ROOT) && $(MAKE) test-types
 
-.PHONY: update-deps
-update-deps: $(VENV)
-	. $(VENV)/bin/activate && pip-upgrade requirements*

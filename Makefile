@@ -2,13 +2,25 @@ LICENSE=LICENSE
 LICENSE_HEADER=LICENSE_HEADER
 VENV=.venv
 $(VENV):
-	$(MAKE) $(VENV)-update
+	$(MAKE) install
 
-.PHONY: $(VENV)-update
-$(VENV)-update:
-	[ -d $(VENV) ] || python3.8 -m venv $(VENV)
-	$(VENV)/bin/pip install --upgrade pip
-	$(VENV)/bin/pip install -r ./requirements.txt
+.PHONY: install
+install: poetry-ensure-installed
+	poetry config --local virtualenvs.in-project true
+	poetry env use python3.8
+	poetry install
+
+.PHONY: deps-show
+deps-show:
+	poetry show
+
+.PHONY: deps-show
+deps-show-outdated:
+	poetry show --outdated
+
+.PHONY: deps-update
+deps-update:
+	poetry update
 
 .PHONY clean:
 clean:
@@ -21,7 +33,7 @@ docker-build:
 
 .PHONY: black
 black: $(VENV)
-	$(VENV)/bin/black .
+	poetry run black .
 
 .PHONY: format
 format:
@@ -38,14 +50,17 @@ LICENSE_HEADER:
 
 .PHONY: license
 license: LICENSE LICENSE_HEADER $(VENV)
-	. $(VENV)/bin/activate \
-		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/mentor_classifier $(args) \
-		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/mentor_classifier_tasks $(args) \
-		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/tests $(args) \
-		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier_api/src $(args) \
-		&& python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier_api/tests $(args) \
-		&& python -m licenseheaders -t LICENSE_HEADER -d tools $(args) \
-		&& python -m licenseheaders -t LICENSE_HEADER -d shared $(args)
+	poetry run python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/mentor_classifier $(args)
+	poetry run python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/mentor_classifier_tasks $(args)
+	poetry run python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier/tests $(args)
+	poetry run python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier_api/src $(args)
+	poetry run python -m licenseheaders -t LICENSE_HEADER -d mentor_classifier_api/tests $(args)
+	poetry run python -m licenseheaders -t LICENSE_HEADER -d tools $(args)
+	poetry run python -m licenseheaders -t LICENSE_HEADER -d shared $(args)
+
+.PHONY: poetry-ensure-installed
+poetry-ensure-installed:
+	sh ./tools/poetry_ensure_installed.sh
 
 .PHONY: test
 test:
@@ -62,11 +77,11 @@ test-all:
 
 .PHONY: test-format
 test-format: $(VENV)
-	$(VENV)/bin/black --check .
+	poetry run black --check .
 
 .PHONY: test-lint
 test-lint: $(VENV)
-	$(VENV)/bin/flake8 .
+	poetry run flake8 .
 
 .PHONY: test-license
 test-license: LICENSE LICENSE_HEADER
@@ -74,6 +89,5 @@ test-license: LICENSE LICENSE_HEADER
 
 .PHONY: test-types
 test-types: $(VENV)
-	. $(VENV)/bin/activate \
-		&& mypy mentor_classifier \
-		&& mypy mentor_classifier_api
+	poetry run mypy mentor_classifier
+	poetry run mypy mentor_classifier_api
