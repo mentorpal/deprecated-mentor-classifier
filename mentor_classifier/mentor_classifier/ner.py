@@ -25,8 +25,7 @@ import torch
 from torch import Tensor
 from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
 from mentor_classifier.stopwords import STOPWORDS
-import functools
-import time
+from spacy.matcher import PhraseMatcher
 import csv
 
 SIMILARITY_THRESHOLD = 0.92
@@ -39,6 +38,29 @@ QUESTION_TEMPLATES = {
     "place": Template("What was $entity like?"),
     "acronym": Template("What is $entity?"),
     "job": Template("What does a(n) $entity do?"),
+    "family": Template("Can you tell me more about your $entity"),
+}
+
+FAMILY_MEMBERS = {
+    "mother": "mother",
+    "mom": "mother",
+    "father": "father",
+    "dad": "father",
+    "brother": "brother",
+    "bro": "brother",
+    "sister": "sister",
+    "sis": "sister",
+    "cousin": "cousin",
+    "husband": "spouse",
+    "wife": "spouse",
+    "spouse": "spouse",
+    "grandpa": "grandfather",
+    "grandfather": "grandfather",
+    "grandma": "grandmother",
+    "grandmother": "grandmother",
+    "aunt": "aunt",
+    "uncle": "uncle",
+    "siblings": "siblings",
 }
 
 
@@ -66,6 +88,7 @@ class NamedEntities:
         self.people: Dict[str, EntityObject] = {}
         self.places: Dict[str, EntityObject] = {}
         self.acronyms: Dict[str, EntityObject] = {}
+        self.family:  Dict[str, EntityObject] = {}
         self.model: Language
         self.transformer: SentenceTransformer
         self.pop_culture: Set[str] = set()
@@ -79,9 +102,18 @@ class NamedEntities:
         )
         self.load_pop_culture()
         self.answers = self.answer_blob(answers)
+        matcher = PhraseMatcher(self.model.vocab)
+        terms = FAMILY_MEMBERS.keys()
+        patterns = [self.model.make_doc(text) for text in terms]
+        matcher.add("family", patterns)
         for answer in answers:
             answer_doc = self.model(answer.answer_text)
             for sent in answer_doc.sents:
+                matches = matcher(sent)
+                for match_id, start, end in matches:
+                    span = answer_doc[start:end]
+                    ent = FAMILY_MEMBERS[span.text]
+                    self.family[ent] = EntityObject(span, sent, answer_doc, ent)
                 if sent.ents:
                     for ent in sent.ents:
                         if ent.label_ == "PERSON":
@@ -114,7 +146,7 @@ class NamedEntities:
             tensors.append(self.transformer.encode(answer, convert_to_tensor=True))
         length = len(tensors)
         tensor = tensors[0]
-        for i in range(1,length):
+        for i in range(1, length):
             tensor.add(tensors[i])
         return torch.div(tensor, length)
 
@@ -224,21 +256,15 @@ class NamedEntities:
         self, category_answers: List[AnswerInfo], all_answered: List[AnswerInfo]
     ) -> List[FollowupQuestion]:
         followups: Dict[str, FollowupQuestion] = {}
-        self.people = self.clean_ents(
-            self.people, all_answered, "person"
-        )
-        self.places = self.clean_ents(
-            self.places,all_answered, "place"
-        )
-        self.acronyms = self.clean_ents(
-            self.acronyms, all_answered, "acronym"
-        )
+        self.people = self.clean_ents(self.people, all_answered, "person")
+        self.places = self.clean_ents(self.places, all_answered, "place")
+        self.acronyms = self.clean_ents(self.acronyms, all_answered, "acronym")
+        self.family = self.clean_ents(self.family, all_answered, "family")
+        self.add_followups("family", self.family, followups)
         self.add_followups("person", self.people, followups)
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)
         # followups = self.remove_similar(followups, all_answered)
         followups_list = list(followups.values())
-        # import random 
-        # random.shuffle(followups_list)
         followups_list.sort(key=lambda followup: followup.weight, reverse=True)
         return followups_list

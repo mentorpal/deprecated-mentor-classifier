@@ -114,6 +114,7 @@ def test_deduplication(
     question_text = [followup.question for followup in followups]
     assert question_text == expected_followups
 
+
 @pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
@@ -147,14 +148,13 @@ def test_from_category(
     question_strs = [
         [question.question, question.weight, question.verb] for question in questions
     ]
-
-    # with open(
-    #     "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/average_blob_w.csv",
-    #     "w",
-    # ) as f:
-    #     write = csv.writer(f)
-    #     write.writerows(question_strs)
-    # assert 0 == 1
+    with open(
+        "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/family.csv",
+        "w",
+    ) as f:
+        write = csv.writer(f)
+        write.writerows(question_strs)
+    assert 0 == 1
 
 
 def load_scored(mentor, category):
