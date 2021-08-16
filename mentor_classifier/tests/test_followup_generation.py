@@ -68,7 +68,6 @@ def test_covers_all_entities(
             [
                 "What is USC?",
                 "What is University of California Berkeley?",
-                "Can you tell me more about Clint Anderson?",
             ],
         )
     ],
