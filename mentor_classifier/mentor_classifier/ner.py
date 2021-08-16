@@ -156,7 +156,7 @@ class NamedEntities:
                                 ent, sent, answer_doc, ent.text
                             )
 
-    def load_pop_culture(self, shared_root: str):
+    def load_pop_culture(self, shared_root):
         pop_path = path.join(shared_root, "pop_culture.csv")
         with open(pop_path) as f:
             csv_reader = csv.reader(f)
