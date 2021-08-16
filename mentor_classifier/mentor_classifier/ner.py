@@ -7,7 +7,7 @@
 
 from dataclasses import dataclass
 import logging
-from os import path
+from os import path, environ
 from string import Template
 from typing import List, Dict, Set
 from spacy.matcher import PhraseMatcher
@@ -25,13 +25,12 @@ import torch
 from torch import Tensor
 from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
 from mentor_classifier.stopwords import STOPWORDS
-from spacy.matcher import PhraseMatcher
 import csv
 
+from .constants import AVERAGE_EMBEDDING, SEMANTIC_DEDUP
+
 SIMILARITY_THRESHOLD = 0.92
-POP_WEIGHT = -0.5
-POP_THRESHOLD = 0.4
-I_WEIGHT = 1
+I_WEIGHT = 0.5
 
 QUESTION_TEMPLATES = {
     "person": Template("Can you tell me more about $entity?"),
@@ -63,6 +62,13 @@ FAMILY_MEMBERS = {
     "siblings": "siblings",
 }
 
+EXCLUDE = [
+    "America",
+    "United States",
+    "the United States",
+    "US",
+]
+
 
 @dataclass
 class FollowupQuestion:
@@ -83,25 +89,40 @@ class EntityObject:
     verb: str = ""
 
 
+def answer_average_embedding_enabled() -> bool:
+    enabled = environ.get(AVERAGE_EMBEDDING, "")
+    return enabled == "1" or enabled.lower() == "true"
+
+
+def semantic_deduplication_enabled() -> bool:
+    enabled = environ.get(SEMANTIC_DEDUP, "")
+    return enabled == "1" or enabled.lower() == "true"
+
+
 class NamedEntities:
-    def __init__(self, answers: List[AnswerInfo], shared_root: str = ""):
+    def __init__(
+        self, answers: List[AnswerInfo], mentor_name: str, shared_root: str = ""
+    ):
         self.people: Dict[str, EntityObject] = {}
         self.places: Dict[str, EntityObject] = {}
         self.acronyms: Dict[str, EntityObject] = {}
-        self.family:  Dict[str, EntityObject] = {}
+        self.family: Dict[str, EntityObject] = {}
         self.model: Language
         self.transformer: SentenceTransformer
         self.pop_culture: Set[str] = set()
         self.answers = Tensor
-        self.load(answers, shared_root or get_shared_root())
+        self.load(answers, mentor_name, shared_root or get_shared_root())
 
-    def load(self, answers: List[AnswerInfo], shared_root: str):
+    def load(self, answers: List[AnswerInfo], mentor_name: str, shared_root: str):
         self.model = find_or_load_spacy(path.join(shared_root, "spacy-model"))
         self.transformer = find_or_load_sentence_transformer(
             path.join(shared_root, "sentence-transformer")
         )
         self.load_pop_culture()
-        self.answers = self.answer_blob(answers)
+        if answer_average_embedding_enabled():
+            self.answers = self.answer_blob_average(answers)
+        else:
+            self.answers = self.answer_blob(answers)
         matcher = PhraseMatcher(self.model.vocab)
         terms = FAMILY_MEMBERS.keys()
         patterns = [self.model.make_doc(text) for text in terms]
@@ -112,10 +133,16 @@ class NamedEntities:
                 matches = matcher(sent)
                 for match_id, start, end in matches:
                     span = answer_doc[start:end]
-                    ent = FAMILY_MEMBERS[span.text]
-                    self.family[ent] = EntityObject(span, sent, answer_doc, ent)
+                    entity = FAMILY_MEMBERS[span.text]
+                    self.family[entity] = EntityObject(span, sent, answer_doc, entity)
                 if sent.ents:
                     for ent in sent.ents:
+                        if (
+                            ent.text in EXCLUDE
+                            or ent.text in mentor_name
+                            or mentor_name in ent.text
+                        ):
+                            continue
                         if ent.label_ == "PERSON":
                             self.people[ent.text] = EntityObject(
                                 ent, sent, answer_doc, ent.text
@@ -130,13 +157,15 @@ class NamedEntities:
                             )
 
     def load_pop_culture(self):
-        path = "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/pop_culture.csv"
-        with open(path) as f:
+        pop_path = path.abspath(
+            path.join("tests", "fixtures", "data", "pop_culture.csv")
+        )
+        with open(pop_path) as f:
             csv_reader = csv.reader(f)
             for row in csv_reader:
                 self.pop_culture.add(row[0])
 
-    def answer_blob(self, answers: List[AnswerInfo]) -> Tensor:
+    def answer_blob_average(self, answers: List[AnswerInfo]) -> Tensor:
         text_list = [answer.answer_text for answer in answers]
         tensors = []
         for answer in text_list:
@@ -150,15 +179,24 @@ class NamedEntities:
             tensor.add(tensors[i])
         return torch.div(tensor, length)
 
-    def org_weight(self, blob: Tensor, entity: EntityObject):
-        org_tensor = self.transformer.encode(entity.text, convert_to_tensor=True)
-        weight = float(util.pytorch_cos_sim(blob, org_tensor))
+    def answer_blob(self, answers: List[AnswerInfo]) -> Tensor:
+        text_list = [answer.answer_text for answer in answers]
+        answer_text = " ".join(text_list)
+        for word in answer_text:
+            if word in STOPWORDS:
+                answer_text.replace(word, " ")
+        return self.transformer.encode(answer_text, convert_to_tensor=True)
+
+    def ent_sim(self, blob: Tensor, entity: EntityObject):
+        ent_tensor = self.transformer.encode(entity.text, convert_to_tensor=True)
+        weight = float(util.pytorch_cos_sim(blob, ent_tensor))
         return weight
 
     def check_relevance(
         self,
         entity_vals: Dict[str, EntityObject],
         entity_type: str,
+        i_weight: float = I_WEIGHT,
     ) -> Dict[str, EntityObject]:
         blob = self.answers
         for entity in entity_vals.keys():
@@ -218,9 +256,9 @@ class NamedEntities:
 
     def check_pop_culture(self, ent: EntityObject, blob: Tensor) -> None:
         lemma = ent.span.lemma_
-        sim = self.org_weight(blob, ent)
-        if lemma in self.pop_culture and sim <= POP_THRESHOLD:
-            ent.weight = ent.weight + POP_WEIGHT
+        sim = self.ent_sim(blob, ent)
+        if lemma in self.pop_culture:
+            ent.weight = ent.weight - (1 - sim)
 
     def remove_duplicates(
         self, entity_vals: Dict[str, EntityObject], all_answered: List[AnswerInfo]
@@ -233,24 +271,24 @@ class NamedEntities:
         return entity_vals
 
     # Very slow
-    # def remove_similar(
-    #     self,
-    #     followups: Dict[str, FollowupQuestion],
-    #     answered: List[AnswerInfo],
-    #     similarity_threshold: float = SIMILARITY_THRESHOLD,
-    # ) -> Dict[str, FollowupQuestion]:
-    #     followups_text = [followups[followup].question for followup in followups.keys()]
-    #     answered_text = [question.question_text for question in answered]
-    #     questions = answered_text + followups_text
-    #     paraphrases = util.paraphrase_mining(self.transformer, questions)
-    #     for paraphrase in paraphrases:
-    #         score, i, j = paraphrase
-    #         if score > similarity_threshold:
-    #             if questions[i] in followups:
-    #                 followups.pop(questions[i])
-    #             elif questions[j] in followups:
-    #                 followups.pop(questions[j])
-    #     return followups
+    def remove_similar(
+        self,
+        followups: Dict[str, FollowupQuestion],
+        answered: List[AnswerInfo],
+        similarity_threshold: float = SIMILARITY_THRESHOLD,
+    ) -> Dict[str, FollowupQuestion]:
+        followups_text = [followups[followup].question for followup in followups.keys()]
+        answered_text = [question.question_text for question in answered]
+        questions = answered_text + followups_text
+        paraphrases = util.paraphrase_mining(self.transformer, questions)
+        for paraphrase in paraphrases:
+            score, i, j = paraphrase
+            if score > similarity_threshold:
+                if questions[i] in followups:
+                    followups.pop(questions[i])
+                elif questions[j] in followups:
+                    followups.pop(questions[j])
+        return followups
 
     def generate_questions(
         self, category_answers: List[AnswerInfo], all_answered: List[AnswerInfo]
@@ -264,7 +302,8 @@ class NamedEntities:
         self.add_followups("person", self.people, followups)
         self.add_followups("place", self.places, followups)
         self.add_followups("acronym", self.acronyms, followups)
-        # followups = self.remove_similar(followups, all_answered)
+        if semantic_deduplication_enabled():
+            followups = self.remove_similar(followups, all_answered)
         followups_list = list(followups.values())
         followups_list.sort(key=lambda followup: followup.weight, reverse=True)
         return followups_list

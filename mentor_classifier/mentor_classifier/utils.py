@@ -9,6 +9,14 @@ from pathlib import Path
 from typing import List
 
 
+def use_average_embedding() -> bool:
+    return bool(environ.get("AVERAGE_EMBEDDING", "False"))
+
+
+def use_semantic_deduplication() -> bool:
+    return bool(environ.get("SEMANTIC_DEDUP", "False"))
+
+
 def extract_alphanumeric(input_string: str) -> str:
     from string import ascii_letters, digits, whitespace
 

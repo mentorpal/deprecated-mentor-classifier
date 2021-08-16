@@ -103,6 +103,7 @@ GQL_QUERY_MENTOR_ME = """
 query Mentor() {
     me {
         mentor(){
+            name
             answers() {
                 _id
                 question {
@@ -238,6 +239,7 @@ def generate_followups(
     cookies: Dict[str, str] = {},
     headers: Dict[str, str] = {},
 ) -> List[FollowupQuestion]:
+    name = fetch_mentor_name(cookies=cookies, headers=headers)
     data = fetch_category(category, cookies=cookies, headers=headers)
     me = data.get("me")
     if me is None:
@@ -251,7 +253,7 @@ def generate_followups(
         for answer_data in category_answer
     ]
     all_answered = fetch_mentor_questions(cookies=cookies, headers=headers)
-    followups = NamedEntities(category_answers).generate_questions(
+    followups = NamedEntities(category_answers, name).generate_questions(
         category_answers, all_answered
     )
     return followups
@@ -266,6 +268,14 @@ def fetch_mentor_questions(
         for answer in data.get("answers", [])
     ]
     return answered
+
+
+def fetch_mentor_name(
+    cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> str:
+    data = fetch_me_data(cookies=cookies, headers=headers)
+    name = data["name"]
+    return name
 
 
 def update_training(mentor: str):

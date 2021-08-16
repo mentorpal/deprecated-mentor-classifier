@@ -4,44 +4,17 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from mentor_classifier.types import Answer, AnswerInfo
+from mentor_classifier.types import AnswerInfo
 
 import pytest
 import responses
 
 from .helpers import (
     fixture_mentor_data,
-    load_mentor_csv,
 )
 from mentor_classifier.ner import NamedEntities
-from .helpers import get_answers
-from typing import List, Dict
-from os import path
+from typing import List
 import csv
-
-
-@responses.activate
-@pytest.mark.parametrize(
-    "mentor_id, expected_question",
-    [("clint", "Can you tell me more about Clint Anderson?")],
-)
-def test_generates_followups(
-    mentor_id: str,
-    expected_question: str,
-    shared_root: str,
-):
-    mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
-    answers = get_answers(mentor)
-    answer_info_list: List[AnswerInfo] = [
-        AnswerInfo(
-            question_text=answer.question.question, answer_text=answer.transcript
-        )
-        for answer in answers
-    ]
-    ents = NamedEntities(answer_info_list, shared_root)
-    questions = ents.generate_questions(answer_info_list, answer_info_list)
-    actual_question = questions[0].question
-    assert actual_question == expected_question
 
 
 @responses.activate
@@ -51,8 +24,8 @@ def test_generates_followups(
         ("Where did you live?", "I lived in the U.K.", "What was U.K. like?"),
         (
             "Who is your brother?",
-            "He is Clint Anderson",
-            "Can you tell me more about Clint Anderson?",
+            "He is Ben",
+            "Can you tell me more about Ben?",
         ),
         ("Where do you work?", "I work at USC", "What is USC?"),
     ],
@@ -65,7 +38,7 @@ def test_covers_all_entities(
 ):
     answer_info = AnswerInfo(question_text=question, answer_text=answer)
     answer_info_list = [answer_info]
-    ents = NamedEntities(answer_info_list, shared_root)
+    ents = NamedEntities(answer_info_list, "Clint Anderson", shared_root)
     questions = ents.generate_questions(answer_info_list, answer_info_list)
     actual_question = questions[0].question
     assert actual_question == expected_followup
@@ -109,57 +82,14 @@ def test_deduplication(
     answer_info_list = [
         AnswerInfo(questions[x], answers[x]) for x in range(len(questions))
     ]
-    ents = NamedEntities(answer_info_list, shared_root)
+    ents = NamedEntities(answer_info_list, "Clint Anderson", shared_root)
     followups = ents.generate_questions(answer_info_list, answer_info_list)
     question_text = [followup.question for followup in followups]
     assert question_text == expected_followups
 
 
-@pytest.mark.only
-@responses.activate
-@pytest.mark.parametrize(
-    "mentor_id, category_id",
-    [("clint_long", "background")],
-)
-def test_from_category(
-    mentor_id: str,
-    category_id: str,
-    shared_root: str,
-):
-    mentor = load_mentor_csv(fixture_mentor_data(mentor_id, "data.csv"))
-    category = load_mentor_csv(fixture_mentor_data(mentor_id, category_id + ".csv"))
-
-    answers = get_answers(category)
-    answer_info: List[AnswerInfo] = [
-        AnswerInfo(
-            question_text=answer.question.question, answer_text=answer.transcript
-        )
-        for answer in answers
-    ]
-    ents = NamedEntities(answer_info, shared_root)
-    context = get_answers(mentor)
-    context_info: List[AnswerInfo] = [
-        AnswerInfo(
-            question_text=answer.question.question, answer_text=answer.transcript
-        )
-        for answer in context
-    ]
-    questions = ents.generate_questions(answer_info, context_info)
-    question_strs = [
-        [question.question, question.weight, question.verb] for question in questions
-    ]
-    with open(
-        "/Users/erice/Desktop/mentor-classifier/mentor_classifier/tests/fixtures/data/clint_long/family.csv",
-        "w",
-    ) as f:
-        write = csv.writer(f)
-        write.writerows(question_strs)
-    assert 0 == 1
-
-
 def load_scored(mentor, category):
-    data_path = path.join(category, category + "_scored.csv")
-    data = fixture_mentor_data(mentor, data_path)
+    data = fixture_mentor_data(mentor, category + "_scored.csv")
     good = set()
     bad = set()
     with open(data) as f:
@@ -175,9 +105,7 @@ def load_scored(mentor, category):
 
 def k_precision(category, mentor, file_name, good, bad, k):
     import logging
-
-    data_path = path.join(category, file_name)
-    data = fixture_mentor_data(mentor, data_path)
+    data = fixture_mentor_data(mentor, file_name)
     logging.warning(data)
     pos = 0
     neg = 0
@@ -199,18 +127,17 @@ def k_precision(category, mentor, file_name, good, bad, k):
 # test for comparing lists sorted with different algorithms
 @responses.activate
 @pytest.mark.parametrize(
-    "mentor_id, category_id, standard_file, test_file, k",
-    [("clint_long", "background", "background_f_i.csv", "average_blob.csv", 20)],
+    "mentor_id, category_id,test_file, expected_precision, k",
+    [("clint_long", "background", "background_followups.csv", 0.7, 20)],
 )
 def test_sort(
     mentor_id: str,
     category_id: str,
-    standard_file: str,
     test_file: str,
+    expected_precision: float,
     k: int,
     shared_root: str,
 ):
     good, bad = load_scored(mentor_id, category_id)
     precision = k_precision(category_id, mentor_id, test_file, good, bad, k)
-    s_precision = k_precision(category_id, mentor_id, standard_file, good, bad, k)
-    assert precision >= s_precision
+    assert precision >= expected_precision
