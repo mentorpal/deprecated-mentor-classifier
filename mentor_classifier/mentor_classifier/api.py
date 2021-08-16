@@ -239,7 +239,6 @@ def generate_followups(
     cookies: Dict[str, str] = {},
     headers: Dict[str, str] = {},
 ) -> List[FollowupQuestion]:
-    name = fetch_mentor_name(cookies=cookies, headers=headers)
     data = fetch_category(category, cookies=cookies, headers=headers)
     me = data.get("me")
     if me is None:
@@ -253,6 +252,7 @@ def generate_followups(
         for answer_data in category_answer
     ]
     all_answered = fetch_mentor_questions(cookies=cookies, headers=headers)
+    name = fetch_mentor_name(cookies=cookies, headers=headers)
     followups = NamedEntities(category_answers, name).generate_questions(
         category_answers, all_answered
     )

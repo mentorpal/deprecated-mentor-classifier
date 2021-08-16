@@ -103,10 +103,7 @@ def load_scored(mentor, category):
 
 
 def k_precision(category, mentor, file_name, good, bad, k):
-    import logging
-
     data = fixture_mentor_data(mentor, file_name)
-    logging.warning(data)
     pos = 0
     neg = 0
     with open(data) as f:

@@ -118,7 +118,7 @@ class NamedEntities:
         self.transformer = find_or_load_sentence_transformer(
             path.join(shared_root, "sentence-transformer")
         )
-        self.load_pop_culture()
+        self.load_pop_culture(shared_root)
         if answer_average_embedding_enabled():
             self.answers = self.answer_blob_average(answers)
         else:
@@ -156,10 +156,8 @@ class NamedEntities:
                                 ent, sent, answer_doc, ent.text
                             )
 
-    def load_pop_culture(self):
-        pop_path = path.abspath(
-            path.join("tests", "fixtures", "data", "pop_culture.csv")
-        )
+    def load_pop_culture(self, shared_root: str):
+        pop_path = path.join(shared_root, "pop_culture.csv")
         with open(pop_path) as f:
             csv_reader = csv.reader(f)
             for row in csv_reader:
