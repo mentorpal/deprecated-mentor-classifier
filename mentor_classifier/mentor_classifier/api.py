@@ -7,7 +7,7 @@
 import json
 import os
 import requests
-from typing import Dict, List, TypedDict
+from typing import Dict, List, TypedDict, Any
 
 import pandas as pd
 
@@ -251,8 +251,12 @@ def generate_followups(
         )
         for answer_data in category_answer
     ]
-    all_answered = fetch_mentor_questions(cookies=cookies, headers=headers)
-    name = fetch_mentor_name(cookies=cookies, headers=headers)
+    data = fetch_mentor_questions(cookies=cookies, headers=headers)
+    all_answered = [
+        AnswerInfo(answer["question"]["question"], answer["transcript"])
+        for answer in data.get("answers", [])
+    ]
+    name = data["name"]
     followups = NamedEntities(category_answers, name).generate_questions(
         category_answers, all_answered
     )
@@ -261,21 +265,9 @@ def generate_followups(
 
 def fetch_mentor_questions(
     cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
-) -> List[AnswerInfo]:
+) -> Dict[Any, Any]:
     data = fetch_me_data(cookies=cookies, headers=headers)
-    answered = [
-        AnswerInfo(answer["question"]["question"], answer["transcript"])
-        for answer in data.get("answers", [])
-    ]
-    return answered
-
-
-def fetch_mentor_name(
-    cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
-) -> str:
-    data = fetch_me_data(cookies=cookies, headers=headers)
-    name = data["name"]
-    return name
+    return data
 
 
 def update_training(mentor: str):

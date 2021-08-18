@@ -18,7 +18,7 @@ from spacy.symbols import VERB, nsubj
 
 from mentor_classifier.spacy_model import find_or_load_spacy
 from mentor_classifier.types import AnswerInfo
-from mentor_classifier.utils import get_shared_root
+from mentor_classifier.utils import get_shared_root, props_to_bool
 
 from sentence_transformers import util, SentenceTransformer
 import torch
@@ -90,18 +90,20 @@ class EntityObject:
 
 
 def answer_average_embedding_enabled() -> bool:
-    enabled = environ.get(AVERAGE_EMBEDDING, "")
-    return enabled == "1" or enabled.lower() == "true"
+    return props_to_bool(AVERAGE_EMBEDDING, environ)
 
 
 def semantic_deduplication_enabled() -> bool:
-    enabled = environ.get(SEMANTIC_DEDUP, "")
-    return enabled == "1" or enabled.lower() == "true"
+    return props_to_bool(SEMANTIC_DEDUP, environ)
 
 
 class NamedEntities:
     def __init__(
-        self, answers: List[AnswerInfo], mentor_name: str, shared_root: str = ""
+        self,
+        answers: List[AnswerInfo],
+        mentor_name: str,
+        shared_root: str = "",
+        test: bool = False,
     ):
         self.people: Dict[str, EntityObject] = {}
         self.places: Dict[str, EntityObject] = {}
@@ -113,12 +115,18 @@ class NamedEntities:
         self.answers = Tensor
         self.load(answers, mentor_name, shared_root or get_shared_root())
 
-    def load(self, answers: List[AnswerInfo], mentor_name: str, shared_root: str):
+    def load(
+        self,
+        answers: List[AnswerInfo],
+        mentor_name: str,
+        shared_root: str,
+        test: bool = False,
+    ):
         self.model = find_or_load_spacy(path.join(shared_root, "spacy-model"))
         self.transformer = find_or_load_sentence_transformer(
             path.join(shared_root, "sentence-transformer")
         )
-        self.load_pop_culture(shared_root)
+        self.load_pop_culture(shared_root, test)
         if answer_average_embedding_enabled():
             self.answers = self.answer_blob_average(answers)
         else:
@@ -156,8 +164,11 @@ class NamedEntities:
                                 ent, sent, answer_doc, ent.text
                             )
 
-    def load_pop_culture(self, shared_root):
-        pop_path = path.join(shared_root, "pop_culture.csv")
+    def load_pop_culture(self, shared_root, test: bool = False):
+        if test:
+            pop_path = path.join(shared_root, "pop_culture_test.csv")
+        else:
+            pop_path = path.join(shared_root, "pop_culture.csv")
         with open(pop_path) as f:
             csv_reader = csv.reader(f)
             for row in csv_reader:

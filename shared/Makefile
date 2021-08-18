@@ -28,6 +28,10 @@ installed/spacy-model: $(VENV)
 	$(MAKE) installed
 	. $(VENV)/bin/activate && python spacy_download.py 
 
+installed/pop_culture.csv: $(VENV)
+	$(MAKE) installed
+	. $(VENV)/bin/activate && python generate_pop.py 
+
 
 .PHONY: update-deps
 update-deps: $(VENV)

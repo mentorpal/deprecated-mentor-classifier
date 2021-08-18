@@ -52,6 +52,7 @@ license:
 test: $(VENV)
 	cd $(ROOT)/shared/ && $(MAKE) installed/word2vec.bin
 	cd $(ROOT)/shared/ && $(MAKE) installed/sentence-transformer
+	cd $(ROOT)/shared/ && $(MAKE) installed/pop_culture.csv
 	. $(VENV)/bin/activate \
 		&& export PYTHONPATH=$${PYTHONPATH}:$(PWD)/src \
 		&& coverage run \

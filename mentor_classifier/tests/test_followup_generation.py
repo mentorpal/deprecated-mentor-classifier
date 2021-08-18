@@ -38,7 +38,7 @@ def test_covers_all_entities(
 ):
     answer_info = AnswerInfo(question_text=question, answer_text=answer)
     answer_info_list = [answer_info]
-    ents = NamedEntities(answer_info_list, "Clint Anderson", shared_root)
+    ents = NamedEntities(answer_info_list, "Clint Anderson", shared_root, test=True)
     questions = ents.generate_questions(answer_info_list, answer_info_list)
     actual_question = questions[0].question
     assert actual_question == expected_followup
@@ -81,7 +81,7 @@ def test_deduplication(
     answer_info_list = [
         AnswerInfo(questions[x], answers[x]) for x in range(len(questions))
     ]
-    ents = NamedEntities(answer_info_list, "Clint Anderson", shared_root)
+    ents = NamedEntities(answer_info_list, "Clint Anderson", shared_root, test=True)
     followups = ents.generate_questions(answer_info_list, answer_info_list)
     question_text = [followup.question for followup in followups]
     assert question_text == expected_followups

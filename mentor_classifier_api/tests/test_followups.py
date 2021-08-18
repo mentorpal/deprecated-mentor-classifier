@@ -26,9 +26,9 @@ def python_path_env(monkeypatch, shared_root):
         (
             "About me",
             {
-                "entityType": "Clint Anderson",
-                "question": "Can you tell me more about Clint Anderson?",
-                "template": "person",
+                "entityType": "the USC Archery Club",
+                "question": "What is the USC Archery Club?",
+                "template": "acronym",
             },
         )
     ],
@@ -42,4 +42,7 @@ def test_followup(client, category, expected_results):
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     res = client.post(f"/classifier/me/followups/category/{category}")
     data = res.json["data"]
+    import logging
+
+    logging.warning(data)
     assert data["followups"][0] == expected_results
