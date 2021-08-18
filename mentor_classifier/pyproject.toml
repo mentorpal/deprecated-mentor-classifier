@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "mentor_classifier"
+version = "1.0.0"
+description = "train and run inference for mentor pal"
+authors = []
+
+[tool.poetry.dependencies]
+python = "~3.8.4"
+celery = "^5.1.0"
+click = "<8"
+gensim = "^4.0.1"
+h5py = "^3.2.1"
+numpy = "^1.20.3"
+pandas = "^1.2.4"
+pylru = "^1.2.0"
+PyYAML = "^5.4.1"
+redis = "^3.5.3"
+requests = "^2.25.1"
+scikit-learn = "^0.24.2"
+sentence-transformers = "^2.0.0"
+spacy = "^3.1.0"
+
+
+[tool.poetry.dev-dependencies]
+coverage = "^5.5"
+freezegun = "^1.1.0"
+pip-upgrader = "^1.4.15"
+pytest = "^6.2.4"
+pytest-mock = "^3.6.1"
+pytest-env = "^0.6.2"
+pytest-flask = "^1.2.0"
+pytest-only = "^1.2.2"
+responses = "^0.13.3"
+tqdm = "4.61.0"
+poethepoet = "^0.10.0"
+
+[tool.poe.tasks]
+# The problem stems from that fb doesn't publish 
+# the cpu versions to pypi and then versions of pip
+# after 19.0 don't respect "dependency_links"
+# (e.g. for https://download.pytorch.org/whl/torch_stable.html)
+force-cpu-only = "python -m pip install torch==1.9.0+cpu torchvision==0.10.0+cpu -f https://download.pytorch.org/whl/torch_stable.html"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
