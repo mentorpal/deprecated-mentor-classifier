@@ -100,11 +100,11 @@ query CategoryAnswers($category: String!) {
 """
 
 GQL_QUERY_MENTOR_ME = """
-query Mentor() {
+query Mentor{
     me {
-        mentor(){
+        mentor {
             name
-            answers() {
+            answers {
                 _id
                 question {
                     _id

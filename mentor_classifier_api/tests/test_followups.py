@@ -4,7 +4,7 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-
+from os import path
 import pytest
 import responses
 import json
@@ -34,15 +34,12 @@ def python_path_env(monkeypatch, shared_root):
     ],
 )
 def test_followup(client, category, expected_results):
-    with open(fixture_path("graphql/{}.json".format("category_answers"))) as f:
+    with open(fixture_path(path.join("graphql", "category_answers.json"))) as f:
         data = json.load(f)
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    with open(fixture_path("graphql/{}.json".format("mentor_answers"))) as f:
+    with open(fixture_path(path.join("graphql", "mentor_answers.json"))) as f:
         data = json.load(f)
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     res = client.post(f"/classifier/me/followups/category/{category}")
     data = res.json["data"]
-    import logging
-
-    logging.warning(data)
     assert data["followups"][0] == expected_results
