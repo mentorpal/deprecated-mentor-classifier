@@ -46,6 +46,10 @@ installed/spacy-model: $(VENV)
 	$(MAKE) installed
 	poetry run python spacy_download.py 
 
+installed/pop_culture.csv: $(VENV)
+	$(MAKE) installed
+	poetry run python generate_pop.py
+
 .PHONY: poetry-ensure-installed
 poetry-ensure-installed:
 	sh $(ROOT)/tools/poetry_ensure_installed.sh

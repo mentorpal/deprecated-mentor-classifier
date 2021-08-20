@@ -25,4 +25,5 @@ installed
 models
 shared/installed/sentence-transformer/distilbert-base-nli-mean-tokens/*
 shared/installed/spacy-model/*
+!shared/installed/spacy-model/pop_culture_test.csv
 

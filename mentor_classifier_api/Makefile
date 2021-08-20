@@ -70,6 +70,7 @@ license:
 test: $(VENV)
 	cd $(ROOT)/shared/ && $(MAKE) installed/word2vec.bin
 	cd $(ROOT)/shared/ && $(MAKE) installed/sentence-transformer
+	cd $(ROOT)/shared/ && $(MAKE) installed/pop_culture.csv
 	cd $(ROOT)/shared && $(MAKE) installed/spacy-model
 	poetry run coverage run \
 		--omit="$(PWD)/tests $(VENV)" \

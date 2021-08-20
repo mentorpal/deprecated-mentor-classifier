@@ -7,7 +7,7 @@
 import json
 import os
 import requests
-from typing import Dict, List, TypedDict
+from typing import Dict, List, TypedDict, Tuple
 
 import pandas as pd
 
@@ -99,6 +99,21 @@ query CategoryAnswers($category: String!) {
 }
 """
 
+GQL_QUERY_MENTOR_ANSWERS_AND_NAME = """
+query Mentor{
+    me {
+        mentor {
+            name
+            answers {
+                question {
+                    question
+                }
+                transcript
+            }
+        }
+    }
+} """
+
 
 def __auth_gql(
     query: GQLQueryBody, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
@@ -110,6 +125,10 @@ def __auth_gql(
 
 def query_mentor(mentor: str) -> GQLQueryBody:
     return {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor}}
+
+
+def query_mentor_answers_and_name() -> GQLQueryBody:
+    return {"query": GQL_QUERY_MENTOR_ANSWERS_AND_NAME, "variables": {}}
 
 
 def query_category_answers(category: str) -> GQLQueryBody:
@@ -184,6 +203,23 @@ def fetch_mentor_data(mentor: str) -> dict:
     return data
 
 
+def fetch_mentor_answers_and_name(
+    cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> Tuple[List[AnswerInfo], str]:
+    tdjson = __auth_gql(
+        query_mentor_answers_and_name(), cookies=cookies, headers=headers
+    )
+    if "errors" in tdjson:
+        raise Exception(json.dumps(tdjson.get("errors")))
+    data = tdjson["data"]["me"]["mentor"]
+    all_answered = [
+        AnswerInfo(answer["question"]["question"], answer["transcript"])
+        for answer in data.get("answers", [])
+    ]
+    name = data["name"]
+    return all_answered, name
+
+
 def fetch_category(
     category: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
 ) -> dict:
@@ -194,21 +230,26 @@ def fetch_category(
 
 
 def generate_followups(
-    category: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+    category: str,
+    cookies: Dict[str, str] = {},
+    headers: Dict[str, str] = {},
 ) -> List[FollowupQuestion]:
     data = fetch_category(category, cookies=cookies, headers=headers)
     me = data.get("me")
     if me is None:
         raise NameError("me not found")
     category_answer = me.get("categoryAnswers", [])
-    recorded = [
+    category_answers = [
         AnswerInfo(
             answer_text=answer_data.get("answerText") or "",
             question_text=answer_data.get("questionText") or "",
         )
         for answer_data in category_answer
     ]
-    followups = NamedEntities(recorded).generate_questions()
+    all_answered, name = fetch_mentor_answers_and_name(cookies=cookies, headers=headers)
+    followups = NamedEntities(category_answers, name).generate_questions(
+        category_answers, all_answered
+    )
     return followups
 
 

@@ -30,7 +30,7 @@ def followup(category: str):
     questions = [
         {
             "question": question.question,
-            "entityType": question.entity_type,
+            "entityType": question.entity,
             "template": question.template,
         }
         for question in data

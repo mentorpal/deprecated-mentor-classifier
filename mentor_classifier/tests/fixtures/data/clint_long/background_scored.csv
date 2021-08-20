@@ -1,0 +1,101 @@
+question,score,verb,rating
+What was Afghanistan like?,0.4557962156832218,fought,1
+What is the USC Archery Club?,0.4014402702450752,shoot,1
+What is McDonalds?,0.3970266506075859,working,0
+What is the US Navy Reserve?,0.39653895050287247,serving,1
+Can you tell me more about your father,0.3943447768688202,split,1
+What is ICT?,0.38401221483945847,work,1
+Can you tell me more about Aesop?,0.3673527091741562,grew,0
+What was Alabama like?,0.3673527091741562,grew,1
+What was Flint like?,0.3673527091741562,grew,1
+What was Washington like?,0.36701953411102295,came,1
+What is Central Texas College?,0.3546338528394699,open,1
+What was Birmington like?,0.3470528572797775,moved,1
+What was Fukuoka like?,0.3247496783733368,go,1
+What is the US Navy?,0.3205069750547409,joined,1
+What is the US Navy Reserves?,0.3205069750547409,joined,1
+What is Pasadena City College?,0.31951990723609924,went,1
+"What is University of California, Berkeley?",0.31951990723609924,went,1
+Can you tell me more about your brother,0.3121178597211838,speaking,1
+What is Touou?,0.30168892443180084,doing,0
+What is E7?,0.2995902746915817,became,1
+What was Charleston like?,0.2625619173049927,guess,1
+What was South Carolina like?,0.2625619173049927,guess,1
+What is Sasebo?,0.26252132654190063,want,1
+What is University of Southern California?,0.2545972913503647,did,1
+Can you tell me more about your sister,0.25432994961738586,had,1
+What is the University of California at Berkeley?,0.2485499083995819,got,1
+Can you tell me more about your mother,0.15356825292110443,divorced,1
+What was Los Angeles like?,-0.025662435218691826,born,1
+What was Gardena like?,-0.025662435218691826,born,1
+What was Germany like?,-0.04713096097111702,live,1
+What is UC Berkeley?,-0.07223772257566452,computing,1
+Can you tell me more about kinda?,-0.08705677092075348,drained,0
+Can you tell me more about Kyudo?,-0.09497307986021042,call,0
+What was Grand Blanc like?,-0.1115032210946083,lived,0
+Can you tell me more about Siddhartha?,-0.12915010750293732,sold,0
+What is Super Mario and Legend of Zelda?,-0.13386373221874237,walk,0
+What is Students Against Drunk Driving?,-0.1395963728427887,involved,0
+What is Amnesty International?,-0.1395963728427887,involved,0
+What is Siddhartha?,-0.14797332882881165,wrote,0
+What was Orange County like?,-0.16523131728172302,making,1
+What is Pepsi?,-0.16523131728172302,making,0
+What is SAT?,-0.1679791659116745,trying,1
+Can you tell me more about Hermann Hesse's?,-0.17120784521102905,read,0
+What is Kinect?,-0.1722443699836731,used,1
+What was Berkeley like?,-0.17338097095489502,accepted,1
+What is Stanford?,-0.17338097095489502,accepted,1
+What was States like?,-0.17421410977840424,talking,0
+What is Leap Motion?,-0.1768682450056076,combined,1
+What is Berkeley?,-0.1774308979511261,talk,0
+What was China like?,-0.18048009276390076,went,1
+What was Ramen like?,-0.18048009276390076,went,0
+What is Dungeons and Dragons?,-0.1864406019449234,play,0
+What was Midas like?,-0.18937009572982788,take,0
+What is the University of Southern California?,-0.19008564949035645,going,1
+What is the Naval Academy?,-0.19197313487529755,make,1
+Can you tell me more about Rich Dad Poor Dad?,-0.1932445615530014,called,1
+Can you tell me more about Robert Kiyosaki?,-0.1932445615530014,called,0
+What is Steppenwolf?,-0.1932445615530014,called,0
+What is XO?,-0.1932445615530014,called,0
+What is MSAT?,-0.1932445615530014,called,1
+Can you tell me more about Ronald Jester?,-0.19991736114025116,been,0
+What is GM?,-0.19991736114025116,been,0
+What was New York City' like?,-0.20170362293720245,visit,0
+What was Bremerton like?,-0.20170362293720245,visit,1
+What is Caltech?,-0.2140970081090927,tell,1
+What is California Institute of Technology?,-0.2140970081090927,tell,1
+What is XYZ?,-0.21928827464580536,set,0
+Can you tell me more about your grandmother,-0.23747867345809937,want,1
+What is PHD?,-0.2438957393169403,get,1
+What was the United States' like?,-0.24567005038261414,had,0
+What is the University of Southern California Institute for Creative Technologies?,-0.24567005038261414,had,1
+Can you tell me more about Swap Meet?,-0.24618475139141083,know,0
+Can you tell me more about Youtube?,-0.2535938620567322,say,0
+What is the Navy Reserve?,-0.258442759513855,'m,1
+What was San Diego like?,-0.2641579806804657,do,1
+Can you tell me more about Hermann Hesse?,-0.2645881474018097,have,0
+Can you tell me more about Birmington?,-0.2645881474018097,have,1
+Can you tell me more about Java?,-0.2654562294483185,was,1
+Can you tell me more about Wilkinson?,-0.2654562294483185,was,0
+"What is the University of California, Berkeley?",-0.2654562294483185,was,1
+Can you tell me more about Best Buy?,-0.2657623887062073,has,0
+What was the United States Military Reserve like?,-0.26620620489120483,be,1
+Can you tell me more about Bob?,-0.28019288182258606,is,1
+What was New York like?,-0.28019288182258606,is,1
+What was New York City like?,-0.28019288182258606,is,1
+What is USC?,-0.28019288182258606,is,1
+What is Navy Reserve?,-0.28019288182258606,is,1
+What was San Francisco like?,-0.284902423620224,'s,1
+What was Albany like?,-0.284902423620224,'s,1
+What is McDonald's?,-0.4154139831662178,working,0
+Can you tell me more about Michael Jackson?,-0.46596580743789673,listened,0
+Can you tell me more about Spiderman?,-0.5411218032240868,drawing,0
+What was Netflix like?,-0.5724959075450897,watch,0
+What was Prince like?,-0.7460376061499119,listened,0
+Can you tell me more about Mate Clinton Anderson?,-1,,0
+Can you tell me more about Haagen Dazs?,-1,,0
+What was Orlando like?,-1,,1
+What was Florida like?,-1,,1
+What is University of California Berkeley?,-1,,1
+What is Microsoft?,-1.128449261188507,have,0

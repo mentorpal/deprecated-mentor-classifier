@@ -4,9 +4,17 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from os import environ
+from os import _Environ, environ
+from typing import Any, Dict, Union, List
 from pathlib import Path
-from typing import List
+
+
+def use_average_embedding() -> bool:
+    return props_to_bool("AVERAGE_EMBEDDING", environ)
+
+
+def use_semantic_deduplication() -> bool:
+    return props_to_bool("SEMANTIC_DEDUP", environ)
 
 
 def extract_alphanumeric(input_string: str) -> str:
@@ -39,3 +47,12 @@ def sanitize_string(input_string: str) -> str:
     input_string = input_string.replace("\u00a0", " ")
     input_string = extract_alphanumeric(input_string)
     return input_string
+
+
+def props_to_bool(
+    name: str, props: Union[Dict[str, Any], _Environ], dft: bool = False
+) -> bool:
+    if not (props and name in props):
+        return dft
+    v = props[name]
+    return str(v).lower() in ["1", "t", "true"]
