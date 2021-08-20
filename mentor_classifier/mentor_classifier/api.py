@@ -206,7 +206,9 @@ def fetch_mentor_data(mentor: str) -> dict:
 def fetch_mentor_answers_and_name(
     cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
 ) -> Tuple[List[AnswerInfo], str]:
-    tdjson = __auth_gql(query_mentor_answers_and_name(), cookies=cookies, headers=headers)
+    tdjson = __auth_gql(
+        query_mentor_answers_and_name(), cookies=cookies, headers=headers
+    )
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
     data = tdjson["data"]["me"]["mentor"]
