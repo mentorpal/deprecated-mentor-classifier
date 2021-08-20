@@ -37,7 +37,7 @@ QUESTION_TEMPLATES = {
     "place": Template("What was $entity like?"),
     "acronym": Template("What is $entity?"),
     "job": Template("What does a(n) $entity do?"),
-    "family": Template("Can you tell me more about your $entity"),
+    "family": Template("Can you tell me more about your $entity?"),
 }
 
 FAMILY_MEMBERS = {
