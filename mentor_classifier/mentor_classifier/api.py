@@ -7,7 +7,7 @@
 import json
 import os
 import requests
-from typing import Dict, List, TypedDict, Any
+from typing import Dict, List, TypedDict, Tuple
 
 import pandas as pd
 
@@ -99,34 +99,20 @@ query CategoryAnswers($category: String!) {
 }
 """
 
-GQL_QUERY_MENTOR_ME = """
+GQL_QUERY_MENTOR_ANSWERS_AND_NAME = """
 query Mentor{
     me {
         mentor {
             name
             answers {
-                _id
                 question {
-                    _id
                     question
-                    paraphrases
-                    type
-                    name
-                    mentor
-                    mentorType
-                    minVideoLength
-            }
-            transcript
-            status
-            media {
-                type
-                tag
-                url
+                }
+                transcript
             }
         }
     }
-}
-"""
+} """
 
 
 def __auth_gql(
@@ -141,8 +127,8 @@ def query_mentor(mentor: str) -> GQLQueryBody:
     return {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor}}
 
 
-def query_me() -> GQLQueryBody:
-    return {"query": GQL_QUERY_MENTOR_ME, "variables": {}}
+def query_mentor_answers_and_name() -> GQLQueryBody:
+    return {"query": GQL_QUERY_MENTOR_ANSWERS_AND_NAME, "variables": {}}
 
 
 def query_category_answers(category: str) -> GQLQueryBody:
@@ -217,12 +203,19 @@ def fetch_mentor_data(mentor: str) -> dict:
     return data
 
 
-def fetch_me_data(cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}) -> dict:
-    tdjson = __auth_gql(query_me(), cookies=cookies, headers=headers)
+def fetch_mentor_answers_and_name(
+    cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+) -> Tuple[List[AnswerInfo], str]:
+    tdjson = __auth_gql(query_mentor_answers_and_name(), cookies=cookies, headers=headers)
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
     data = tdjson["data"]["me"]["mentor"]
-    return data
+    all_answered = [
+        AnswerInfo(answer["question"]["question"], answer["transcript"])
+        for answer in data.get("answers", [])
+    ]
+    name = data["name"]
+    return all_answered, name
 
 
 def fetch_category(
@@ -251,23 +244,11 @@ def generate_followups(
         )
         for answer_data in category_answer
     ]
-    data = fetch_mentor_questions(cookies=cookies, headers=headers)
-    all_answered = [
-        AnswerInfo(answer["question"]["question"], answer["transcript"])
-        for answer in data.get("answers", [])
-    ]
-    name = data["name"]
+    all_answered, name = fetch_mentor_answers_and_name(cookies=cookies, headers=headers)
     followups = NamedEntities(category_answers, name).generate_questions(
         category_answers, all_answered
     )
     return followups
-
-
-def fetch_mentor_questions(
-    cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
-) -> Dict[Any, Any]:
-    data = fetch_me_data(cookies=cookies, headers=headers)
-    return data
 
 
 def update_training(mentor: str):
