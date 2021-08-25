@@ -43,13 +43,13 @@ To build/push a work-in-progress tag of `mentor-classifier` for the current comm
 To build/push a pre-release semver tag of `mentor-classifier` for the current commit in your branch
 
 - create a [github release](https://github.com/ICTLearningSciences/mentor-classifier/releases/new) **from your development branch** with tag format `/^\d+\.\d+\.\d+(-[a-z\d\-.]+)?$/` (e.g. `1.0.0-alpha.1`)
-- this will create a tag like `uscictdocker/mentor-classifier:1.0.0-alpha.1`
+- this will create a tag like `mentorpal/mentor-classifier:1.0.0-alpha.1`
 - you can follow progress in [github actions](https://github.com/mentor/mentor-classifier/actions)
 
 
 Once your changes are approved and merged to main, you should create a release tag in semver format as follows:
 
 - create a [github release](https://github.com/ICTLearningSciences/mentor-classifier/releases/new) **from main** with tag format `/^\d+\.\d+\.\d$/` (e.g. `1.0.0`)
-- this will create a tag like `uscictdocker/mentor-classifier:1.0.0`
+- this will create a tag like `mentorpal/mentor-classifier:1.0.0`
 - you can follow progress in [github actions](https://github.com/mentor/mentor-classifier/actions)
 

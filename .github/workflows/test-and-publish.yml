@@ -57,20 +57,20 @@ jobs:
       - name: docker login
         run: docker login -u ${{ secrets.DOCKER_LOGIN }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: docker build classifier
-        run: cd mentor_classifier && DOCKER_IMAGE=uscictdocker/mentor-classifier:${{ steps.tag.outputs.image_tag }} make docker-build
+        run: cd mentor_classifier && DOCKER_IMAGE=mentorpal/mentor-classifier:${{ steps.tag.outputs.image_tag }} make docker-build
       - name: docker build api
-        run: cd mentor_classifier_api && DOCKER_IMAGE=uscictdocker/mentor-classifier-api:${{ steps.tag.outputs.image_tag }} make docker-build
+        run: cd mentor_classifier_api && DOCKER_IMAGE=mentorpal/mentor-classifier-api:${{ steps.tag.outputs.image_tag }} make docker-build
       - name: docker tag release as version
         if: needs.publish-check.outputs.is_release == 'true'
         run: |
-          docker tag "uscictdocker/mentor-classifier:${{ steps.tag.outputs.image_tag }}" "uscictdocker/mentor-classifier:${GITHUB_REF#refs/tags/}"
-          docker tag "uscictdocker/mentor-classifier-api:${{ steps.tag.outputs.image_tag }}" "uscictdocker/mentor-classifier-api:${GITHUB_REF#refs/tags/}"
+          docker tag "mentorpal/mentor-classifier:${{ steps.tag.outputs.image_tag }}" "mentorpal/mentor-classifier:${GITHUB_REF#refs/tags/}"
+          docker tag "mentorpal/mentor-classifier-api:${{ steps.tag.outputs.image_tag }}" "mentorpal/mentor-classifier-api:${GITHUB_REF#refs/tags/}"
       - name: docker tag main as latest
         if: github.ref == 'refs/heads/main'
         run: |
-          docker tag "uscictdocker/mentor-classifier:${{ steps.tag.outputs.image_tag }}" "uscictdocker/mentor-classifier:latest"
-          docker tag "uscictdocker/mentor-classifier-api:${{ steps.tag.outputs.image_tag }}" "uscictdocker/mentor-classifier-api:latest"
+          docker tag "mentorpal/mentor-classifier:${{ steps.tag.outputs.image_tag }}" "mentorpal/mentor-classifier:latest"
+          docker tag "mentorpal/mentor-classifier-api:${{ steps.tag.outputs.image_tag }}" "mentorpal/mentor-classifier-api:latest"
       - name: docker push classifier
-        run: docker push --all-tags uscictdocker/mentor-classifier
+        run: docker push --all-tags mentorpal/mentor-classifier
       - name: docker push api
-        run: docker push --all-tags uscictdocker/mentor-classifier-api
+        run: docker push --all-tags mentorpal/mentor-classifier-api
