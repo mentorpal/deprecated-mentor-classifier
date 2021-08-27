@@ -6,17 +6,22 @@
 #
 import os
 import logging
-from typing import Final
 
 from celery import Celery
 from kombu import Exchange, Queue
 
 from mentor_classifier import ClassifierFactory
 
-QUEUE_TRAINING: Final[str] = "training"
+
+def get_queue_classifier() -> str:
+    return os.environ.get("CLASSIFIER_QUEUE_NAME") or "classifier"
 
 
-broker_url = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+broker_url = (
+    os.environ.get("CLASSIFIER_CELERY_BROKER_URL")
+    or os.environ.get("CELERY_BROKER_URL")
+    or "redis://redis:6379/0"
+)
 celery = Celery("mentor_classifier_tasks", broker=broker_url)
 celery.conf.update(
     {
@@ -27,21 +32,22 @@ celery.conf.update(
             "CELERY_RESULT_BACKEND", "redis://redis:6379/0"
         ),
         "result_serializer": os.environ.get("CELERY_RESULT_SERIALIZER", "json"),
-        "task_default_queue": QUEUE_TRAINING,
-        "task_default_exchange": QUEUE_TRAINING,
-        "task_default_routing_key": QUEUE_TRAINING,
+        "task_default_queue": get_queue_classifier(),
+        "task_default_exchange": get_queue_classifier(),
+        "task_default_routing_key": get_queue_classifier(),
         "task_queues": [
             Queue(
-                QUEUE_TRAINING,
-                exchange=Exchange(QUEUE_TRAINING, "direct", durable=True),
-                routing_key=QUEUE_TRAINING,
+                get_queue_classifier(),
+                exchange=Exchange(get_queue_classifier(), "direct", durable=True),
+                routing_key=get_queue_classifier(),
             )
         ],
-        "task_routes": {"mentor_classifier_tasks.tasks.*": {"queue": QUEUE_TRAINING}},
+        "task_routes": {
+            "mentor_classifier_tasks.tasks.*": {"queue": get_queue_classifier()}
+        },
         "task_serializer": os.environ.get("CELERY_TASK_SERIALIZER", "json"),
     }
 )
-
 
 OUTPUT_ROOT = os.environ.get("OUTPUT_ROOT") or "models"
 SHARED_ROOT = os.environ.get("SHARED_ROOT") or "shared"
