@@ -7,10 +7,13 @@
 import os
 import logging
 
-from celery import Celery
-from kombu import Exchange, Queue
+from dotenv import load_dotenv
 
-from mentor_classifier import ClassifierFactory
+load_dotenv()  # take environment variables from .env.
+from celery import Celery  # NOQA
+from kombu import Exchange, Queue  # NOQA
+
+from mentor_classifier import ClassifierFactory  # NOQA
 
 
 def get_queue_classifier() -> str:
@@ -28,8 +31,10 @@ celery.conf.update(
         "accept_content": ["json"],
         "broker_url": broker_url,
         "event_serializer": os.environ.get("CELERY_EVENT_SERIALIZER", "json"),
-        "result_backend": os.environ.get(
-            "CELERY_RESULT_BACKEND", "redis://redis:6379/0"
+        "result_backend": (
+            os.environ.get("CLASSIFIER_CELERY_RESULT_BACKEND")
+            or os.environ.get("CELERY_RESULT_BACKEND")
+            or "redis://redis:6379/0"
         ),
         "result_serializer": os.environ.get("CELERY_RESULT_SERIALIZER", "json"),
         "task_default_queue": get_queue_classifier(),
