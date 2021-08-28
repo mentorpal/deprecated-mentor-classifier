@@ -45,9 +45,8 @@ build/mentor_classifier:
 .PHONY docker-build:
 # docker-build: clean build/mentor_classifier
 docker-build: clean
-	# docker build -t $(DOCKER_IMAGE) .
 	cd .. \
-		&& docker build -t $(DOCKER_IMAGE) -f ./mentor_classifier_api/Dockerfile .
+		&& docker build  --no-cache -t $(DOCKER_IMAGE) -f ./mentor_classifier_api/Dockerfile .
 
 
 .PHONY docker-build:
