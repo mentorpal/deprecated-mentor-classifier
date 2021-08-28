@@ -34,10 +34,6 @@ install: poetry-ensure-installed
 installed:
 	mkdir -p installed
 
-installed/word2vec.bin: $(VENV)
-	$(MAKE) installed
-	poetry run python word2vec_download.py 
-
 installed/sentence-transformer: $(VENV)
 	$(MAKE) installed
 	poetry run python sentence_transformer_download.py 

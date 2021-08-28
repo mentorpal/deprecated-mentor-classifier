@@ -70,7 +70,6 @@ license:
 PHONY: test
 test: $(VENV)
 	rm -rf tests/fixtures/data_out/*/*
-	cd $(ROOT)/shared && $(MAKE) installed/word2vec.bin
 	cd $(ROOT)/shared && $(MAKE) installed/sentence-transformer
 	cd $(ROOT)/shared && $(MAKE) installed/spacy-model
 	cd $(ROOT)/shared/ && $(MAKE) installed/pop_culture.csv

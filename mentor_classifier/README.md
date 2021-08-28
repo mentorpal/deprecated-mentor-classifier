@@ -14,7 +14,7 @@ Any changes made to this repo should be covered by tests. To run the existing te
 
 ```
 # NOTE: the first time you run this will take a few minutes
-# because it downloads large shared/installed files (e.g. word2vec models)
+# because it downloads large shared/installed files (e.g. transformer models)
 make test
 ```
 
