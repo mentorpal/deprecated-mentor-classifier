@@ -8,7 +8,7 @@ import pytest
 import logging
 import responses
 
-from mentor_classifier import ClassifierFactory, ARCH_LR, ARCH_LR_TRANSFORMER
+from mentor_classifier import ClassifierFactory, ARCH_LR_TRANSFORMER
 from .helpers import (
     fixture_mentor_data,
     fixture_path,
@@ -30,7 +30,7 @@ def data_root() -> str:
     "training_configuration",
     [
         _MentorTrainAndTestConfiguration(
-            mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.66
+            mentor_id="clint", arch=ARCH_LR_TRANSFORMER, expected_training_accuracy=0.66
         )
     ],
 )
@@ -131,7 +131,9 @@ def test_train_and_predict_transformers(
     [
         (
             _MentorTrainAndTestConfiguration(
-                mentor_id="clint", arch=ARCH_LR, expected_training_accuracy=0.5
+                mentor_id="clint",
+                arch=ARCH_LR_TRANSFORMER,
+                expected_training_accuracy=0.5,
             ),
             _MentorTrainAndTestConfiguration(
                 mentor_id="clint",
@@ -143,7 +145,9 @@ def test_train_and_predict_transformers(
         ),
         (
             _MentorTrainAndTestConfiguration(
-                mentor_id="covid", arch=ARCH_LR, expected_training_accuracy=0.32
+                mentor_id="covid",
+                arch=ARCH_LR_TRANSFORMER,
+                expected_training_accuracy=0.32,
             ),
             _MentorTrainAndTestConfiguration(
                 mentor_id="covid",
@@ -155,7 +159,9 @@ def test_train_and_predict_transformers(
         ),
         (
             _MentorTrainAndTestConfiguration(
-                mentor_id="covid", arch=ARCH_LR, expected_training_accuracy=0.32
+                mentor_id="covid",
+                arch=ARCH_LR_TRANSFORMER,
+                expected_training_accuracy=0.32,
             ),
             _MentorTrainAndTestConfiguration(
                 mentor_id="covid",
@@ -239,7 +245,9 @@ def test_compare_test_accuracy(
     [
         (
             _MentorTrainAndTestConfiguration(
-                mentor_id="clint_long", arch=ARCH_LR, expected_training_accuracy=0.28
+                mentor_id="clint_long",
+                arch=ARCH_LR_TRANSFORMER,
+                expected_training_accuracy=0.28,
             ),
             _MentorTrainAndTestConfiguration(
                 mentor_id="clint_long",
