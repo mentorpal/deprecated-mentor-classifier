@@ -258,6 +258,18 @@ optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
+name = "dnspython"
+version = "1.16.0"
+description = "DNS toolkit"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.extras]
+DNSSEC = ["pycryptodome", "ecdsa (>=0.13)"]
+IDNA = ["idna (>=2.1)"]
+
+[[package]]
 name = "docopt"
 version = "0.6.2"
 description = "Pythonic argument parser, that will make you smile"
@@ -688,6 +700,9 @@ description = "Python driver for MongoDB <http://www.mongodb.org>"
 category = "main"
 optional = false
 python-versions = "*"
+
+[package.dependencies]
+dnspython = {version = ">=1.16.0,<1.17.0", optional = true, markers = "extra == \"srv\""}
 
 [package.extras]
 aws = ["pymongo-auth-aws (<2.0.0)"]
@@ -1298,7 +1313,7 @@ watchdog = ["watchdog"]
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.8.4"
-content-hash = "2d49d869e2bbe5ad5d141dfecfc5e8ee3543f1165eee35ca1e9a9dc551c5c3d1"
+content-hash = "41b97a1b4006f8686080854b0580062f915e5e4c66126630b1771c0aa8cc757a"
 
 [metadata.files]
 amqp = [
@@ -1486,6 +1501,10 @@ cython = [
     {file = "Cython-0.29.21-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:c111ac9abdf715762e4fb87395e59d61c0fbb6ce79eb2e24167700b6cfa8ba79"},
     {file = "Cython-0.29.21-py2.py3-none-any.whl", hash = "sha256:5c4276fdcbccdf1e3c1756c7aeb8395e9a36874fa4d30860e7694f43d325ae13"},
     {file = "Cython-0.29.21.tar.gz", hash = "sha256:e57acb89bd55943c8d8bf813763d20b9099cc7165c0f16b707631a7654be9cad"},
+]
+dnspython = [
+    {file = "dnspython-1.16.0-py2.py3-none-any.whl", hash = "sha256:f69c21288a962f4da86e56c4905b49d11aba7938d3d740e80d9e366ee4f1632d"},
+    {file = "dnspython-1.16.0.zip", hash = "sha256:36c5e8e38d4369a08b6780b7f27d790a292b2b08eea01607865bf0936c558e01"},
 ]
 docopt = [
     {file = "docopt-0.6.2.tar.gz", hash = "sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491"},
