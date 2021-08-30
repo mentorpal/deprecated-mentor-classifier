@@ -32,7 +32,7 @@ deps-update:
 
 .PHONY docker-build:
 docker-build:
-	docker build -t $(DOCKER_IMAGE) .
+	docker build --no-cache -t $(DOCKER_IMAGE) .
 
 .PHONY docker-run-shell:
 docker-run-shell:

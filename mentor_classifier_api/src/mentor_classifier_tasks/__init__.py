@@ -4,3 +4,8 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+from os import environ
+
+
+def get_queue_classifier() -> str:
+    return environ.get("CLASSIFIER_QUEUE_NAME") or "classifier"

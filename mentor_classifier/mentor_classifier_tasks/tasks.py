@@ -7,20 +7,52 @@
 import os
 import logging
 
-from celery import Celery
+from dotenv import load_dotenv
 
-from mentor_classifier import ClassifierFactory
+load_dotenv()  # take environment variables from .env.
+from celery import Celery  # NOQA
+from kombu import Exchange, Queue  # NOQA
 
-config = {
-    "broker_url": os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0"),
-    "result_backend": os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379/0"),
-    "accept_content": ["json"],
-    "task_serializer": os.environ.get("CELERY_TASK_SERIALIZER", "json"),
-    "event_serializer": os.environ.get("CELERY_EVENT_SERIALIZER", "json"),
-    "result_serializer": os.environ.get("CELERY_RESULT_SERIALIZER", "json"),
-}
-celery = Celery("mentor-classifier-tasks", broker=config["broker_url"])
-celery.conf.update(config)
+from mentor_classifier import ClassifierFactory  # NOQA
+
+
+def get_queue_classifier() -> str:
+    return os.environ.get("CLASSIFIER_QUEUE_NAME") or "classifier"
+
+
+broker_url = (
+    os.environ.get("CLASSIFIER_CELERY_BROKER_URL")
+    or os.environ.get("CELERY_BROKER_URL")
+    or "redis://redis:6379/0"
+)
+celery = Celery("mentor_classifier_tasks", broker=broker_url)
+celery.conf.update(
+    {
+        "accept_content": ["json"],
+        "broker_url": broker_url,
+        "event_serializer": os.environ.get("CELERY_EVENT_SERIALIZER", "json"),
+        "result_backend": (
+            os.environ.get("CLASSIFIER_CELERY_RESULT_BACKEND")
+            or os.environ.get("CELERY_RESULT_BACKEND")
+            or "redis://redis:6379/0"
+        ),
+        "result_serializer": os.environ.get("CELERY_RESULT_SERIALIZER", "json"),
+        "task_default_queue": get_queue_classifier(),
+        "task_default_exchange": get_queue_classifier(),
+        "task_default_routing_key": get_queue_classifier(),
+        "task_queues": [
+            Queue(
+                get_queue_classifier(),
+                exchange=Exchange(get_queue_classifier(), "direct", durable=True),
+                routing_key=get_queue_classifier(),
+            )
+        ],
+        "task_routes": {
+            "mentor_classifier_tasks.tasks.*": {"queue": get_queue_classifier()}
+        },
+        "task_serializer": os.environ.get("CELERY_TASK_SERIALIZER", "json"),
+    }
+)
 
 OUTPUT_ROOT = os.environ.get("OUTPUT_ROOT") or "models"
 SHARED_ROOT = os.environ.get("SHARED_ROOT") or "shared"

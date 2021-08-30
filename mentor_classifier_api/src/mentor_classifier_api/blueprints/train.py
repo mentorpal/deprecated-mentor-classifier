@@ -21,7 +21,9 @@ def _to_status_url(root: str, id: str) -> str:
 @train_blueprint.route("", methods=["POST"])
 def train():
     mentor: str = request.json.get("mentor")
-    t = mentor_classifier_tasks.tasks.train_task.apply_async(args=[mentor])
+    t = mentor_classifier_tasks.tasks.train_task.apply_async(
+        queue=mentor_classifier_tasks.get_queue_classifier(), args=[mentor]
+    )
     return jsonify(
         {
             "data": {
