@@ -140,4 +140,4 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
             return (id, text, media)
 
         except KeyError:
-            return ("_OFF_TOPIC_", "_OFF_TOPIC_", "")
+            return ("_OFF_TOPIC_", "_OFF_TOPIC_", [])
