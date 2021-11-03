@@ -25,7 +25,7 @@ from mentor_classifier.utils import file_last_updated_at, sanitize_string
 from mentor_classifier.spacy_preprocessor import SpacyPreprocessor
 from .word2vec import W2V
 
-AnswerIdTextAndMedia = Tuple[str, str, str]
+AnswerIdTextAndMedia = Tuple[str, str, list]
 
 
 class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
@@ -140,4 +140,4 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
             return (id, text, media)
 
         except KeyError:
-            return ("_OFF_TOPIC_", "_OFF_TOPIC_", "")
+            return ("_OFF_TOPIC_", "_OFF_TOPIC_", [])

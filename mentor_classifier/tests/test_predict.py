@@ -205,7 +205,7 @@ def test_gets_off_topic(
             "any user question",
             "_OFF_TOPIC_",
             "_OFF_TOPIC_",
-            "",
+            [],
         )
     ],
 )

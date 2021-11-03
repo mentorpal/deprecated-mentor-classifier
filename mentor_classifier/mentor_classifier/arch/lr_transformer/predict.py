@@ -22,6 +22,8 @@ from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import file_last_updated_at, sanitize_string
 from typing import Union, Tuple, List
 
+AnswerIdTextAndMedia = Tuple[str, str, list]
+
 
 class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
     def __init__(self, mentor: Union[str, Mentor], shared_root: str, data_path: str):
@@ -79,7 +81,7 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
             highest_confidence,
         )
         if highest_confidence < OFF_TOPIC_THRESHOLD_DEFAULT:
-            answer_id, answer = self.__get_offtopic()
+            answer_id, answer, answer_media = self.__get_offtopic()
         return QuestionClassiferPredictionResult(
             answer_id, answer, answer_media, highest_confidence, feedback_id
         )
@@ -106,20 +108,14 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
         )
         return prediction[0], answer_text, answer_media, float(highest_confidence)
 
-    def __get_offtopic(self) -> Tuple[str, str]:
+    def __get_offtopic(self) -> AnswerIdTextAndMedia:
         try:
-            i = random.randint(
-                0, len(self.mentor.utterances_by_type["_OFF_TOPIC_"]) - 1
+            id, text, media = random.choice(
+                self.mentor.utterances_by_type["_OFF_TOPIC_"]
             )
-            return (
-                self.mentor.utterances_by_type["_OFF_TOPIC_"][i][0],
-                self.mentor.utterances_by_type["_OFF_TOPIC_"][i][1],
-            )
+            return (id, text, media)
         except KeyError:
-            return (
-                "_OFF_TOPIC_",
-                "_OFF_TOPIC_",
-            )
+            return ("_OFF_TOPIC_", "_OFF_TOPIC_", [])
 
     @staticmethod
     def __load_transformer(path):
