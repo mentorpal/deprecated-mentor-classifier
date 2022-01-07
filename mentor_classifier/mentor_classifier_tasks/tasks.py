@@ -20,6 +20,23 @@ def get_queue_classifier() -> str:
     return os.environ.get("CLASSIFIER_QUEUE_NAME") or "classifier"
 
 
+if os.environ.get("IS_SENTRY_ENABLED", "") == "true":
+    import sentry_sdk  # NOQA E402
+    from sentry_sdk.integrations.celery import CeleryIntegration  # NOQA E402
+
+    sentry_sdk.init(
+        dsn=os.environ.get("SENTRY_DSN_MENTOR_CLASSIFIER"),
+        # include project so issues can be filtered in sentry:
+        environment=os.environ.get("PYTHON_ENV", "careerfair-qa"),
+        integrations=[CeleryIntegration()],
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production.
+        traces_sample_rate=0.20,
+        debug=os.environ.get("SENTRY_DEBUG_CLASSIFIER", "") == "true",
+    )
+
+
 broker_url = (
     os.environ.get("CLASSIFIER_CELERY_BROKER_URL")
     or os.environ.get("CELERY_BROKER_URL")

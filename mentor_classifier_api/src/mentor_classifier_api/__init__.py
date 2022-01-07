@@ -4,6 +4,7 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
+import os
 from dotenv import load_dotenv
 
 load_dotenv()  # take environment variables from .env.
@@ -13,6 +14,10 @@ from logging.config import dictConfig  # NOQA
 from flask import Flask  # NOQA
 from flask_cors import CORS  # NOQA
 from .config_default import Config  # NOQA
+
+if os.environ.get("IS_SENTRY_ENABLED", "") == "true":
+    import sentry_sdk  # NOQA E402
+    from sentry_sdk.integrations.flask import FlaskIntegration  # NOQA E402
 
 
 def create_app():
@@ -37,6 +42,20 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     CORS(app)
+
+    if os.environ.get("IS_SENTRY_ENABLED", "") == "true":
+        sentry_sdk.init(
+            dsn=os.environ.get("SENTRY_DSN_MENTOR_CLASSIFIER"),
+            # include project so issues can be filtered in sentry:
+            environment=os.environ.get("PYTHON_ENV", "careerfair-qa"),
+            integrations=[FlaskIntegration()],
+            # Set traces_sample_rate to 1.0 to capture 100%
+            # of transactions for performance monitoring.
+            # We recommend adjusting this value in production.
+            traces_sample_rate=0.20,
+            debug=os.environ.get("SENTRY_DEBUG_CLASSIFIER", "") == "true",
+        )
+
     from mentor_classifier_api.blueprints.questions import questions_blueprint
 
     app.register_blueprint(questions_blueprint, url_prefix="/classifier/questions")
@@ -62,5 +81,9 @@ def create_app():
     from mentor_classifier_api.blueprints.followups import followups_blueprint
 
     app.register_blueprint(followups_blueprint, url_prefix="/classifier/me/")
+
+    @app.route("/classifier/error")
+    def error_handler_test():
+        raise Exception("Safe to ignore, route for intentional error")
 
     return app
