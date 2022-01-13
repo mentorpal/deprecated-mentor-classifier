@@ -21,6 +21,7 @@ if os.environ.get("IS_SENTRY_ENABLED", "") == "true":
     import sentry_sdk  # NOQA E402
     from sentry_sdk.integrations.flask import FlaskIntegration  # NOQA E402
 
+
 class JSONFormatter(logging.Formatter):
     RECORD_ATTRS = [
         "name",
@@ -93,7 +94,6 @@ class RequestFilter(logging.Filter):
         #         return True
         # else:
         #     return True
-
 
 
 def create_app():
