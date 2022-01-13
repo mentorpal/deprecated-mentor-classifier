@@ -13,7 +13,7 @@ load_dotenv()  # take environment variables from .env.
 
 from logging.config import dictConfig  # NOQA
 
-from flask import Flask, has_request_context, request  # NOQA
+from flask import Flask, has_request_context, g, request  # NOQA
 from flask_cors import CORS  # NOQA
 from .config_default import Config  # NOQA
 
