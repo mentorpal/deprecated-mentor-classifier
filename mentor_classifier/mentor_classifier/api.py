@@ -74,6 +74,104 @@ query Mentor($id: ID!) {
     }
 }
 """
+
+mentor_query_schema={
+    "type":"object",
+    "properties":{
+        "data":{
+            "type":"object",
+            "properties":{
+                "mentor":{
+                    "type":"object",
+                    "properties":{
+                        "subjects":{
+                            "type":"array",
+                            "items":{
+                                "type":"object",
+                                "properties":{
+                                    "name":{"type":"string"}
+                                }
+                            }
+                        },
+                        "topics":{
+                            "type":"array",
+                            "items":{
+                                "type":"object",
+                                "properties":{
+                                    "name":{"type":"string"}
+                                }
+                            }
+                        },
+                        "questions":{
+                            "type":"array",
+                            "items":{
+                                "type":"object",
+                                "properties":{
+                                    "question":{
+                                        "type":"object",
+                                        "properties":{
+                                            "_id":{"type":"string"}
+                                        },
+                                        "required":["_id"]
+                                    },
+                                    "topics":{
+                                        "type":"array",
+                                        "items":{
+                                            "type":"object",
+                                            "properties":{
+                                                "name":{"type":"string"}
+                                            },
+                                            "required":["name"]
+                                        }
+                                    }
+                                },
+                                "required":["question","topics"]
+                            }
+                        },
+                        "answers":{
+                            "type":"array",
+                            "items":{
+                                "type":"object",
+                                "properties":{
+                                    "status":{"type":"string"},
+                                    "transcript":{"type":"string"},
+                                    "question":{
+                                        "type":"object",
+                                        "properties":{
+                                            "_id":{"type":"string"},
+                                            "question":{"type":"string"},
+                                            "type":{"type":"string"},
+                                            "name":{"type":"string"},
+                                            "paraphrases":{
+                                                "type":"array",
+                                                "items":{
+                                                    "type":"string"
+                                                }
+                                            },
+                                            "media":{
+                                                "type":"object",
+                                                "properties":{
+                                                    "type":{"type":"string"},
+                                                    "tag":{"type":"string"},
+                                                    "url":{"type":"string"},
+                                                },
+                                                "required":["type","tag","url"]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required":["subjects","topics","questions","answers"]
+                }
+            },
+            "required":["mentor"]
+        }
+    },
+    "required":["data"]
+}
+
 GQL_UPDATE_MENTOR_TRAINING = """
 mutation UpdateMentorTraining($id: ID!) {
     updateMentorTraining(id: $id) {
