@@ -3,6 +3,7 @@ WORKDIR /build
 COPY mentor_classifier ./mentor_classifier
 # build mentor-classifier as something api can install
 RUN cd mentor_classifier \
+    && pip install jsonschema \
 	&& pip install poetry \
 	&& poetry config virtualenvs.create false \
 	&& poetry install --no-dev \
@@ -34,6 +35,7 @@ COPY --from=builder /build/mentor_classifier/dist ./dist
 WORKDIR /app
 COPY mentor_classifier_api ./mentor_classifier_api
 RUN cd mentor_classifier_api \
+    && pip install jsonschema \
     && pip install poetry \
 	&& poetry config virtualenvs.create false \
 	&& poetry install --no-dev \

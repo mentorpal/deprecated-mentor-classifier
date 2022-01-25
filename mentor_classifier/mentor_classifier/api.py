@@ -74,6 +74,8 @@ query Mentor($id: ID!) {
     }
 }
 """
+
+
 GQL_UPDATE_MENTOR_TRAINING = """
 mutation UpdateMentorTraining($id: ID!) {
     updateMentorTraining(id: $id) {
@@ -116,7 +118,10 @@ query Mentor{
 
 
 def __auth_gql(
-    query: GQLQueryBody, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+    query: GQLQueryBody,
+    # query_schema: Dict[str, str],
+    cookies: Dict[str, str] = {},
+    headers: Dict[str, str] = {},
 ) -> dict:
     res = requests.post(GRAPHQL_ENDPOINT, json=query, cookies=cookies, headers=headers)
     res.raise_for_status()
