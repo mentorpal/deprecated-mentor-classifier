@@ -12,10 +12,10 @@ import pytest
 import responses
 from responses import matchers
 
-from mentor_classifier.api import GQL_CREATE_USER_QUESTION, GQL_QUERY_MENTOR
+from mentor_classifier.api import GQL_QUERY_MENTOR
 
 from mentor_classifier.mentor import Media
-from mentor_classifier.api import create_user_question, get_off_topic_threshold
+from mentor_classifier.api import get_off_topic_threshold
 from mentor_classifier import ClassifierFactory
 from .helpers import fixture_path
 

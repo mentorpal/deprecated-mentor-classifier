@@ -4,11 +4,10 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from calendar import c
 import json
 import os
 import requests
-from typing import Dict, List, TypedDict, Tuple
+from typing import Collection, Dict, List, TypedDict, Tuple
 
 import pandas as pd
 
@@ -302,7 +301,7 @@ query_mentor_answer_and_name_schema = {
 
 def __auth_gql(
     query: GQLQueryBody,
-    query_schema: Dict[str, str],
+    query_schema: Dict[str, Collection[str]],
     cookies: Dict[str, str] = {},
     headers: Dict[str, str] = {},
 ) -> dict:
@@ -398,9 +397,6 @@ def fetch_training_data(mentor: str) -> pd.DataFrame:
 
 
 def fetch_mentor_data(mentor: str) -> dict:
-    import logging
-
-    logging.error("fetching mentor")
     tdjson = __auth_gql(query_mentor(mentor), mentor_query_schema)
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
@@ -445,9 +441,6 @@ def generate_followups(
     cookies: Dict[str, str] = {},
     headers: Dict[str, str] = {},
 ) -> List[FollowupQuestion]:
-    import logging
-
-    logging.error("fetching category")
     data = fetch_category(category, cookies=cookies, headers=headers)
     me = data.get("me")
     if me is None:
