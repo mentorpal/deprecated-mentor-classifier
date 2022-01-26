@@ -13,6 +13,7 @@ import logging
 
 def validate_json(json_data, json_schema):
     try:
+        logging.error(json_data)
         validate(instance=json_data, schema=json_schema)
     except ValidationError as err:
         logging.error(err)

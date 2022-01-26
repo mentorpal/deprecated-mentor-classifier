@@ -7,6 +7,13 @@
 import pytest
 import logging
 import responses
+from responses import matchers
+
+from mentor_classifier.api import (
+    GQL_CREATE_USER_QUESTION,
+    GQL_QUERY_MENTOR,
+    GQL_UPDATE_MENTOR_TRAINING,
+)
 
 from mentor_classifier import ClassifierFactory, ARCH_LR, ARCH_LR_TRANSFORMER
 from .helpers import (
@@ -25,6 +32,7 @@ def data_root() -> str:
     return fixture_path("data_out")
 
 
+@pytest.mark.only
 @responses.activate
 @pytest.mark.parametrize(
     "training_configuration",
@@ -45,8 +53,55 @@ def test_train_and_predict(
     test_set = load_test_csv(
         fixture_mentor_data(training_configuration.mentor_id, "test.csv")
     )
-    data = {"data": {"mentor": mentor.to_dict()}}
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    fetch_mentor_reponse = {"data": {"mentor": mentor.to_dict()}}
+    update_mentor_response = {
+        "data": {"updateMentorTraining": {"_id": training_configuration.mentor_id}}
+    }
+    create_user_question_response = {
+        "data": {"userQuestionCreate": {"_id": "fake_new_question_id"}}
+    }
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=fetch_mentor_reponse,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_QUERY_MENTOR,
+                    "variables": {"id": training_configuration.mentor_id},
+                }
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=update_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_UPDATE_MENTOR_TRAINING,
+                    "variables": {"id": training_configuration.mentor_id},
+                }
+            )
+        ],
+    )
+
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=create_user_question_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_CREATE_USER_QUESTION,
+                }
+            )
+        ],
+    )
     result = (
         ClassifierFactory()
         .new_training(

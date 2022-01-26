@@ -35,7 +35,7 @@ jsonschema = "4.4.0"
 pytest-env = "^0.6.2"
 pytest-flask = "^1.2.0"
 pytest-only = "^1.2.2"
-responses = "^0.13.3"
+responses = "0.17.0"
 tqdm = "4.61.0"
 poethepoet = "^0.10.0"
 
