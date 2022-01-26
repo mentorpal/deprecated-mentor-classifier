@@ -75,105 +75,92 @@ query Mentor($id: ID!) {
 }
 """
 
-<<<<<<< HEAD
-=======
-mentor_query_schema={
-    "type":"object",
-    "properties":{
-        "data":{
-            "type":"object",
-            "properties":{
-                "mentor":{
-                    "type":"object",
-                    "properties":{
-                        "subjects":{
-                            "type":"array",
-                            "items":{
-                                "type":"object",
-                                "properties":{
-                                    "name":{"type":"string"}
-                                }
-                            }
+mentor_query_schema = {
+    "type": "object",
+    "properties": {
+        "data": {
+            "type": "object",
+            "properties": {
+                "mentor": {
+                    "type": "object",
+                    "properties": {
+                        "subjects": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {"name": {"type": "string"}},
+                            },
                         },
-                        "topics":{
-                            "type":"array",
-                            "items":{
-                                "type":"object",
-                                "properties":{
-                                    "name":{"type":"string"}
-                                }
-                            }
+                        "topics": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {"name": {"type": "string"}},
+                            },
                         },
-                        "questions":{
-                            "type":"array",
-                            "items":{
-                                "type":"object",
-                                "properties":{
-                                    "question":{
-                                        "type":"object",
-                                        "properties":{
-                                            "_id":{"type":"string"}
-                                        },
-                                        "required":["_id"]
+                        "questions": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "question": {
+                                        "type": "object",
+                                        "properties": {"_id": {"type": "string"}},
+                                        "required": ["_id"],
                                     },
-                                    "topics":{
-                                        "type":"array",
-                                        "items":{
-                                            "type":"object",
-                                            "properties":{
-                                                "name":{"type":"string"}
-                                            },
-                                            "required":["name"]
-                                        }
-                                    }
+                                    "topics": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {"name": {"type": "string"}},
+                                            "required": ["name"],
+                                        },
+                                    },
                                 },
-                                "required":["question","topics"]
-                            }
+                                "required": ["question", "topics"],
+                            },
                         },
-                        "answers":{
-                            "type":"array",
-                            "items":{
-                                "type":"object",
-                                "properties":{
-                                    "status":{"type":"string"},
-                                    "transcript":{"type":"string"},
-                                    "question":{
-                                        "type":"object",
-                                        "properties":{
-                                            "_id":{"type":"string"},
-                                            "question":{"type":"string"},
-                                            "type":{"type":"string"},
-                                            "name":{"type":"string"},
-                                            "paraphrases":{
-                                                "type":"array",
-                                                "items":{
-                                                    "type":"string"
-                                                }
+                        "answers": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {"type": "string"},
+                                    "transcript": {"type": "string"},
+                                    "question": {
+                                        "type": "object",
+                                        "properties": {
+                                            "_id": {"type": "string"},
+                                            "question": {"type": "string"},
+                                            "type": {"type": "string"},
+                                            "name": {"type": "string"},
+                                            "paraphrases": {
+                                                "type": "array",
+                                                "items": {"type": "string"},
                                             },
-                                            "media":{
-                                                "type":"object",
-                                                "properties":{
-                                                    "type":{"type":"string"},
-                                                    "tag":{"type":"string"},
-                                                    "url":{"type":"string"},
+                                            "media": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "type": {"type": "string"},
+                                                    "tag": {"type": "string"},
+                                                    "url": {"type": "string"},
                                                 },
-                                                "required":["type","tag","url"]
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                                "required": ["type", "tag", "url"],
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
-                    "required":["subjects","topics","questions","answers"]
+                    "required": ["subjects", "topics", "questions", "answers"],
                 }
             },
-            "required":["mentor"]
+            "required": ["mentor"],
         }
     },
-    "required":["data"]
+    "required": ["data"],
 }
->>>>>>> main
 
 GQL_UPDATE_MENTOR_TRAINING = """
 mutation UpdateMentorTraining($id: ID!) {
@@ -182,6 +169,27 @@ mutation UpdateMentorTraining($id: ID!) {
     }
 }
 """
+update_mentor_training_schema={
+    "type":"object",
+    "properties":{
+        "data":{
+            "type":"object",
+            "properties":{
+                "updateMentorTraining":{
+                    "type":"object",
+                    "properties":{
+                        "_id":{"type":"string"}
+                    },
+                    "required":["_id"]
+                }
+            },
+            "required":["updateMentorTraining"]
+        }
+    },
+    "required":["data"]
+}
+
+
 GQL_CREATE_USER_QUESTION = """
 mutation UserQuestionCreate($userQuestion: UserQuestionCreateInput!) {
     userQuestionCreate(userQuestion: $userQuestion) {
@@ -189,6 +197,27 @@ mutation UserQuestionCreate($userQuestion: UserQuestionCreateInput!) {
     }
 }
 """
+
+create_user_question_schema={
+    "type":"object",
+    "properties":{
+        "data":{
+            "type":"object",
+            "properties":{
+                "userQuestionCreate":{
+                    "type":"object",
+                    "properties":{
+                        "_id":{"type":"string"}
+                    },
+                    "required":["_id"]
+                }
+            },
+            "required":["userQuestionCreate"]
+        }
+    },
+    "required":["data"]
+}
+
 GQL_CATEGORY_ANSWERS = """
 query CategoryAnswers($category: String!) {
   me {
@@ -199,6 +228,37 @@ query CategoryAnswers($category: String!) {
     }
 }
 """
+
+category_answers_schema={
+    "type":"object",
+    "properties":{
+        "data":{
+            "type":"object",
+            "properties":{
+                "me":{
+                    "type":"object",
+                    "properties":{
+                        "categoryAnswers":{
+                            "type":"array",
+                                "items":{
+                                "type":"object",
+                                "properties":{
+                                    "answerText":{"type":"string"},
+                                    "questionText":{"type":"string"},
+                                },
+                                "required":["answerText","questionText"]
+                            },
+                            "required":["_id"]
+                        }
+                    },
+                    "required":["categoryAnswers"]
+                }
+            },
+            "required":["me"]
+        }
+    },
+    "required":["data"]
+}
 
 GQL_QUERY_MENTOR_ANSWERS_AND_NAME = """
 query Mentor{
@@ -214,6 +274,38 @@ query Mentor{
         }
     }
 } """
+
+query_mentor_answer_and_name_schema={
+    "type":"object",
+    "properties":{
+        "me":{
+            "type":"string",
+            "properties":{
+                "name":"string",
+                "answers":{
+                    "type":"array",
+                    "items":{
+                        "type":"object",
+                        "properties":{
+                            "question":{
+                                "type":"object",
+                                "properties":{
+                                    "question":{"type":"string"}
+                                },
+                                "required":["question"]
+                            },
+                            "transcript":{"type":"string"}
+                        },
+                        "required":["question","transcript"]
+                    }
+                }
+            },
+            "required":["name","answers"]
+        }
+    },
+    "required":["me"]
+}
+
 
 
 def __auth_gql(
