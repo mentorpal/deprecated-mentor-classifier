@@ -10,10 +10,13 @@ from shutil import copytree
 
 import responses
 import pytest
+from responses import matchers
 
 from mentor_classifier.dao import Dao
 from mentor_classifier import ClassifierFactory
 from .helpers import fixture_path
+
+from mentor_classifier.api import GQL_UPDATE_MENTOR_TRAINING, GQL_QUERY_MENTOR
 
 
 @responses.activate
@@ -33,9 +36,31 @@ def test_find_classifier_caches(data_root: str, shared_root: str, mentor_id: str
 def test_find_classifier_returns_updated_classifier_if_model_has_changed(
     tmp_path, data_root: str, shared_root: str, mentor_id: str
 ):
+    update_mentor_response = {"data": {"updateMentorTraining": {"_id": mentor_id}}}
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-        responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+        fetch_mentor_response = json.load(f)
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=fetch_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor_id}}
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=update_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {"query": GQL_UPDATE_MENTOR_TRAINING, "variables": {"id": mentor_id}}
+            )
+        ],
+    )
     test_data_root = tmp_path / "data"
     copytree(path.join(data_root, mentor_id), path.join(test_data_root, mentor_id))
     dao = Dao(shared_root=shared_root, data_root=test_data_root)

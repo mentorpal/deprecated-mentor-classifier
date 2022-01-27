@@ -7,6 +7,17 @@
 from os import _Environ, environ
 from typing import Any, Dict, Union, List
 from pathlib import Path
+from jsonschema import validate, ValidationError
+import logging
+
+
+def validate_json(json_data, json_schema):
+    try:
+        logging.error(json_data)
+        validate(instance=json_data, schema=json_schema)
+    except ValidationError as err:
+        logging.error(err)
+        raise err
 
 
 def use_average_embedding() -> bool:

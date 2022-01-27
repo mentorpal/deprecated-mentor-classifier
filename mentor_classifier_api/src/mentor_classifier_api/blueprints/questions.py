@@ -28,6 +28,7 @@ def _get_dao() -> Dao:
     return _dao
 
 
+# Why POST and GET? Isn't it just fetching data and not modifying anything?
 @questions_blueprint.route("/", methods=["GET", "POST"])
 @questions_blueprint.route("", methods=["GET", "POST"])
 def answer():

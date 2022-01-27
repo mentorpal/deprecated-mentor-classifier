@@ -10,6 +10,9 @@ from typing import List
 import json
 import pytest
 import responses
+from responses import matchers
+
+from mentor_classifier.api import GQL_QUERY_MENTOR
 
 from mentor_classifier.mentor import Media
 from mentor_classifier.api import get_off_topic_threshold
@@ -74,9 +77,28 @@ def test_gets_answer_for_exact_match_and_paraphrases(
     expected_answer: str,
     expected_media: List[Media],
 ):
+    create_user_question_response = {
+        "data": {"userQuestionCreate": {"_id": "fake_new_question_id"}}
+    }
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+        fetch_mentor_response = json.load(f)
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=fetch_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor_id}}
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=create_user_question_response,
+        status=200,
+    )
     _ensure_trained(mentor_id, shared_root, data_root)
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
     result = classifier.evaluate(question, shared_root)
@@ -122,9 +144,28 @@ def test_predicts_answer(
     expected_answer: str,
     expected_media: List[Media],
 ):
+    create_user_question_response = {
+        "data": {"userQuestionCreate": {"_id": "fake_new_question_id"}}
+    }
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+        fetch_mentor_response = json.load(f)
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=fetch_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor_id}}
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=create_user_question_response,
+        status=200,
+    )
     _ensure_trained(mentor_id, shared_root, data_root)
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
     result = classifier.evaluate(question, shared_root)
@@ -146,9 +187,28 @@ def _test_gets_off_topic(
     expected_media: List[Media],
 ):
     monkeypatch.setenv("OFF_TOPIC_THRESHOLD", "1.0")  # everything is offtopic
+    create_user_question_response = {
+        "data": {"userQuestionCreate": {"_id": "fake_new_question_id"}}
+    }
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+        fetch_mentor_response = json.load(f)
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=fetch_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor_id}}
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=create_user_question_response,
+        status=200,
+    )
     _ensure_trained(mentor_id, shared_root, data_root)
     classifier = ClassifierFactory().new_prediction(
         mentor=mentor_id, shared_root=shared_root, data_path=data_root

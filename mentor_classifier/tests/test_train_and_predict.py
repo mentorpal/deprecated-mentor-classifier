@@ -7,6 +7,12 @@
 import pytest
 import logging
 import responses
+from responses import matchers
+
+from mentor_classifier.api import (
+    GQL_QUERY_MENTOR,
+    GQL_UPDATE_MENTOR_TRAINING,
+)
 
 from mentor_classifier import ClassifierFactory, ARCH_LR, ARCH_LR_TRANSFORMER
 from .helpers import (
@@ -23,6 +29,138 @@ from mentor_classifier.types import _MentorTrainAndTestConfiguration
 @pytest.fixture(scope="module")
 def data_root() -> str:
     return fixture_path("data_out")
+
+
+def _test_and_predict_gql_responses(mentor, mentor_id):
+    fetch_mentor_reponse = {"data": {"mentor": mentor.to_dict()}}
+    update_mentor_response = {"data": {"updateMentorTraining": {"_id": mentor_id}}}
+    create_user_question_response = {
+        "data": {"userQuestionCreate": {"_id": "fake_new_question_id"}}
+    }
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=fetch_mentor_reponse,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_QUERY_MENTOR,
+                    "variables": {"id": mentor_id},
+                }
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=update_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_UPDATE_MENTOR_TRAINING,
+                    "variables": {"id": mentor_id},
+                }
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=fetch_mentor_reponse,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_QUERY_MENTOR,
+                    "variables": {"id": mentor_id},
+                }
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=update_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_UPDATE_MENTOR_TRAINING,
+                    "variables": {"id": mentor_id},
+                }
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=fetch_mentor_reponse,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_QUERY_MENTOR,
+                    "variables": {"id": mentor_id},
+                }
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=update_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_UPDATE_MENTOR_TRAINING,
+                    "variables": {"id": mentor_id},
+                }
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=fetch_mentor_reponse,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_QUERY_MENTOR,
+                    "variables": {"id": mentor_id},
+                }
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=update_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {
+                    "query": GQL_UPDATE_MENTOR_TRAINING,
+                    "variables": {"id": mentor_id},
+                }
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=create_user_question_response,
+        status=200,
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=create_user_question_response,
+        status=200,
+    )
 
 
 @responses.activate
@@ -45,8 +183,7 @@ def test_train_and_predict(
     test_set = load_test_csv(
         fixture_mentor_data(training_configuration.mentor_id, "test.csv")
     )
-    data = {"data": {"mentor": mentor.to_dict()}}
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    _test_and_predict_gql_responses(mentor, training_configuration.mentor_id)
     result = (
         ClassifierFactory()
         .new_training(
@@ -58,7 +195,6 @@ def test_train_and_predict(
         .train(shared_root)
     )
     assert result.accuracy >= training_configuration.expected_training_accuracy
-
     classifier = ClassifierFactory().new_prediction(
         mentor=training_configuration.mentor_id,
         shared_root=shared_root,
@@ -95,8 +231,7 @@ def test_train_and_predict_transformers(
     test_set = load_test_csv(
         fixture_mentor_data(training_configuration.mentor_id, "test.csv")
     )
-    data = {"data": {"mentor": mentor.to_dict()}}
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    _test_and_predict_gql_responses(mentor, training_configuration.mentor_id)
     result = (
         ClassifierFactory()
         .new_training(
@@ -183,8 +318,7 @@ def test_compare_test_accuracy(
             training_configuration.mentor_id, test_set_file or "test.csv"
         )
     )
-    data = {"data": {"mentor": mentor.to_dict()}}
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    _test_and_predict_gql_responses(mentor, training_configuration.mentor_id)
     lr_train = (
         ClassifierFactory()
         .new_training(
@@ -258,8 +392,7 @@ def test_compare_cross_validation(
     mentor = load_mentor_csv(
         fixture_mentor_data(training_configuration.mentor_id, "data.csv")
     )
-    data = {"data": {"mentor": mentor.to_dict()}}
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+    _test_and_predict_gql_responses(mentor, training_configuration.mentor_id)
     lr_train = (
         ClassifierFactory()
         .new_training(

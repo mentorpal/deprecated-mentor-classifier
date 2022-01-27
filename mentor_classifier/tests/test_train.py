@@ -9,9 +9,12 @@ from os import path
 import json
 import pytest
 import responses
+from responses import matchers
 
 from mentor_classifier import ClassifierFactory, ARCH_DEFAULT
 from .helpers import fixture_path
+
+from mentor_classifier.api import GQL_UPDATE_MENTOR_TRAINING, GQL_QUERY_MENTOR
 
 
 @pytest.fixture(scope="module")
@@ -22,9 +25,31 @@ def data_root() -> str:
 @responses.activate
 @pytest.mark.parametrize("mentor_id", [("clint")])
 def test_trains_and_outputs_models(data_root: str, shared_root: str, mentor_id: str):
+    update_mentor_response = {"data": {"updateMentorTraining": {"_id": mentor_id}}}
     with open(fixture_path("graphql/{}.json".format(mentor_id))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+        query_mentor_response = json.load(f)
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=query_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {"query": GQL_QUERY_MENTOR, "variables": {"id": mentor_id}}
+            )
+        ],
+    )
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=update_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {"query": GQL_UPDATE_MENTOR_TRAINING, "variables": {"id": mentor_id}}
+            )
+        ],
+    )
     result = (
         ClassifierFactory()
         .new_training(mentor_id, shared_root, data_root)
