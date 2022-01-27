@@ -25,7 +25,6 @@ COPY mentor_classifier mentor_classifier
 COPY mentor_classifier_tasks mentor_classifier_tasks
 RUN ls -la
 RUN pip install poetry \
-    && pip install jsonschema \
     && poetry config virtualenvs.create false \
     && poetry install --no-dev \
     && pip install poethepoet \
