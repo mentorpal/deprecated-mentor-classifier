@@ -6,6 +6,7 @@
 #
 from os import environ
 from flask import Blueprint, jsonify, request
+from mentor_classifier_api.helpers import validate_json_payload_decorator
 
 import mentor_classifier_tasks
 import mentor_classifier_tasks.tasks
@@ -17,10 +18,19 @@ def _to_status_url(root: str, id: str) -> str:
     return f"{request.url_root.replace('http://', 'https://', 1) if (environ.get('STATUS_URL_FORCE_HTTPS') or '').lower() in ('1', 'y', 'true', 'on') and str.startswith(request.url_root,'http://') else request.url_root}classifier/train/status/{id}"
 
 
+train_payload_schema = {
+    "type": "object",
+    "properties": {"mentor": {"type": "string", "maxLength": 60, "minLength": 5}},
+    "required": ["mentor"],
+    "additionalProperties": False,
+}
+
+
 @train_blueprint.route("/", methods=["POST"])
 @train_blueprint.route("", methods=["POST"])
-def train():
-    mentor: str = request.json.get("mentor")
+@validate_json_payload_decorator(train_payload_schema)
+def train(body):
+    mentor: str = body.get("mentor")
     t = mentor_classifier_tasks.tasks.train_task.apply_async(
         queue=mentor_classifier_tasks.get_queue_classifier(), args=[mentor]
     )
