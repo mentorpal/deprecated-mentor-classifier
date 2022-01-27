@@ -272,30 +272,44 @@ query Mentor{
 query_mentor_answer_and_name_schema = {
     "type": "object",
     "properties": {
-        "me": {
-            "type": "string",
+        "data": {
+            "type": "object",
             "properties": {
-                "name": "string",
-                "answers": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "question": {
-                                "type": "object",
-                                "properties": {"question": {"type": "string"}},
-                                "required": ["question"],
+                "me": {
+                    "type": "object",
+                    "properties": {
+                        "mentor": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "answers": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "question": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "question": {"type": "string"}
+                                                },
+                                                "required": ["question"],
+                                            },
+                                            "transcript": {"type": "string"},
+                                        },
+                                        "required": ["question", "transcript"],
+                                    },
+                                },
                             },
-                            "transcript": {"type": "string"},
-                        },
-                        "required": ["question", "transcript"],
+                            "required": ["name", "answers"],
+                        }
                     },
-                },
+                    "required": ["mentor"],
+                }
             },
-            "required": ["name", "answers"],
+            "required": ["me"],
         }
     },
-    "required": ["me"],
+    "required": ["data"],
 }
 
 
@@ -397,6 +411,9 @@ def fetch_training_data(mentor: str) -> pd.DataFrame:
 
 
 def fetch_mentor_data(mentor: str) -> dict:
+    import logging
+
+    logging.error("fetching mentor: " + mentor)
     tdjson = __auth_gql(query_mentor(mentor), mentor_query_schema)
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
@@ -407,6 +424,9 @@ def fetch_mentor_data(mentor: str) -> dict:
 def fetch_mentor_answers_and_name(
     cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
 ) -> Tuple[List[AnswerInfo], str]:
+    import logging
+
+    logging.error("fethcing mentor answers and name")
     tdjson = __auth_gql(
         query_mentor_answers_and_name(),
         query_mentor_answer_and_name_schema,
@@ -427,6 +447,9 @@ def fetch_mentor_answers_and_name(
 def fetch_category(
     category: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
 ) -> dict:
+    import logging
+
+    logging.error("fetching category")
     tdjson = __auth_gql(
         query_category_answers(category),
         category_answers_schema,

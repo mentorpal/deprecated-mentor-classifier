@@ -28,6 +28,7 @@ def _get_dao() -> Dao:
     return _dao
 
 
+# This route expects query string params, should I update the client to
 @questions_blueprint.route("/", methods=["GET", "POST"])
 @questions_blueprint.route("", methods=["GET", "POST"])
 def answer():

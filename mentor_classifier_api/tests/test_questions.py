@@ -8,7 +8,9 @@ import json
 
 import pytest
 import responses
+from responses import matchers
 
+from mentor_classifier.api import GQL_QUERY_MENTOR
 from . import fixture_path
 
 
@@ -79,8 +81,27 @@ def test_evaluate_classifies_user_questions(
     client, input_mentor, input_question, expected_results
 ):
     with open(fixture_path("graphql/{}.json".format(input_mentor))) as f:
-        data = json.load(f)
-    responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
+        fetch_mentor_response = json.load(f)
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=fetch_mentor_response,
+        status=200,
+        match=[
+            matchers.json_params_matcher(
+                {"query": GQL_QUERY_MENTOR, "variables": {"id": input_mentor}}
+            )
+        ],
+    )
+    create_user_question_response = {
+        "data": {"userQuestionCreate": {"_id": "fake_new_question_id"}}
+    }
+    responses.add(
+        responses.POST,
+        "http://graphql/graphql",
+        json=create_user_question_response,
+        status=200,
+    )
     res = client.get(
         f"/classifier/questions/?mentor={input_mentor}&query={input_question}"
     )
