@@ -6,6 +6,7 @@
 #
 import json
 from unittest.mock import patch, Mock
+from mentor_classifier.utils import validate_json  # type: ignore
 
 import pytest
 
@@ -36,6 +37,53 @@ def test_train(mock_train_task, classifier_domain, input_mentor, fake_task_id, c
             "statusUrl": f"{classifier_domain}/classifier/train/status/{fake_task_id}",
         }
     }
+
+
+json_validation_fail_response_schema = {
+    "type": "object",
+    "properties": {
+        "error": {"type": "string"},
+        "message": {"type": "string"},
+    },
+    "required": ["error", "message"],
+}
+
+
+@pytest.mark.parametrize(
+    "classifier_domain,input_mentor,fake_task_id",
+    [
+        ("https://mentor.org", "mentor_1", "fake_task_id_1"),
+    ],
+)
+@patch("mentor_classifier_tasks.tasks.train_task")
+def test_train_error_incorrect_json_schema(
+    mock_train_task, classifier_domain, input_mentor, fake_task_id, client
+):
+    mock_task = Bunch(id=fake_task_id)
+    mock_train_task.apply_async.return_value = mock_task
+
+    # unexpected property
+    res = client.post(
+        f"{classifier_domain}/classifier/train/",
+        data=json.dumps({"mentor": input_mentor, "question": "1234"}),
+        content_type="application/json",
+    )
+    validate_json(res.json, json_validation_fail_response_schema)
+    assert res.status_code == 400
+    assert (
+        res.json["message"]
+        == "Additional properties are not allowed ('question' was unexpected)"
+    )
+
+    # incorrect field type
+    res = client.post(
+        f"{classifier_domain}/classifier/train/",
+        data=json.dumps({"mentor": 1234}),
+        content_type="application/json",
+    )
+    validate_json(res.json, json_validation_fail_response_schema)
+    assert res.status_code == 400
+    assert res.json["message"] == "1234 is not of type 'string'"
 
 
 # ISSUE: if the classifier api doesn't do end-to-end ssl

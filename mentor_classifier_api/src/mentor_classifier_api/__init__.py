@@ -9,10 +9,13 @@ from dotenv import load_dotenv
 load_dotenv()  # take environment variables from .env.
 
 from logging.config import dictConfig  # NOQA
-
+import json  # NOQA
+from json import JSONDecodeError  # NOQA
+from jsonschema import ValidationError  # NOQA
 from flask import Flask  # NOQA
 from flask_cors import CORS  # NOQA
 from .config_default import Config  # NOQA
+from werkzeug.exceptions import HTTPException  # NOQA
 
 
 def create_app():
@@ -37,6 +40,57 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     CORS(app)
+
+    def generic_exception_handler(e):
+        """Return JSON instead of generic 500 internal error for Exceptions"""
+        response = app.response_class(
+            response=json.dumps({"error": "Exception", "message": str(e)}),
+            status=500,
+            content_type="application/json",
+        )
+        return response
+
+    app.register_error_handler(Exception, generic_exception_handler)
+
+    def http_error_handler(e):
+        """Return JSON instead of HTML for HTTP errors."""
+        # start with the correct headers and status code from the error
+        response = e.get_response()
+        # replace the body with JSON
+        response.data = json.dumps(
+            {
+                "code": e.code,
+                "name": e.name,
+                "description": e.description,
+            }
+        )
+        response.content_type = "application/json"
+        return response
+
+    app.register_error_handler(HTTPException, http_error_handler)
+
+    def json_validation_error_handler(e):
+        response = app.response_class(
+            response=json.dumps(
+                {"error": "ValidationError", "message": str(e.message)}
+            ),
+            status=400,
+            content_type="application/json",
+        )
+        return response
+
+    app.register_error_handler(ValidationError, json_validation_error_handler)
+
+    def json_parse_error_handler(e):
+        response = app.response_class(
+            response=json.dumps({"error": "JSON Parse Error", "message": str(e)}),
+            status=400,
+            content_type="application/json",
+        )
+        return response
+
+    app.register_error_handler(JSONDecodeError, json_parse_error_handler)
+
     from mentor_classifier_api.blueprints.questions import questions_blueprint
 
     app.register_blueprint(questions_blueprint, url_prefix="/classifier/questions")
