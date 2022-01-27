@@ -10,7 +10,7 @@ import pytest
 import responses
 from responses import matchers
 
-from mentor_classifier.api import GQL_QUERY_MENTOR
+from mentor_classifier.api import GQL_QUERY_MENTOR  # type: ignore
 from . import fixture_path
 
 
