@@ -5,7 +5,7 @@
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
 import os
-
+import logging
 from celery import Celery
 from kombu import Exchange, Queue
 
@@ -18,6 +18,7 @@ broker_url = (
     or os.environ.get("CELERY_BROKER_URL")
     or "redis://redis:6379/0"
 )
+logging.info(f'API celery broker {broker_url}')
 celery = Celery("mentor_classifier_tasks", broker=broker_url)
 celery.conf.update(
     {
