@@ -18,7 +18,7 @@ broker_url = (
     or os.environ.get("CELERY_BROKER_URL")
     or "redis://redis:6379/0"
 )
-logging.info(f'API celery broker {broker_url}')
+logging.info(f"API celery broker {broker_url}")
 celery = Celery("mentor_classifier_tasks", broker=broker_url)
 celery.conf.update(
     {
