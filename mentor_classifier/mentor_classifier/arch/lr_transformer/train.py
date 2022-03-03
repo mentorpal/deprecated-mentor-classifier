@@ -49,13 +49,12 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
         self.transformer = self.__load_transformer(shared_root)
 
     def __load_transformer(self, shared_root):
-        if not TransformersQuestionClassifierTraining.transformer:
+        if getattr(TransformersQuestionClassifierTraining, "transformer", None) is None:
             # class variable, load just once
             transformer_pkl = os.path.join(shared_root, "transformer.pkl")
             logger.info(f"loading transformers from {transformer_pkl}")
-            TransformersQuestionClassifierTraining.transformer = joblib.load(
-                transformer_pkl
-            )
+            transformer = joblib.load(transformer_pkl)
+            setattr(TransformersQuestionClassifierTraining, "transformer", transformer)
         return TransformersQuestionClassifierTraining.transformer
 
     def train(self, shared_root) -> QuestionClassifierTrainingResult:

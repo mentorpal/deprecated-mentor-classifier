@@ -74,6 +74,7 @@ test: $(VENV)
 	cd $(ROOT)/shared && $(MAKE) installed/sentence-transformer
 	cd $(ROOT)/shared && $(MAKE) installed/spacy-model
 	cd $(ROOT)/shared/ && $(MAKE) installed/pop_culture.csv
+	cd $(ROOT)/shared/ && $(MAKE) installed/transformer.pkl
 	poetry run coverage run \
 		--omit="$(PWD)/tests $(VENV)" \
 		-m py.test -vv $(args)

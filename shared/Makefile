@@ -50,6 +50,10 @@ installed/pop_culture.csv: $(VENV)
 	$(MAKE) installed
 	poetry run python generate_pop.py
 
+installed/transformer.pkl: $(VENV)
+	$(MAKE) installed
+	PYTHONPATH=../mentor_classifier:$PYTHONPATH poetry run python generate_transformer_pkl.py
+
 .PHONY: poetry-ensure-installed
 poetry-ensure-installed:
 	sh $(ROOT)/tools/poetry_ensure_installed.sh
