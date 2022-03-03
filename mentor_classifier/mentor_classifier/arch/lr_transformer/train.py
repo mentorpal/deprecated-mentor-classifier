@@ -20,6 +20,7 @@ from mentor_classifier import (
     ARCH_LR_TRANSFORMER,
 )
 from mentor_classifier.mentor import Mentor
+from .embeddings import TransformerEmbeddings
 from ...api import update_training
 from ...log import logger
 from ...utils import sanitize_string
@@ -27,7 +28,7 @@ from typing import Union, Tuple, List
 
 
 class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
-    transformer = None  # shared between mentors
+    transformer: TransformerEmbeddings  # shared between mentors
 
     def __init__(
         self,

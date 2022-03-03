@@ -7,7 +7,7 @@
 from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
 from sentence_transformers import SentenceTransformer
 from os import path
-from typing import List
+from typing import List, Union
 
 
 class TransformerEmbeddings:
@@ -16,6 +16,6 @@ class TransformerEmbeddings:
             path.join(shared_root, "sentence-transformer")
         )
 
-    def get_embeddings(self, data: List[str]):
+    def get_embeddings(self, data: Union[str, List[str]]):
         embeddings = self.transformer.encode(data, show_progress_bar=True)
         return embeddings

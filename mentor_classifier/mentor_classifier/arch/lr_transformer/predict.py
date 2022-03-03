@@ -20,12 +20,13 @@ from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import file_last_updated_at, sanitize_string
 from typing import Union, Tuple, List
 from ...log import logger
+from .embeddings import TransformerEmbeddings
 
 AnswerIdTextAndMedia = Tuple[str, str, list]
 
 
 class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
-    transformer = None  # shared between mentors
+    transformer: TransformerEmbeddings  # shared between mentors
 
     def __init__(self, mentor: Union[str, Mentor], shared_root: str, data_path: str):
         if isinstance(mentor, str):
