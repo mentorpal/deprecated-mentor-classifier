@@ -14,7 +14,9 @@ if __name__ == "__main__":
     else:
         print(f"generating {pkl}")
         # loading these takes 10+sec so only do it here:
-        from mentor_classifier.arch.lr_transformer.embeddings import TransformerEmbeddings
+        from mentor_classifier.arch.lr_transformer.embeddings import (
+            TransformerEmbeddings,
+        )
         import joblib
 
         transformer = TransformerEmbeddings(sys.argv[-1])
