@@ -7,10 +7,9 @@
 import json
 import os
 import requests
+import csv
 from typing import Dict, List, TypedDict, Tuple
-
-import pandas as pd
-
+from io import StringIO
 from mentor_classifier.ner import FollowupQuestion, NamedEntities
 from .types import AnswerInfo
 
@@ -157,7 +156,7 @@ def mutation_create_user_question(
     }
 
 
-def fetch_training_data(mentor: str) -> pd.DataFrame:
+def fetch_training_data(mentor: str) -> str:
     data = fetch_mentor_data(mentor)
     data_dict = {}
     data_list = []
@@ -190,10 +189,12 @@ def fetch_training_data(mentor: str) -> pd.DataFrame:
         data_list.append(
             [answer_id, current_question, paraphrase_str, answer, topic_str]
         )
-    data_df = pd.DataFrame(
-        data_list, columns=["id", "question", "paraphrases", "answer", "topic"]
-    )
-    return data_df
+
+    data_csv = StringIO()
+    csv_writer = csv.writer(data_csv)
+    csv_writer.writerow(["id", "question", "paraphrases", "answer", "topic"])
+    csv_writer.writerows(data_list)
+    return data_csv.getvalue()
 
 
 def fetch_mentor_data(mentor: str) -> dict:
