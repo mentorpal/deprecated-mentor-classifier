@@ -4,9 +4,19 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-import joblib
-from mentor_classifier.arch.lr_transformer.embeddings import TransformerEmbeddings
+import sys
+from os import path
 
 if __name__ == "__main__":
-    transformer = TransformerEmbeddings("installed")
-    joblib.dump(transformer, "installed/transformer.pkl")
+    pkl = f"{sys.argv[-1]}/transformer.pkl"
+    if path.exists(pkl):
+        print(f"{pkl} exists, skipping")
+    else:
+        print(f"generating {pkl}")
+        # loading these takes 10+sec so only do it here:
+        from mentor_classifier.arch.lr_transformer.embeddings import TransformerEmbeddings
+        import joblib
+
+        transformer = TransformerEmbeddings(sys.argv[-1])
+        joblib.dump(transformer, pkl)
+        print(f"{pkl} created")
