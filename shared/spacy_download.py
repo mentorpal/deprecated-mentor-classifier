@@ -12,8 +12,8 @@ from utils import download
 
 def spacy_download(to_path="installed", replace_existing=True) -> str:
     spacy_path = os.path.abspath(os.path.join(to_path, "spacy-model"))
-    if os.path.isfile(spacy_path) and not replace_existing:
-        print(f"already is a file! {spacy_path}")
+    if not replace_existing and os.path.exists(os.path.join(spacy_path, "en_core_web_sm-3.1.0")):
+        print(f"already exists! {spacy_path}/en_core_web_sm-3.1.0")
         return spacy_path
     spacy_tar = os.path.join(to_path, "spacy.tar.gz")
     download(
@@ -27,4 +27,4 @@ def spacy_download(to_path="installed", replace_existing=True) -> str:
 
 
 if __name__ == "__main__":
-    spacy_download()
+    spacy_download(replace_existing=False)

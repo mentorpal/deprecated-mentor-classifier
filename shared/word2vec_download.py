@@ -26,4 +26,4 @@ def word2vec_download(to_path="installed", replace_existing=True) -> str:
 
 
 if __name__ == "__main__":
-    word2vec_download()
+    word2vec_download(replace_existing=False)
