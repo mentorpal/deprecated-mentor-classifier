@@ -15,7 +15,9 @@ trainingdata_blueprint = Blueprint("trainingdata", __name__)
 def get_data(mentor: str):
     data_csv = fetch_training_data(mentor)
     output = make_response(data_csv)
-    output.headers["Content-Disposition"] = f"attachment; filename={mentor}-trainingdata.csv"
+    output.headers[
+        "Content-Disposition"
+    ] = f"attachment; filename={mentor}-trainingdata.csv"
     output.headers["Content-type"] = "text/csv"
     return (
         output,
