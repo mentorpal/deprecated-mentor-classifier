@@ -7,9 +7,7 @@
 import logging
 import os
 import random
-
 import joblib
-
 from mentor_classifier import (
     QuestionClassifierPrediction,
     QuestionClassiferPredictionResult,
@@ -21,11 +19,15 @@ from mentor_classifier.api import create_user_question, OFF_TOPIC_THRESHOLD_DEFA
 from mentor_classifier.mentor import Mentor
 from mentor_classifier.utils import file_last_updated_at, sanitize_string
 from typing import Union, Tuple, List
+from ...log import logger
+from .embeddings import TransformerEmbeddings
 
 AnswerIdTextAndMedia = Tuple[str, str, list]
 
 
 class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
+    transformer: TransformerEmbeddings  # shared between mentors
+
     def __init__(self, mentor: Union[str, Mentor], shared_root: str, data_path: str):
         if isinstance(mentor, str):
             logging.info("loading mentor id {}...".format(mentor))
@@ -39,10 +41,21 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
         self.model_file = mentor_model_path(
             data_path, mentor.id, ARCH_LR_TRANSFORMER, "model.pkl"
         )
-        self.transformer = self.__load_transformer(
-            os.path.join(data_path, mentor.id, ARCH_LR_TRANSFORMER, "transformer.pkl")
-        )
         self.model = self.__load_model()
+        self.transformer = self.__load_transformer(shared_root)
+
+    def __load_transformer(self, shared_root):
+        if (
+            getattr(TransformersQuestionClassifierPrediction, "transformer", None)
+            is None
+        ):
+            # class variable, load just once
+            logger.info(f"loading transformers from {shared_root}")
+            transformer = joblib.load(os.path.join(shared_root, "transformer.pkl"))
+            setattr(
+                TransformersQuestionClassifierPrediction, "transformer", transformer
+            )
+        return TransformersQuestionClassifierPrediction.transformer
 
     def evaluate(
         self, question: str, shared_root, canned_question_match_disabled: bool = False
@@ -116,7 +129,3 @@ class TransformersQuestionClassifierPrediction(QuestionClassifierPrediction):
             return (id, text, media)
         except KeyError:
             return ("_OFF_TOPIC_", "_OFF_TOPIC_", [])
-
-    @staticmethod
-    def __load_transformer(path):
-        return joblib.load(path)

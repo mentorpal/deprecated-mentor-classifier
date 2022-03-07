@@ -67,6 +67,10 @@ format: $(VENV)
 license:
 	cd $(ROOT) && make license
 
+installed/transformer.pkl: $(VENV)
+	PYTHONPATH=./mentor_classifier:$PYTHONPATH poetry run python generate_transformer_pkl.py
+
+
 PHONY: test
 test: $(VENV)
 	rm -rf tests/fixtures/data_out/*/*
@@ -74,9 +78,15 @@ test: $(VENV)
 	cd $(ROOT)/shared && $(MAKE) installed/sentence-transformer
 	cd $(ROOT)/shared && $(MAKE) installed/spacy-model
 	cd $(ROOT)/shared/ && $(MAKE) installed/pop_culture.csv
+	$(MAKE) transformer.pkl
 	poetry run coverage run \
 		--omit="$(PWD)/tests $(VENV)" \
 		-m py.test -vv $(args)
+
+# this needs venv from this make file, not shared
+transformer.pkl: $(VENV)
+	poetry run python ../shared/generate_transformer_pkl.py ../shared/installed
+
 
 .PHONY: test-all
 test-all: test-format test-lint test-types test-license test

@@ -31,4 +31,4 @@ def transformer_download(to_path=DEFAULT_TO_PATH, replace_existing=False) -> str
 
 
 if __name__ == "__main__":
-    transformer_download()
+    transformer_download(replace_existing=False)

@@ -22,11 +22,14 @@ from mentor_classifier import (
 from mentor_classifier.mentor import Mentor
 from .embeddings import TransformerEmbeddings
 from ...api import update_training
+from ...log import logger
 from ...utils import sanitize_string
 from typing import Union, Tuple, List
 
 
 class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
+    transformer: TransformerEmbeddings  # shared between mentors
+
     def __init__(
         self,
         mentor: Union[str, Mentor],
@@ -34,7 +37,7 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
         output_dir: str = "out",
     ):
         if isinstance(mentor, str):
-            print("loading mentor id {}...".format(mentor))
+            logger.info("loading mentor id {}...".format(mentor))
             mentor = Mentor(mentor)
         assert isinstance(
             mentor, Mentor
@@ -43,7 +46,16 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
         )
         self.mentor = mentor
         self.model_path = mentor_model_path(output_dir, mentor.id, ARCH_LR_TRANSFORMER)
-        self.transformer = TransformerEmbeddings(shared_root)
+        self.transformer = self.__load_transformer(shared_root)
+
+    def __load_transformer(self, shared_root):
+        if getattr(TransformersQuestionClassifierTraining, "transformer", None) is None:
+            # class variable, load just once
+            transformer_pkl = os.path.join(shared_root, "transformer.pkl")
+            logger.info(f"loading transformers from {transformer_pkl}")
+            transformer = joblib.load(transformer_pkl)
+            setattr(TransformersQuestionClassifierTraining, "transformer", transformer)
+        return TransformersQuestionClassifierTraining.transformer
 
     def train(self, shared_root) -> QuestionClassifierTrainingResult:
         x_train, y_train = self.__load_training_data()
@@ -59,7 +71,6 @@ class TransformersQuestionClassifierTraining(QuestionClassifierTraining):
         update_training(self.mentor.id)
         os.makedirs(self.model_path, exist_ok=True)
         joblib.dump(classifier, os.path.join(self.model_path, "model.pkl"))
-        joblib.dump(self.transformer, os.path.join(self.model_path, "transformer.pkl"))
         return QuestionClassifierTrainingResult(
             scores, training_accuracy, self.model_path
         )

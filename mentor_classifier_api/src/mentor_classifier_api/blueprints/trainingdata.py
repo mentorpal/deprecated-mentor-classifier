@@ -13,10 +13,11 @@ trainingdata_blueprint = Blueprint("trainingdata", __name__)
 
 @trainingdata_blueprint.route("/<mentor>", methods=["GET"])
 def get_data(mentor: str):
-    data = fetch_training_data(mentor)
-    data_csv = data.to_csv(index=False)
+    data_csv = fetch_training_data(mentor)
     output = make_response(data_csv)
-    output.headers["Content-Disposition"] = "attachment; filename=mentor.csv"
+    output.headers[
+        "Content-Disposition"
+    ] = f"attachment; filename={mentor}-trainingdata.csv"
     output.headers["Content-type"] = "text/csv"
     return (
         output,

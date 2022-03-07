@@ -25,6 +25,7 @@ broker_url = (
     or os.environ.get("CELERY_BROKER_URL")
     or "redis://redis:6379/0"
 )
+logging.info(f"WORKER celery broker {broker_url}")
 celery = Celery("mentor_classifier_tasks", broker=broker_url)
 celery.conf.update(
     {
@@ -36,6 +37,7 @@ celery.conf.update(
             or os.environ.get("CELERY_RESULT_BACKEND")
             or "redis://redis:6379/0"
         ),
+        # "worker_concurrency": 1,    "worker_prefetch_multiplier": 1,
         "result_serializer": os.environ.get("CELERY_RESULT_SERIALIZER", "json"),
         "task_default_queue": get_queue_classifier(),
         "task_default_exchange": get_queue_classifier(),

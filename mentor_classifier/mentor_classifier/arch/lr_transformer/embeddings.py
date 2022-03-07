@@ -6,8 +6,10 @@
 #
 from mentor_classifier.sentence_transformer import find_or_load_sentence_transformer
 from sentence_transformers import SentenceTransformer
+import joblib
+import sys
 from os import path
-from typing import List
+from typing import List, Union
 
 
 class TransformerEmbeddings:
@@ -16,6 +18,17 @@ class TransformerEmbeddings:
             path.join(shared_root, "sentence-transformer")
         )
 
-    def get_embeddings(self, data: List[str]):
+    def get_embeddings(self, data: Union[str, List[str]]):
         embeddings = self.transformer.encode(data, show_progress_bar=True)
         return embeddings
+
+
+if __name__ == "__main__":
+    pkl = f"{sys.argv[-1]}/transformer.pkl"
+    if path.exists(pkl):
+        print(f"{pkl} exists, skipping")
+    else:
+        print(f"generating {pkl}")
+        transformer = TransformerEmbeddings(sys.argv[-1])
+        joblib.dump(transformer, pkl)
+        print(f"{pkl} created")
