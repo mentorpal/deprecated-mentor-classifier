@@ -18,7 +18,6 @@ def python_path_env(monkeypatch, shared_root):
     monkeypatch.setenv("MODEL_ROOT", fixture_path("models"))
     monkeypatch.setenv("SHARED_ROOT", shared_root)
 
-
 @responses.activate
 @pytest.mark.parametrize(
     "category, mentor, expected_results",
@@ -41,6 +40,6 @@ def test_followup(client, category, mentor, expected_results):
     with open(fixture_path(path.join("graphql", "mentor_answers.json"))) as f:
         data = json.load(f)
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    res = client.post(f"/classifier/followups/category/{category}/{mentor}")
+    res = client.post(f"/classifier/followups/category/{category}/{mentor}/")
     data = res.json["data"]
     assert data["followups"][0] == expected_results

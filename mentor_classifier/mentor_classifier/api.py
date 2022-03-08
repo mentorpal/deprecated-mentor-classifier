@@ -242,7 +242,6 @@ def generate_followups(
     headers: Dict[str, str] = {},
 ) -> List[FollowupQuestion]:
     data = fetch_category(category, mentor, cookies=cookies, headers=headers)
-
     category_answer = data.get("categoryAnswers", [])
     category_answers = [
         AnswerInfo(
