@@ -21,10 +21,11 @@ def python_path_env(monkeypatch, shared_root):
 
 @responses.activate
 @pytest.mark.parametrize(
-    "category, expected_results",
+    "category, mentor, expected_results",
     [
         (
             "About me",
+            "mentor_1",
             {
                 "entityType": "the USC Archery Club",
                 "question": "What is the USC Archery Club?",
@@ -33,13 +34,13 @@ def python_path_env(monkeypatch, shared_root):
         )
     ],
 )
-def test_followup(client, category, expected_results):
+def test_followup(client, category, mentor, expected_results):
     with open(fixture_path(path.join("graphql", "category_answers.json"))) as f:
         data = json.load(f)
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     with open(fixture_path(path.join("graphql", "mentor_answers.json"))) as f:
         data = json.load(f)
         responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
-    res = client.post(f"/classifier/me/followups/category/{category}")
+    res = client.post(f"/classifier/followups/category/{category}/{mentor}")
     data = res.json["data"]
     assert data["followups"][0] == expected_results
