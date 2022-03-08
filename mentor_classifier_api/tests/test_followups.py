@@ -18,6 +18,7 @@ def python_path_env(monkeypatch, shared_root):
     monkeypatch.setenv("MODEL_ROOT", fixture_path("models"))
     monkeypatch.setenv("SHARED_ROOT", shared_root)
 
+
 @responses.activate
 @pytest.mark.parametrize(
     "category, mentor, expected_results",
