@@ -28,6 +28,7 @@ RUN pip install poetry \
     && poetry config virtualenvs.create false \
     && poetry install --no-dev \
     && pip install poethepoet \
+    && pip install tomlkit pastel \
     # for now we need force install
     # cpu-only versions of all the torch pip modules.
     # The problem stmes from that fb doesn't publish
