@@ -6,6 +6,7 @@ RUN cd mentor_classifier \
 	&& pip install poetry \
 	&& poetry config virtualenvs.create false \
 	&& poetry install --no-dev \
+    && pip install tomlkit pastel \
     && pip install poethepoet \
 	&& poetry run poe force-cpu-only \
 	&& poetry build \
