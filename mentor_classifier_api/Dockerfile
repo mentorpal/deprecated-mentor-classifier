@@ -6,6 +6,7 @@ RUN cd mentor_classifier \
 	&& pip install poetry \
 	&& poetry config virtualenvs.create false \
 	&& poetry install --no-dev \
+    && pip install tomlkit pastel \
     && pip install poethepoet \
 	&& poetry run poe force-cpu-only \
 	&& poetry build \
@@ -40,6 +41,7 @@ RUN cd mentor_classifier_api \
     && pip install poethepoet \
 	&& poetry run poe force-cpu-only \
 	&& poetry cache clear $(poetry cache list) --all -n \
+    && pip install tomlkit pastel \
     # seems like poetry and pip caches
     # are not clearing no matter what so hacking with below...
     && rm -rf /root/.cache/* \

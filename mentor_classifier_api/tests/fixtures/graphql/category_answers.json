@@ -1,12 +1,10 @@
 {
     "data": {
-        "me":{
-            "categoryAnswers":[
-                {
-                    "answerText": "My hobbies are very different depending on which country I'm in. So, right now I'm in Japan and I don't really do too much other than play video games but when I'm in the United States, then I'm playing online games, Guild Wars 2 and I do lots of archery. I shoot archery with the USC Archery Club and I do it here too. They call it Kyudo, you know, which is like, very you know, a super cool way of doing archery but I really like doing that for sport.",
-                    "questionText": "What are your hobbies"
-                }
-            ]
-        }
+        "categoryAnswers":[
+            {
+                "answerText": "My hobbies are very different depending on which country I'm in. So, right now I'm in Japan and I don't really do too much other than play video games but when I'm in the United States, then I'm playing online games, Guild Wars 2 and I do lots of archery. I shoot archery with the USC Archery Club and I do it here too. They call it Kyudo, you know, which is like, very you know, a super cool way of doing archery but I really like doing that for sport.",
+                "questionText": "What are your hobbies"
+            }
+        ]
     }
 }

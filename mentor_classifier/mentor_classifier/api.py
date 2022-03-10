@@ -89,12 +89,10 @@ mutation UserQuestionCreate($userQuestion: UserQuestionCreateInput!) {
 }
 """
 GQL_CATEGORY_ANSWERS = """
-query CategoryAnswers($category: String!) {
-  me {
-        categoryAnswers(category: $category) {
-            answerText
-            questionText
-        }
+query CategoryAnswers($category: String!, $mentor: ID!) {
+    categoryAnswers(category: $category, mentor: $mentor) {
+        answerText
+        questionText
     }
 }
 """
@@ -131,8 +129,11 @@ def query_mentor_answers_and_name() -> GQLQueryBody:
     return {"query": GQL_QUERY_MENTOR_ANSWERS_AND_NAME, "variables": {}}
 
 
-def query_category_answers(category: str) -> GQLQueryBody:
-    return {"query": GQL_CATEGORY_ANSWERS, "variables": {"category": category}}
+def query_category_answers(category: str, mentor: str) -> GQLQueryBody:
+    return {
+        "query": GQL_CATEGORY_ANSWERS,
+        "variables": {"category": category, "mentor": mentor},
+    }
 
 
 def mutation_update_training(mentor: str) -> GQLQueryBody:
@@ -223,24 +224,25 @@ def fetch_mentor_answers_and_name(
 
 
 def fetch_category(
-    category: str, cookies: Dict[str, str] = {}, headers: Dict[str, str] = {}
+    category: str,
+    mentor: str,
+    cookies: Dict[str, str] = {},
+    headers: Dict[str, str] = {},
 ) -> dict:
     tdjson = __auth_gql(
-        query_category_answers(category), cookies=cookies, headers=headers
+        query_category_answers(category, mentor), cookies=cookies, headers=headers
     )
     return tdjson.get("data") or {}
 
 
 def generate_followups(
     category: str,
+    mentor: str,
     cookies: Dict[str, str] = {},
     headers: Dict[str, str] = {},
 ) -> List[FollowupQuestion]:
-    data = fetch_category(category, cookies=cookies, headers=headers)
-    me = data.get("me")
-    if me is None:
-        raise NameError("me not found")
-    category_answer = me.get("categoryAnswers", [])
+    data = fetch_category(category, mentor, cookies=cookies, headers=headers)
+    category_answer = data.get("categoryAnswers", [])
     category_answers = [
         AnswerInfo(
             answer_text=answer_data.get("answerText") or "",
