@@ -24,7 +24,9 @@ def get_auth_headers() -> Dict[str, str]:
 
 @followups_blueprint.route("followups/category/<category>/<mentor>/", methods=["POST"])
 def followup(category: str, mentor: str):
-    data = generate_followups(category, mentor)
+    data = generate_followups(
+        category, mentor, cookies=request.cookies, headers=get_auth_headers()
+    )
     questions = [
         {
             "question": question.question,
