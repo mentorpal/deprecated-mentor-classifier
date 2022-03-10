@@ -7,6 +7,7 @@ RUN cd mentor_classifier \
 	&& poetry config virtualenvs.create false \
 	&& poetry install --no-dev \
     && pip install poethepoet \
+    && pip install tomlkit pastel \
 	&& poetry run poe force-cpu-only \
 	&& poetry build \
     && poetry cache clear $(poetry cache list) --all -n \
@@ -38,6 +39,7 @@ RUN cd mentor_classifier_api \
 	&& poetry config virtualenvs.create false \
 	&& poetry install --no-dev \
     && pip install poethepoet \
+    && pip install tomlkit pastel \
 	&& poetry run poe force-cpu-only \
 	&& poetry cache clear $(poetry cache list) --all -n \
     # seems like poetry and pip caches
