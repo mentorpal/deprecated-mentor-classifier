@@ -20,7 +20,7 @@ class GQLQueryBody(TypedDict):
 
 
 OFF_TOPIC_THRESHOLD_DEFAULT = (
-    -0.55
+    -0.631
 )  # todo: this should probably be specific to the classifier arch?
 
 
