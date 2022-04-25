@@ -78,10 +78,10 @@
             "name": null,
             "paraphrases": ["Who are you?"]
           },
-          "media": [
-            { "type": "video", "tag": "web", "url": "q1_web.mp4" },
-            { "type": "video", "tag": "mobile", "url": "q1_mobile.mp4" }
-          ]
+
+            "webMedia":{ "type": "video", "tag": "web", "url": "q1_web.mp4" },
+            "mobileMedia":{ "type": "video", "tag": "mobile", "url": "q1_mobile.mp4" }
+
         },
         {
           "_id": "A2",
@@ -93,8 +93,7 @@
             "type": null,
             "name": null,
             "paraphrases": ["What's your age?"]
-          },
-          "media": []
+          }
         },
         {
           "_id": "A3",
@@ -106,8 +105,7 @@
             "type": null,
             "name": null,
             "paraphrases": []
-          },
-          "media": []
+          }
         },
         {
           "_id": "A4",
@@ -120,14 +118,12 @@
             "name": "_IDLE_",
             "paraphrases": []
           },
-          "media": [
-            { "type": "video", "tag": "web", "url": "idle_web.mp4" },
-            {
+            "webMedia":{ "type": "video", "tag": "web", "url": "idle_web.mp4" },
+            "mobileMedia":{
               "type": "video",
               "tag": "mobile",
               "url": "idle_mobile.mp4"
             }
-          ]
         },
         {
           "_id": "A5",
@@ -139,8 +135,7 @@
             "type": "UTTERANCE",
             "name": "_INTRO_",
             "paraphrases": []
-          },
-          "media": []
+          }
         }
       ]
     }

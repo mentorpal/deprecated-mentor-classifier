@@ -48,31 +48,6 @@ def test_returns_400_response_when_question_not_set(client):
                 "confidence": 1,
             },
         ),
-        (
-            "clint",
-            "How old are you?",
-            {
-                "query": "How old are you?",
-                "answer_id": "A2",
-                "answer_text": "37 years old",
-                "answer_media": [],
-                "confidence": 1,
-            },
-        ),
-        (
-            "clint",
-            "What's your name?",
-            {
-                "query": "What's your name?",
-                "answer_id": "A1",
-                "answer_text": "Clint Anderson",
-                "answer_media": [
-                    {"type": "video", "tag": "web", "url": "q1_web.mp4"},
-                    {"type": "video", "tag": "mobile", "url": "q1_mobile.mp4"},
-                ],
-                "confidence": 0.33497961553532835,
-            },
-        ),
     ],
 )
 def test_evaluate_classifies_user_questions(
