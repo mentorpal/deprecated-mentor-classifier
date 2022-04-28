@@ -17,7 +17,7 @@
                         },
                         "transcript": "I am from the U.K.",
                         "status": "well, thank u",
-                        "media":{
+                        "webMedia":{
                             "type": "video",
                             "tag": "cool",
                             "url": "coolkids.com"

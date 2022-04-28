@@ -20,7 +20,7 @@ class GQLQueryBody(TypedDict):
 
 
 OFF_TOPIC_THRESHOLD_DEFAULT = (
-    -0.55
+    -0.631
 )  # todo: this should probably be specific to the classifier arch?
 
 
@@ -64,7 +64,17 @@ query Mentor($id: ID!) {
                 name
                 paraphrases
             }
-            media {
+            webMedia {
+                type
+                tag
+                url
+            }
+            mobileMedia{
+                type
+                tag
+                url
+            }
+            vttMedia{
                 type
                 tag
                 url
@@ -159,6 +169,10 @@ def mutation_create_user_question(
 
 def fetch_training_data(mentor: str) -> str:
     data = fetch_mentor_data(mentor)
+    import logging
+
+    logging.info("fetched mentor data")
+    logging.info(data)
     data_dict = {}
     data_list = []
     for answer in data.get("answers", []):
@@ -198,12 +212,37 @@ def fetch_training_data(mentor: str) -> str:
     return data_csv.getvalue()
 
 
+def get_media_list_from_answer_gql(answer):
+    media_list = []
+    if "webMedia" in answer:
+        media_list.append(answer["webMedia"])
+    if "mobileMedia" in answer:
+        media_list.append(answer["mobileMedia"])
+    if "vttMedia" in answer:
+        media_list.append(answer["vttMedia"])
+    return media_list
+
+
+def convert_mentor_gql_data(mentor_gql):
+    mentor_gql_answers = mentor_gql["answers"]
+    mentor_answers = list(
+        map(
+            lambda answer_gql: {
+                **answer_gql,
+                "media": get_media_list_from_answer_gql(answer_gql),
+            },
+            mentor_gql_answers,
+        )
+    )
+    return {**mentor_gql, "answers": mentor_answers}
+
+
 def fetch_mentor_data(mentor: str) -> dict:
     tdjson = __auth_gql(query_mentor(mentor))
     if "errors" in tdjson:
         raise Exception(json.dumps(tdjson.get("errors")))
     data = tdjson["data"]["mentor"]
-    return data
+    return convert_mentor_gql_data(data)
 
 
 def fetch_mentor_answers_and_name(
