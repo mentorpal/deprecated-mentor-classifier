@@ -41,10 +41,15 @@ def test_returns_400_response_when_question_not_set(client):
                 "query": "What is your name?",
                 "answer_id": "A1",
                 "answer_text": "Clint Anderson",
-                "answer_media": [
-                    {"type": "video", "tag": "web", "url": "q1_web.mp4"},
-                    {"type": "video", "tag": "mobile", "url": "q1_mobile.mp4"},
-                ],
+                "answer_media": {
+                    "web_media": {"type": "video", "tag": "web", "url": "q1_web.mp4"},
+                    "mobile_media": {
+                        "type": "video",
+                        "tag": "mobile",
+                        "url": "q1_mobile.mp4",
+                    },
+                    "vtt_media": None,
+                },
                 "confidence": 1,
             },
         ),
