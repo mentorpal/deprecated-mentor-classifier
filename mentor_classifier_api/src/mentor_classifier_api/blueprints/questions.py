@@ -44,13 +44,27 @@ def answer():
         return (jsonify({"message": f"No models found for mentor {mentor}."}), 404)
     classifier = _get_dao().find_classifier(mentor)
     result = classifier.evaluate(question, shared_root)
+    media = result.answer_media
+    web_media = next(
+        (m for m in media if m["type"] == "video" and m["tag"] == "web"), None
+    )
+    mobile_media = next(
+        (m for m in media if m["type"] == "video" and m["tag"] == "mobile"), None
+    )
+    vtt_media = next(
+        (m for m in media if m["type"] == "subtitles" and m["tag"] == "en"), None
+    )
     return (
         jsonify(
             {
                 "query": question,
                 "answer_id": result.answer_id,
                 "answer_text": result.answer_text,
-                "answer_media": result.answer_media,
+                "answer_media": {
+                    "web_media": web_media,
+                    "mobile_media": mobile_media,
+                    "vtt_media": vtt_media,
+                },
                 "confidence": result.highest_confidence,
                 "feedback_id": result.feedback_id,
                 "classifier": "",
