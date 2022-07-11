@@ -1,6 +1,7 @@
 {
   "data": {
     "mentor": {
+      "mentorType": "VIDEO",
       "subjects": [
         {
           "name": "Advice"
@@ -147,6 +148,62 @@
             "paraphrases": []
           },
           "webMedia":"/clint/offtopic.mp4"
+        },
+        {
+          "_id": "A7",
+          "status": "NONE",
+          "transcript": "A7",
+          "question": {
+            "_id": "Q7",
+            "question": "Q7",
+            "type": null,
+            "name": null,
+            "paraphrases": []
+          },
+          "webMedia":{ "type": "video", "tag": "web", "url": "q1_web.mp4" },
+          "mobileMedia":{ "type": "video", "tag": "mobile", "url": "q1_mobile.mp4" }
+        },
+        {
+          "_id": "A8",
+          "status": "NONE",
+          "transcript": "",
+          "question": {
+            "_id": "Q8",
+            "question": "Q8",
+            "type": null,
+            "name": null,
+            "paraphrases": []
+          },
+          "webMedia":{ "type": "video", "tag": "web", "url": "q1_web.mp4" },
+          "mobileMedia":{ "type": "video", "tag": "mobile", "url": "q1_mobile.mp4" }
+        },
+        {
+          "_id": "A9",
+          "status": "NONE",
+          "transcript": "A9",
+          "question": {
+            "_id": "Q9",
+            "question": "Q9",
+            "type": null,
+            "name": null,
+            "paraphrases": []
+          },
+          "webMedia":null,
+          "mobileMedia":null
+        },
+        {
+          "_id": "A10",
+          "status": "NONE",
+          "transcript": "A10",
+          "question": {
+            "_id": "Q10",
+            "question": "Q10",
+            "type": null,
+            "name": null,
+            "paraphrases": []
+          },
+          "webMedia":{ "type": "video", "tag": "web" },
+          "mobileMedia":{ "type": "video", "tag": "mobile" }
         }
       ]
     }

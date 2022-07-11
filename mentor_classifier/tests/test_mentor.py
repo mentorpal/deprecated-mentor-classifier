@@ -62,6 +62,18 @@ from .helpers import fixture_path
                         "paraphrases": ["What's your age?"],
                         "media": [],
                     },
+                    "Q7": {
+                        "id": "Q7",
+                        "question_text": "Q7",
+                        "answer": "A7",
+                        "answer_id": "A7",
+                        "topics": [],
+                        "paraphrases": [],
+                        "media": [
+                            {"type": "video", "tag": "web", "url": "q1_web.mp4"},
+                            {"type": "video", "tag": "mobile", "url": "q1_mobile.mp4"},
+                        ],
+                    },
                 },
                 "questions_by_text": {
                     "what is your name": {
@@ -131,7 +143,104 @@ from .helpers import fixture_path
                     },
                 },
             },
-        )
+        ),
+        (
+            "clint_chat",
+            {
+                "topics": ["Advice", "Background", "Utterances", "About Me", "Weird"],
+                "utterances_by_type": {
+                    "_INTRO_": [["A5", "Hi I'm Clint", []]],
+                    "_OFF_TOPIC_": [["A6", "Ask me something else", [None]]],
+                },
+                "questions_by_id": {
+                    "Q1": {
+                        "id": "Q1",
+                        "question_text": "What is your name?",
+                        "answer": "Clint Anderson",
+                        "answer_id": "A1",
+                        "topics": ["About Me"],
+                        "paraphrases": ["Who are you?"],
+                        "media": [None, None],
+                    },
+                    "Q2": {
+                        "id": "Q2",
+                        "question_text": "How old are you?",
+                        "answer": "37 years old",
+                        "answer_id": "A2",
+                        "topics": [],
+                        "paraphrases": ["What's your age?"],
+                        "media": [],
+                    },
+                    "Q7": {
+                        "id": "Q7",
+                        "question_text": "Q7",
+                        "answer": "A7",
+                        "answer_id": "A7",
+                        "topics": [],
+                        "paraphrases": [],
+                        "media": [None],
+                    },
+                },
+                "questions_by_text": {
+                    "what is your name": {
+                        "id": "Q1",
+                        "question_text": "What is your name?",
+                        "answer": "Clint Anderson",
+                        "answer_id": "A1",
+                        "topics": ["About Me"],
+                        "paraphrases": ["Who are you?"],
+                        "media": [None, None],
+                    },
+                    "who are you": {
+                        "id": "Q1",
+                        "question_text": "What is your name?",
+                        "answer": "Clint Anderson",
+                        "answer_id": "A1",
+                        "topics": ["About Me"],
+                        "paraphrases": ["Who are you?"],
+                        "media": [None, None],
+                    },
+                    "how old are you": {
+                        "id": "Q2",
+                        "question_text": "How old are you?",
+                        "answer": "37 years old",
+                        "answer_id": "A2",
+                        "topics": [],
+                        "paraphrases": ["What's your age?"],
+                        "media": [],
+                    },
+                    "whats your age": {
+                        "id": "Q2",
+                        "question_text": "How old are you?",
+                        "answer": "37 years old",
+                        "answer_id": "A2",
+                        "topics": [],
+                        "paraphrases": ["What's your age?"],
+                        "media": [],
+                    },
+                },
+                "questions_by_answer": {
+                    "clint anderson": {
+                        "id": "Q1",
+                        "question_text": "What is your name?",
+                        "answer": "Clint Anderson",
+                        "answer_id": "A1",
+                        "topics": ["About Me"],
+                        "paraphrases": ["Who are you?"],
+                        "media": [None, None],
+                    },
+                    "37 years old": {
+                        "id": "Q2",
+                        "question_text": "How old are you?",
+                        "answer": "37 years old",
+                        "answer_id": "A2",
+                        "topics": [],
+                        "paraphrases": ["What's your age?"],
+                        "media": [],
+                    },
+                },
+            },
+        ),
     ],
 )
 def test_loads_mentor_from_api(mentor_id, expected_data):
@@ -139,6 +248,12 @@ def test_loads_mentor_from_api(mentor_id, expected_data):
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     m = Mentor(mentor_id)
+    print(m.id)
+    print(m.topics)
+    print(m.utterances_by_type)
+    print(m.questions_by_id)
+    print(m.questions_by_text)
+    print(m.questions_by_answer)
     assert m.id == mentor_id
     assert m.topics == expected_data["topics"]
     assert m.utterances_by_type == expected_data["utterances_by_type"]

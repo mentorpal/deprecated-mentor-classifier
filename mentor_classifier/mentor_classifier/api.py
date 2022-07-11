@@ -39,6 +39,7 @@ GRAPHQL_ENDPOINT = os.environ.get("GRAPHQL_ENDPOINT") or "http://graphql/graphql
 GQL_QUERY_MENTOR = """
 query Mentor($id: ID!) {
     mentor(id: $id) {
+        mentorType
         subjects {
             name
         }
