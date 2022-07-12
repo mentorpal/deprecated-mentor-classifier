@@ -1,7 +1,7 @@
 {
   "data": {
     "mentor": {
-      "mentorType": "VIDEO",
+      "mentorType": "CHAT",
       "subjects": [
         {
           "name": "Advice"
@@ -79,10 +79,8 @@
             "name": null,
             "paraphrases": ["Who are you?"]
           },
-
-            "webMedia":{ "type": "video", "tag": "web", "url": "q1_web.mp4" },
-            "mobileMedia":{ "type": "video", "tag": "mobile", "url": "q1_mobile.mp4" }
-
+          "webMedia":null,
+          "mobileMedia":null
         },
         {
           "_id": "A2",
@@ -109,24 +107,6 @@
           }
         },
         {
-          "_id": "A4",
-          "status": "COMPLETE",
-          "transcript": null,
-          "question": {
-            "_id": "Q4",
-            "question": "Look at the camera.",
-            "type": "UTTERANCE",
-            "name": "_IDLE_",
-            "paraphrases": []
-          },
-            "webMedia":{ "type": "video", "tag": "web", "url": "idle_web.mp4" },
-            "mobileMedia":{
-              "type": "video",
-              "tag": "mobile",
-              "url": "idle_mobile.mp4"
-            }
-        },
-        {
           "_id": "A5",
           "status": "COMPLETE",
           "transcript": "Hi I'm Clint",
@@ -137,6 +117,45 @@
             "name": "_INTRO_",
             "paraphrases": []
           }
+        },
+        {
+          "_id": "A6",
+          "status": "COMPLETE",
+          "transcript": "Ask me something else",
+          "question": {
+            "_id": "Q6",
+            "question": "Off topic",
+            "type": "UTTERANCE",
+            "name": "_OFF_TOPIC_",
+            "paraphrases": []
+          },
+          "webMedia":null
+        },
+        {
+          "_id": "A7",
+          "status": "NONE",
+          "transcript": "A7",
+          "question": {
+            "_id": "Q7",
+            "question": "Q7",
+            "type": null,
+            "name": null,
+            "paraphrases": []
+          },
+          "webMedia":null
+        },
+        {
+          "_id": "A8",
+          "status": "NONE",
+          "transcript": "",
+          "question": {
+            "_id": "Q8",
+            "question": "Q8",
+            "type": null,
+            "name": null,
+            "paraphrases": []
+          },
+          "webMedia":null
         }
       ]
     }

@@ -36,8 +36,19 @@ class Mentor(object):
             self.topics.append(topic["name"])
         for answer in data.get("answers", []):
             question = answer["question"]
-            if answer["status"] != "COMPLETE":
+            if answer["status"] == "INCOMPLETE":
                 continue
+            if answer["status"] != "COMPLETE":
+                if not answer["transcript"]:
+                    continue
+                if data.get("mentorType", "") == "VIDEO":
+                    if (
+                        not answer["webMedia"]
+                        or not answer["mobileMedia"]
+                        or not answer["webMedia"].get("url", "")
+                        or not answer["mobileMedia"].get("url", "")
+                    ):
+                        continue
             if question["type"] == "UTTERANCE":
                 if question["name"] not in self.utterances_by_type:
                     self.utterances_by_type[question["name"]] = []
