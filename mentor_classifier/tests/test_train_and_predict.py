@@ -228,8 +228,8 @@ def test_compare_test_accuracy(
     )
     lr_test_accuracy = lr_test_results.passing_tests / len(lr_test_results.results)
     assert lr_test_accuracy <= hf_test_accuracy
-    hf_result = hf_classifier.evaluate(example, shared_root)
-    lr_result = lr_classifier.evaluate(example, shared_root)
+    hf_result = hf_classifier.evaluate(example, "123", shared_root)
+    lr_result = lr_classifier.evaluate(example, "123", shared_root)
     assert hf_result.highest_confidence >= lr_result.highest_confidence
 
 

@@ -79,7 +79,7 @@ def test_gets_answer_for_exact_match_and_paraphrases(
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     _ensure_trained(mentor_id, shared_root, data_root)
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
-    result = classifier.evaluate(question, shared_root)
+    result = classifier.evaluate(question, "123", shared_root)
     assert result.answer_id == expected_answer_id
     assert result.answer_text == expected_answer
     assert result.answer_media == expected_media
@@ -127,7 +127,7 @@ def test_predicts_answer(
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     _ensure_trained(mentor_id, shared_root, data_root)
     classifier = ClassifierFactory().new_prediction(mentor_id, shared_root, data_root)
-    result = classifier.evaluate(question, shared_root)
+    result = classifier.evaluate(question, "123", shared_root)
     assert result.answer_id == expected_answer_id
     assert result.answer_text == expected_answer
     assert result.answer_media == expected_media
@@ -153,7 +153,7 @@ def _test_gets_off_topic(
     classifier = ClassifierFactory().new_prediction(
         mentor=mentor_id, shared_root=shared_root, data_path=data_root
     )
-    result = classifier.evaluate(question, shared_root)
+    result = classifier.evaluate(question, "123", shared_root)
     assert result.highest_confidence < get_off_topic_threshold()
     assert result.answer_id == expected_answer_id
     assert result.answer_text == expected_answer

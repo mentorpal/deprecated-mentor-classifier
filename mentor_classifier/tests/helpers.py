@@ -81,7 +81,7 @@ def run_model_against_testset_ignore_confidence(
     result = _MentorTestSetResult()
     for test_set_entry in test_set.tests:
         current_result_entry = _MentorTestResultEntry(test_set_entry)
-        test_result = evaluator.evaluate(test_set_entry.question, shared_root)
+        test_result = evaluator.evaluate(test_set_entry.question, "123", shared_root)
 
         if test_result.answer_text != test_set_entry.expected_answer:
             current_result_entry.passing = False
@@ -101,7 +101,7 @@ def run_model_against_testset(
 
     for test_set_entry in test_set.tests:
         current_result_entry = _MentorTestResultEntry(test_set_entry)
-        test_result = evaluator.evaluate(test_set_entry.question, shared_root)
+        test_result = evaluator.evaluate(test_set_entry.question, "123", shared_root)
 
         if test_result.answer_text != test_set_entry.expected_answer:
             current_result_entry.passing = False

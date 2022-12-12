@@ -35,15 +35,18 @@ def answer():
         return (jsonify({"query": ["required field"]}), 400)
     if "mentor" not in request.args:
         return (jsonify({"mentor": ["required field"]}), 400)
+    if "chatsessionid" not in request.args:
+        return (jsonify({"chatsessionid": ["required field"]}), 400)
     question = request.args["query"].strip()
     mentor = request.args["mentor"].strip()
+    chatsessionid = request.args["chatsessionid"].strip()
     model_root = os.environ.get("MODEL_ROOT") or "models"
     mentor_models = os.path.join(model_root, mentor)
     shared_root = os.environ.get("SHARED_ROOT") or "shared"
     if not os.path.isdir(mentor_models):
         return (jsonify({"message": f"No models found for mentor {mentor}."}), 404)
     classifier = _get_dao().find_classifier(mentor)
-    result = classifier.evaluate(question, shared_root)
+    result = classifier.evaluate(question, chatsessionid, shared_root)
     media = result.answer_media
     web_media = next(
         (m for m in media if m["type"] == "video" and m["tag"] == "web"), None

@@ -62,7 +62,7 @@ def test_evaluate_classifies_user_questions(
         data = json.load(f)
     responses.add(responses.POST, "http://graphql/graphql", json=data, status=200)
     res = client.get(
-        f"/classifier/questions/?mentor={input_mentor}&query={input_question}"
+        f"/classifier/questions/?mentor={input_mentor}&query={input_question}&chatsessionid=123"
     )
     assert res.json["query"] == expected_results["query"]
     assert res.json["answer_id"] == expected_results["answer_id"]

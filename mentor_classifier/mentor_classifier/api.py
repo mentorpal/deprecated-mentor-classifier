@@ -151,7 +151,12 @@ def mutation_update_training(mentor: str) -> GQLQueryBody:
 
 
 def mutation_create_user_question(
-    mentor: str, question: str, answer_id: str, answer_type: str, confidence: float
+    mentor: str,
+    question: str,
+    answer_id: str,
+    chat_session_id: str,
+    answer_type: str,
+    confidence: float,
 ) -> GQLQueryBody:
     return {
         "query": GQL_CREATE_USER_QUESTION,
@@ -162,6 +167,7 @@ def mutation_create_user_question(
                 "classifierAnswer": answer_id,
                 "classifierAnswerType": answer_type,
                 "confidence": float(confidence),
+                "chatSessionId": chat_session_id,
             }
         },
     }
@@ -306,12 +312,13 @@ def create_user_question(
     mentor: str,
     question: str,
     answer_id: str,
+    chat_session_id: str,
     answer_type: str,
     confidence: float,
 ) -> str:
     tdjson = __auth_gql(
         mutation_create_user_question(
-            mentor, question, answer_id, answer_type, confidence
+            mentor, question, answer_id, chat_session_id, answer_type, confidence
         )
     )
     if "errors" in tdjson:

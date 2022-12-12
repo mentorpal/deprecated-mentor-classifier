@@ -46,6 +46,7 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
     def evaluate(
         self,
         question: str,
+        chat_session_id: str,
         shared_root: str,
         canned_question_match_disabled=False,
     ) -> QuestionClassiferPredictionResult:
@@ -83,6 +84,7 @@ class LRQuestionClassifierPrediction(QuestionClassifierPrediction):
             self.mentor.id,
             question,
             answer_id,
+            chat_session_id,
             "OFF_TOPIC" if highest_confidence < off_topic_threshold else "CLASSIFIER",
             highest_confidence,
         )
